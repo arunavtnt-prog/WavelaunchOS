@@ -181,8 +181,12 @@ export class JobQueue {
   }
 
   private async generatePDF(payload: any): Promise<JobResult> {
-    const { generatePDF } = await import('@/lib/pdf/generator')
-    return generatePDF(payload.type, payload.id, payload.quality)
+    const { generateBusinessPlanPDF } = await import('@/lib/pdf/generate-business-plan-pdf')
+    return generateBusinessPlanPDF({
+      businessPlanId: payload.businessPlanId,
+      quality: payload.quality || 'final',
+      userId: payload.userId,
+    })
   }
 
   private async backupDatabase(payload: any): Promise<JobResult> {
