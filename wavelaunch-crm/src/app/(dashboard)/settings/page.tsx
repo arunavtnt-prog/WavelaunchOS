@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Database, Key, Mail, Bell } from 'lucide-react'
+import { Database, Key, Mail, Bell, Activity } from 'lucide-react'
 
 const settingsSections = [
   {
@@ -12,11 +12,16 @@ const settingsSections = [
     icon: Database,
   },
   {
+    name: 'System Monitoring',
+    description: 'Monitor system health and performance metrics',
+    href: '/settings/monitoring',
+    icon: Activity,
+  },
+  {
     name: 'API Configuration',
     description: 'Configure Claude API keys and settings',
     href: '/settings/api',
     icon: Key,
-    comingSoon: true,
   },
   {
     name: 'Email Settings',
