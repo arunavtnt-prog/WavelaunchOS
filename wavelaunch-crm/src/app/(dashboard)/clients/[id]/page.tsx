@@ -87,21 +87,25 @@ export default function ClientDetailPage() {
           </div>
         </Link>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2">
-            <Folder className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Files</span>
+        <Link href={`/clients/${client.id}/files`}>
+          <div className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center gap-2">
+              <Folder className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Files</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold">{client._count?.files || 0}</p>
           </div>
-          <p className="mt-2 text-2xl font-bold">{client._count?.files || 0}</p>
-        </div>
+        </Link>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2">
-            <StickyNote className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Notes</span>
+        <Link href={`/clients/${client.id}/notes`}>
+          <div className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center gap-2">
+              <StickyNote className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Notes</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold">{client._count?.notes || 0}</p>
           </div>
-          <p className="mt-2 text-2xl font-bold">{client._count?.notes || 0}</p>
-        </div>
+        </Link>
       </div>
 
       {/* Overview */}
@@ -156,7 +160,7 @@ export default function ClientDetailPage() {
       {/* Quick Actions */}
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-4">
           <Link href={`/clients/${client.id}/business-plan`}>
             <Button variant="outline" className="h-auto py-4 w-full">
               <div className="flex flex-col items-center gap-2">
@@ -175,12 +179,23 @@ export default function ClientDetailPage() {
             </Button>
           </Link>
 
-          <Button variant="outline" className="h-auto py-4" disabled>
-            <div className="flex flex-col items-center gap-2">
-              <Folder className="h-6 w-6" />
-              <span>Upload File</span>
-            </div>
-          </Button>
+          <Link href={`/clients/${client.id}/files`}>
+            <Button variant="outline" className="h-auto py-4 w-full">
+              <div className="flex flex-col items-center gap-2">
+                <Folder className="h-6 w-6" />
+                <span>Files</span>
+              </div>
+            </Button>
+          </Link>
+
+          <Link href={`/clients/${client.id}/notes`}>
+            <Button variant="outline" className="h-auto py-4 w-full">
+              <div className="flex flex-col items-center gap-2">
+                <StickyNote className="h-6 w-6" />
+                <span>Notes</span>
+              </div>
+            </Button>
+          </Link>
         </div>
       </div>
 
