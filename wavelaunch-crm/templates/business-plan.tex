@@ -1,0 +1,137 @@
+% Wavelaunch Studio Business Plan Template
+% Professional LaTeX template for creator brand business plans
+
+\documentclass[11pt,letterpaper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{calc}
+
+% Page geometry
+\geometry{
+  letterpaper,
+  left=1in,
+  right=1in,
+  top=1.2in,
+  bottom=1in,
+  headheight=0.5in,
+  headsep=0.3in
+}
+
+% Wavelaunch brand colors
+\definecolor{wavelaunch-primary}{RGB}{59, 130, 246}     % Blue-500
+\definecolor{wavelaunch-secondary}{RGB}{99, 102, 241}   % Indigo-500
+\definecolor{wavelaunch-accent}{RGB}{168, 85, 247}      % Purple-500
+\definecolor{wavelaunch-dark}{RGB}{15, 23, 42}          % Slate-900
+\definecolor{wavelaunch-light}{RGB}{148, 163, 184}      % Slate-400
+
+% Hyperlink setup
+\hypersetup{
+  colorlinks=true,
+  linkcolor=wavelaunch-primary,
+  urlcolor=wavelaunch-primary,
+  citecolor=wavelaunch-secondary,
+  pdfborder={0 0 0}
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\color{wavelaunch-light}\small\textit{$if(client-name)$$client-name$$endif$}}
+\fancyhead[R]{\color{wavelaunch-light}\small\textit{Business Plan}}
+\fancyfoot[C]{\color{wavelaunch-light}\thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{wavelaunch-primary}\leaders\hrule height \headrulewidth\hfill}}
+
+% Section formatting
+\titleformat{\section}
+  {\Large\bfseries\color{wavelaunch-primary}}
+  {\thesection}{1em}{}
+\titleformat{\subsection}
+  {\large\bfseries\color{wavelaunch-secondary}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{wavelaunch-dark}}
+  {\thesubsubsection}{1em}{}
+
+% Title page
+\title{
+  \vspace{-2cm}
+  \begin{center}
+    \color{wavelaunch-primary}
+    \rule{\textwidth}{2pt}\\[0.5cm]
+    {\Huge\bfseries $if(brand-name)$$brand-name$$else$$if(client-name)$$client-name$$endif$$endif$}\\[0.3cm]
+    {\Large Business Plan}\\[0.3cm]
+    \rule{\textwidth}{2pt}
+  \end{center}
+  \vspace{1cm}
+}
+
+\author{}
+\date{}
+
+% Document quality settings
+$if(pdf-quality)$
+  $if(pdf-quality-final)$
+    % Final quality - 300 DPI
+    \pdfcompresslevel=9
+    \pdfobjcompresslevel=3
+  $else$
+    % Draft quality - 150 DPI
+    \pdfcompresslevel=9
+    \pdfobjcompresslevel=2
+  $endif$
+$endif$
+
+\begin{document}
+
+% Title page
+\maketitle
+\thispagestyle{empty}
+
+\vfill
+
+\begin{center}
+  \begin{tabular}{rl}
+    \textbf{Client:} & $if(client-name)$$client-name$$endif$ \\
+    $if(brand-name)$\textbf{Brand:} & $brand-name$ \\$endif$
+    $if(industry)$\textbf{Industry:} & $industry$ \\$endif$
+    \textbf{Prepared by:} & Wavelaunch Studio \\
+    \textbf{Date:} & $if(date)$$date$$endif$ \\
+    \textbf{Version:} & $if(version)$$version$$endif$
+  \end{tabular}
+\end{center}
+
+\vfill
+
+\begin{center}
+  \color{wavelaunch-light}
+  \small
+  \textit{Confidential - For Internal Use Only}\\
+  \vspace{0.2cm}
+  \textit{wavelaunch.studio}
+\end{center}
+
+\newpage
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Main content
+$body$
+
+\end{document}
