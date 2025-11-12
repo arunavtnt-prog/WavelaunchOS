@@ -75,6 +75,11 @@ export default function BusinessPlanEditPage() {
   const [rejectionReason, setRejectionReason] = useState('')
   const [changingStatus, setChangingStatus] = useState(false)
 
+  // PDF generation
+  const [showPDFDialog, setShowPDFDialog] = useState(false)
+  const [pdfQuality, setPDFQuality] = useState<'draft' | 'final'>('final')
+  const [generatingPDF, setGeneratingPDF] = useState(false)
+
   useEffect(() => {
     fetchBusinessPlan()
   }, [planId])
@@ -159,6 +164,85 @@ export default function BusinessPlanEditPage() {
     } finally {
       setChangingStatus(false)
     }
+  }
+
+  const handleGeneratePDF = async () => {
+    if (!businessPlan) return
+
+    try {
+      setGeneratingPDF(true)
+      setError(null)
+
+      const res = await fetch(`/api/business-plans/${planId}/generate-pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quality: pdfQuality }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        // Poll job status
+        const jobId = data.data.jobId
+        pollPDFJob(jobId)
+      } else {
+        setError(data.error || 'Failed to generate PDF')
+        setGeneratingPDF(false)
+      }
+    } catch (err) {
+      console.error('Error generating PDF:', err)
+      setError('Failed to generate PDF')
+      setGeneratingPDF(false)
+    }
+  }
+
+  const pollPDFJob = async (jobId: string) => {
+    const maxAttempts = 60 // Poll for up to 5 minutes
+    let attempts = 0
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/jobs/${jobId}`)
+        const data = await res.json()
+
+        if (data.success) {
+          const job = data.data
+
+          if (job.status === 'COMPLETED') {
+            setGeneratingPDF(false)
+            setShowPDFDialog(false)
+
+            // Download the file
+            const result = JSON.parse(job.result)
+            const fileId = result.fileId
+
+            // Open download in new tab
+            window.open(`/api/files/${fileId}/download`, '_blank')
+            return
+          }
+
+          if (job.status === 'FAILED') {
+            setError(job.error || 'PDF generation failed')
+            setGeneratingPDF(false)
+            return
+          }
+
+          // Still processing
+          attempts++
+          if (attempts < maxAttempts) {
+            setTimeout(poll, 5000) // Poll every 5 seconds
+          } else {
+            setError('PDF generation timeout')
+            setGeneratingPDF(false)
+          }
+        }
+      } catch (err) {
+        console.error('Error polling PDF job:', err)
+        setGeneratingPDF(false)
+      }
+    }
+
+    poll()
   }
 
   const renderStatusActions = () => {
@@ -277,9 +361,22 @@ export default function BusinessPlanEditPage() {
 
           <div className="flex gap-2">
             {renderStatusActions()}
-            <Button variant="outline" disabled>
-              <FileDown className="h-4 w-4 mr-2" />
-              Export PDF
+            <Button
+              variant="outline"
+              onClick={() => setShowPDFDialog(true)}
+              disabled={generatingPDF}
+            >
+              {generatingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export PDF
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -356,6 +453,99 @@ export default function BusinessPlanEditPage() {
                 </>
               ) : (
                 'Reject'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PDF Generation Dialog */}
+      <Dialog open={showPDFDialog} onOpenChange={setShowPDFDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export to PDF</DialogTitle>
+            <DialogDescription>
+              Choose the quality for your PDF export. Draft quality is faster and smaller, while
+              final quality produces a high-resolution document suitable for printing.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="space-y-4">
+              <div
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                  pdfQuality === 'draft'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setPDFQuality('draft')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Draft Quality (150 DPI)</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Faster generation, smaller file size. Good for reviews and internal use.
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="quality"
+                    value="draft"
+                    checked={pdfQuality === 'draft'}
+                    onChange={() => setPDFQuality('draft')}
+                    className="h-4 w-4"
+                  />
+                </div>
+              </div>
+
+              <div
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                  pdfQuality === 'final'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setPDFQuality('final')}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold">Final Quality (300 DPI)</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      High-resolution output, larger file size. Best for client delivery and
+                      printing.
+                    </p>
+                  </div>
+                  <input
+                    type="radio"
+                    name="quality"
+                    value="final"
+                    checked={pdfQuality === 'final'}
+                    onChange={() => setPDFQuality('final')}
+                    className="h-4 w-4"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPDFDialog(false)}
+              disabled={generatingPDF}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleGeneratePDF} disabled={generatingPDF}>
+              {generatingPDF ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Generate PDF
+                </>
               )}
             </Button>
           </DialogFooter>
