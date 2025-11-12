@@ -65,13 +65,15 @@ export default function ClientDetailPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Business Plans</span>
+        <Link href={`/clients/${client.id}/business-plan`}>
+          <div className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Business Plans</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold">{client._count?.businessPlans || 0}</p>
           </div>
-          <p className="mt-2 text-2xl font-bold">{client._count?.businessPlans || 0}</p>
-        </div>
+        </Link>
 
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2">
@@ -153,12 +155,14 @@ export default function ClientDetailPage() {
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-xl font-semibold">Quick Actions</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <Button variant="outline" className="h-auto py-4" disabled>
-            <div className="flex flex-col items-center gap-2">
-              <FileText className="h-6 w-6" />
-              <span>Generate Business Plan</span>
-            </div>
-          </Button>
+          <Link href={`/clients/${client.id}/business-plan`}>
+            <Button variant="outline" className="h-auto py-4 w-full">
+              <div className="flex flex-col items-center gap-2">
+                <FileText className="h-6 w-6" />
+                <span>Business Plans</span>
+              </div>
+            </Button>
+          </Link>
 
           <Button variant="outline" className="h-auto py-4" disabled>
             <div className="flex flex-col items-center gap-2">
