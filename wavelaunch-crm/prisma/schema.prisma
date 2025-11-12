@@ -1,0 +1,398 @@
+// WavelaunchOS CRM - Complete Database Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// AUTHENTICATION & USERS
+// ============================================================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  businessPlansGenerated BusinessPlan[]
+  deliverablesGenerated  Deliverable[]
+  filesUploaded          File[]
+  notes                  Note[]
+  activities             Activity[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+// ============================================================================
+// CLIENT MANAGEMENT
+// ============================================================================
+
+model Client {
+  id          String   @id @default(cuid())
+  creatorName String
+  brandName   String?
+  email       String   @unique
+  status      ClientStatus @default(ACTIVE)
+
+  // Core Info
+  niche               String
+  goals               String?
+  socialHandles       String? // JSON
+  onboardedAt         DateTime @default(now())
+
+  // Required Fields (from onboarding)
+  visionStatement     String
+  targetIndustry      String
+  targetAudience      String
+  demographics        String // JSON
+  painPoints          String
+  uniqueValueProps    String
+  targetDemographicAge String
+  brandImage          String
+  brandPersonality    String
+  preferredFont       String
+
+  // Optional Fields
+  professionalMilestones    String?
+  personalTurningPoints     String?
+  competitiveDifferentiation String?
+  emergingCompetitors       String?
+  inspirationBrands         String?
+  brandingAesthetics        String?
+  emotionsBrandEvokes       String?
+  scalingGoals              String?
+  growthStrategies          String?
+  longTermVision            String?
+  additionalInfo            String?
+  specificDeadlines         String?
+  currentChannels           String?
+  audienceGenderSplit       String?
+  audienceMaritalStatus     String?
+  brandValues               String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  businessPlans BusinessPlan[]
+  deliverables  Deliverable[]
+  files         File[]
+  notes         Note[]
+  activities    Activity[]
+
+  @@map("clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+// ============================================================================
+// BUSINESS PLANS
+// ============================================================================
+
+model BusinessPlan {
+  id              String           @id @default(cuid())
+  clientId        String
+  version         Int              @default(1)
+  status          DocumentStatus   @default(DRAFT)
+
+  // Content
+  contentMarkdown String
+  pdfPath         String?
+
+  // Workflow
+  generatedBy     String
+  generatedAt     DateTime         @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client    Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User @relation(fields: [generatedBy], references: [id])
+
+  @@map("business_plans")
+}
+
+enum DocumentStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  DELIVERED
+  REJECTED
+}
+
+// ============================================================================
+// DELIVERABLES (M1-M8)
+// ============================================================================
+
+model Deliverable {
+  id       String         @id @default(cuid())
+  clientId String
+  month    Int // 1-8
+  title    String
+  type     DeliverableType @default(MAIN)
+  parentId String? // For subdocuments
+
+  // Content
+  contentMarkdown String
+  pdfPath         String?
+  status          DocumentStatus @default(DRAFT)
+
+  // Workflow
+  generatedBy     String
+  generatedAt     DateTime       @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client          Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User         @relation(fields: [generatedBy], references: [id])
+  parent          Deliverable? @relation("subdocuments", fields: [parentId], references: [id])
+  subdocuments    Deliverable[] @relation("subdocuments")
+
+  @@map("deliverables")
+}
+
+enum DeliverableType {
+  MAIN
+  SUBDOCUMENT
+}
+
+// ============================================================================
+// FILES & STORAGE
+// ============================================================================
+
+model File {
+  id       String       @id @default(cuid())
+  clientId String?
+  filename String
+  filepath String
+  filesize Int // bytes
+  mimetype String
+  category FileCategory @default(UPLOAD)
+
+  // Metadata
+  uploadedBy String
+  uploadedAt DateTime @default(now())
+  deletedAt  DateTime?
+
+  // Relations
+  client       Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  uploadedByUser User  @relation(fields: [uploadedBy], references: [id])
+
+  @@map("files")
+}
+
+enum FileCategory {
+  BUSINESS_PLAN
+  DELIVERABLE
+  UPLOAD
+  MISC
+}
+
+// ============================================================================
+// PROMPT TEMPLATES
+// ============================================================================
+
+model PromptTemplate {
+  id       String              @id @default(cuid())
+  name     String
+  type     PromptTemplateType
+  yamlPath String
+  isActive Boolean             @default(false)
+  version  Int                 @default(1)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("prompt_templates")
+}
+
+enum PromptTemplateType {
+  BUSINESS_PLAN
+  DELIVERABLE_M1
+  DELIVERABLE_M2
+  DELIVERABLE_M3
+  DELIVERABLE_M4
+  DELIVERABLE_M5
+  DELIVERABLE_M6
+  DELIVERABLE_M7
+  DELIVERABLE_M8
+}
+
+// ============================================================================
+// JOB QUEUE
+// ============================================================================
+
+model Job {
+  id       String    @id @default(cuid())
+  type     JobType
+  status   JobStatus @default(QUEUED)
+  payload  String // JSON
+  result   String? // JSON
+  error    String?
+  attempts Int       @default(0)
+
+  // Metadata
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  @@map("jobs")
+}
+
+enum JobType {
+  GENERATE_BUSINESS_PLAN
+  GENERATE_DELIVERABLE
+  GENERATE_PDF
+  SUMMARIZE_THREAD
+  BACKUP_DATABASE
+  CLEANUP_FILES
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ============================================================================
+// NOTES
+// ============================================================================
+
+model Note {
+  id          String   @id @default(cuid())
+  clientId    String
+  content     String
+  isImportant Boolean  @default(false)
+  tags        String? // JSON array
+  category    String?
+
+  // Metadata
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@map("notes")
+}
+
+// ============================================================================
+// ACTIVITY LOG
+// ============================================================================
+
+model Activity {
+  id          String       @id @default(cuid())
+  clientId    String?
+  type        ActivityType
+  description String
+  metadata    String? // JSON
+  userId      String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  // Relations
+  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
+
+enum ActivityType {
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_DELETED
+  BUSINESS_PLAN_GENERATED
+  BUSINESS_PLAN_UPDATED
+  BUSINESS_PLAN_APPROVED
+  BUSINESS_PLAN_DELIVERED
+  BUSINESS_PLAN_REJECTED
+  DELIVERABLE_GENERATED
+  DELIVERABLE_UPDATED
+  DELIVERABLE_APPROVED
+  DELIVERABLE_DELIVERED
+  DELIVERABLE_REJECTED
+  FILE_UPLOADED
+  FILE_DELETED
+  NOTE_CREATED
+  NOTE_UPDATED
+  NOTE_DELETED
+  BACKUP_CREATED
+  BACKUP_RESTORED
+  SETTINGS_UPDATED
+}
+
+// ============================================================================
+// BACKUPS
+// ============================================================================
+
+model BackupLog {
+  id       String        @id @default(cuid())
+  filename String
+  filepath String
+  filesize Int // bytes
+  status   BackupStatus
+  verified Boolean       @default(false)
+  error    String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  @@map("backup_logs")
+}
+
+enum BackupStatus {
+  SUCCESS
+  FAILED
+}
+
+// ============================================================================
+// SETTINGS
+// ============================================================================
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String // JSON
+
+  // Metadata
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
