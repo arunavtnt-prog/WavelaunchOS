@@ -181,12 +181,24 @@ export class JobQueue {
   }
 
   private async generatePDF(payload: any): Promise<JobResult> {
-    const { generateBusinessPlanPDF } = await import('@/lib/pdf/generate-business-plan-pdf')
-    return generateBusinessPlanPDF({
-      businessPlanId: payload.businessPlanId,
-      quality: payload.quality || 'final',
-      userId: payload.userId,
-    })
+    // Handle both business plan and deliverable PDFs
+    if (payload.businessPlanId) {
+      const { generateBusinessPlanPDF } = await import('@/lib/pdf/generate-business-plan-pdf')
+      return generateBusinessPlanPDF({
+        businessPlanId: payload.businessPlanId,
+        quality: payload.quality || 'final',
+        userId: payload.userId,
+      })
+    } else if (payload.deliverableId) {
+      const { generateDeliverablePDF } = await import('@/lib/pdf/generate-deliverable-pdf')
+      return generateDeliverablePDF({
+        deliverableId: payload.deliverableId,
+        quality: payload.quality || 'final',
+        userId: payload.userId,
+      })
+    } else {
+      throw new Error('Missing businessPlanId or deliverableId in PDF generation payload')
+    }
   }
 
   private async backupDatabase(payload: any): Promise<JobResult> {
