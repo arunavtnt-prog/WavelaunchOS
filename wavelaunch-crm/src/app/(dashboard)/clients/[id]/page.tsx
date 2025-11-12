@@ -75,15 +75,17 @@ export default function ClientDetailPage() {
           </div>
         </Link>
 
-        <div className="rounded-lg border bg-card p-4">
-          <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Deliverables</span>
+        <Link href={`/clients/${client.id}/deliverables`}>
+          <div className="rounded-lg border bg-card p-4 hover:bg-accent transition-colors cursor-pointer">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Deliverables</span>
+            </div>
+            <p className="mt-2 text-2xl font-bold">
+              {client.deliverables?.length || 0}/8
+            </p>
           </div>
-          <p className="mt-2 text-2xl font-bold">
-            {client.deliverables?.length || 0}/8
-          </p>
-        </div>
+        </Link>
 
         <div className="rounded-lg border bg-card p-4">
           <div className="flex items-center gap-2">
@@ -164,12 +166,14 @@ export default function ClientDetailPage() {
             </Button>
           </Link>
 
-          <Button variant="outline" className="h-auto py-4" disabled>
-            <div className="flex flex-col items-center gap-2">
-              <Activity className="h-6 w-6" />
-              <span>Generate Next Deliverable</span>
-            </div>
-          </Button>
+          <Link href={`/clients/${client.id}/deliverables`}>
+            <Button variant="outline" className="h-auto py-4 w-full">
+              <div className="flex flex-col items-center gap-2">
+                <Activity className="h-6 w-6" />
+                <span>Deliverables</span>
+              </div>
+            </Button>
+          </Link>
 
           <Button variant="outline" className="h-auto py-4" disabled>
             <div className="flex flex-col items-center gap-2">
