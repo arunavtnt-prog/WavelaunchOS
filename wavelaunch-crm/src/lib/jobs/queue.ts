@@ -202,8 +202,8 @@ export class JobQueue {
   }
 
   private async backupDatabase(payload: any): Promise<JobResult> {
-    const { createBackup } = await import('@/lib/backup/create')
-    return createBackup(payload.manual, payload.userId)
+    const { createBackup } = await import('@/lib/backup/backup')
+    return createBackup(payload.label)
   }
 
   private async cleanupFiles(payload: any): Promise<JobResult> {

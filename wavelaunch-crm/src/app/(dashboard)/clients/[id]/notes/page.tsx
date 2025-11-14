@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RichTextEditor } from '@/components/notes/rich-text-editor'
+import { useToast } from '@/hooks/use-toast'
 import {
   ArrowLeft,
   Plus,
@@ -46,6 +47,7 @@ interface NoteWithRelations extends Note {
 export default function ClientNotesPage() {
   const params = useParams()
   const router = useRouter()
+  const { toast } = useToast()
   const [notes, setNotes] = useState<NoteWithRelations[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -119,7 +121,11 @@ export default function ClientNotesPage() {
 
   const handleSaveNote = async () => {
     if (!formData.title.trim()) {
-      alert('Please enter a title')
+      toast({
+        title: 'Validation Error',
+        description: 'Please enter a title',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -137,8 +143,16 @@ export default function ClientNotesPage() {
         if (data.success) {
           await fetchNotes()
           setDialogOpen(false)
+          toast({
+            title: 'Success',
+            description: 'Note updated successfully',
+          })
         } else {
-          alert(data.error || 'Failed to update note')
+          toast({
+            title: 'Error',
+            description: data.error || 'Failed to update note',
+            variant: 'destructive',
+          })
         }
       } else {
         // Create new note
@@ -155,13 +169,25 @@ export default function ClientNotesPage() {
         if (data.success) {
           await fetchNotes()
           setDialogOpen(false)
+          toast({
+            title: 'Success',
+            description: 'Note created successfully',
+          })
         } else {
-          alert(data.error || 'Failed to create note')
+          toast({
+            title: 'Error',
+            description: data.error || 'Failed to create note',
+            variant: 'destructive',
+          })
         }
       }
     } catch (error) {
       console.error('Failed to save note:', error)
-      alert('Failed to save note')
+      toast({
+        title: 'Error',
+        description: 'Failed to save note',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
@@ -181,12 +207,24 @@ export default function ClientNotesPage() {
         await fetchNotes()
         setDeleteDialogOpen(false)
         setNoteToDelete(null)
+        toast({
+          title: 'Success',
+          description: 'Note deleted successfully',
+        })
       } else {
-        alert(data.error || 'Failed to delete note')
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to delete note',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to delete note:', error)
-      alert('Failed to delete note')
+      toast({
+        title: 'Error',
+        description: 'Failed to delete note',
+        variant: 'destructive',
+      })
     } finally {
       setDeleting(false)
     }
