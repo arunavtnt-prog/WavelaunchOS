@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
 import { Key, AlertTriangle } from 'lucide-react'
 
 export default function APIConfigPage() {
+  const { toast } = useToast()
   const [apiKey, setApiKey] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -15,7 +17,10 @@ export default function APIConfigPage() {
     // Placeholder for save functionality
     setTimeout(() => {
       setSaving(false)
-      alert('API configuration saved! (This is a placeholder - configure via environment variables)')
+      toast({
+        title: 'Configuration Note',
+        description: 'API configuration saved! (This is a placeholder - configure via environment variables)',
+      })
     }, 1000)
   }
 

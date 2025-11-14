@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/hooks/use-toast'
 import {
   Database,
   Download,
@@ -42,6 +43,7 @@ interface BackupStats {
 }
 
 export default function BackupSettingsPage() {
+  const { toast } = useToast()
   const [backups, setBackups] = useState<BackupInfo[]>([])
   const [stats, setStats] = useState<BackupStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -95,13 +97,24 @@ export default function BackupSettingsPage() {
         await fetchBackups()
         setCreateDialogOpen(false)
         setBackupLabel('')
-        alert('Backup created successfully!')
+        toast({
+          title: 'Success',
+          description: 'Backup created successfully!',
+        })
       } else {
-        alert(data.error || 'Failed to create backup')
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to create backup',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to create backup:', error)
-      alert('Failed to create backup')
+      toast({
+        title: 'Error',
+        description: 'Failed to create backup',
+        variant: 'destructive',
+      })
     } finally {
       setCreating(false)
     }
@@ -121,17 +134,26 @@ export default function BackupSettingsPage() {
 
       const data = await res.json()
       if (data.success) {
-        alert(
-          `Backup restored successfully! Safety backup created: ${data.data.safetyBackup}\n\nThe page will reload to reflect the restored data.`
-        )
+        toast({
+          title: 'Backup Restored',
+          description: `Safety backup created: ${data.data.safetyBackup}. The page will reload to reflect the restored data.`,
+        })
         // Reload page to reflect restored data
-        window.location.reload()
+        setTimeout(() => window.location.reload(), 2000)
       } else {
-        alert(data.error || 'Failed to restore backup')
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to restore backup',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to restore backup:', error)
-      alert('Failed to restore backup')
+      toast({
+        title: 'Error',
+        description: 'Failed to restore backup',
+        variant: 'destructive',
+      })
     } finally {
       setRestoring(false)
       setRestoreDialogOpen(false)
@@ -152,12 +174,24 @@ export default function BackupSettingsPage() {
         await fetchBackups()
         setDeleteDialogOpen(false)
         setBackupToDelete(null)
+        toast({
+          title: 'Success',
+          description: 'Backup deleted successfully',
+        })
       } else {
-        alert(data.error || 'Failed to delete backup')
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to delete backup',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to delete backup:', error)
-      alert('Failed to delete backup')
+      toast({
+        title: 'Error',
+        description: 'Failed to delete backup',
+        variant: 'destructive',
+      })
     } finally {
       setDeleting(false)
     }
@@ -176,12 +210,24 @@ export default function BackupSettingsPage() {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
+        toast({
+          title: 'Success',
+          description: 'Backup downloaded successfully',
+        })
       } else {
-        alert('Failed to download backup')
+        toast({
+          title: 'Error',
+          description: 'Failed to download backup',
+          variant: 'destructive',
+        })
       }
     } catch (error) {
       console.error('Failed to download backup:', error)
-      alert('Failed to download backup')
+      toast({
+        title: 'Error',
+        description: 'Failed to download backup',
+        variant: 'destructive',
+      })
     }
   }
 
