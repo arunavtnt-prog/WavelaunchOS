@@ -13,48 +13,48 @@ const execAsync = promisify(exec)
 function sanitizeContentForLaTeX(content: string): string {
   // Map of Unicode characters to LaTeX-safe replacements
   const replacements: Record<string, string> = {
-    '★': '*', // Star symbol
-    '✓': '\\checkmark', // Checkmark (will need amssymb package)
-    '✗': 'x', // X mark
-    '→': '->', // Right arrow
-    '←': '<-', // Left arrow
-    '↑': '^', // Up arrow
-    '↓': 'v', // Down arrow
-    '•': '-', // Bullet point (Markdown will handle this)
-    '–': '--', // En dash
-    '—': '---', // Em dash
-    '"': '"', // Left double quote
-    '"': '"', // Right double quote
-    ''': "'", // Left single quote
-    ''': "'", // Right single quote
-    '…': '...', // Ellipsis
-    '™': '(TM)', // Trademark
-    '©': '(C)', // Copyright
-    '®': '(R)', // Registered
-    '°': ' degrees', // Degree symbol
-    '±': '+/-', // Plus-minus
-    '×': 'x', // Multiplication
-    '÷': '/', // Division
-    '≈': '~=', // Approximately equal
-    '≠': '!=', // Not equal
-    '≤': '<=', // Less than or equal
-    '≥': '>=', // Greater than or equal
-    '∞': 'infinity', // Infinity
-    '∑': 'sum', // Summation
-    '∏': 'product', // Product
-    '√': 'sqrt', // Square root
-    '∂': 'd', // Partial derivative
-    '∫': 'integral', // Integral
-    '⚡': '[!]', // Lightning/Energy
-    '🚀': '[rocket]', // Rocket
-    '💡': '[idea]', // Light bulb
-    '📈': '[growth]', // Chart increasing
-    '📊': '[chart]', // Bar chart
-    '💰': '[$]', // Money bag
-    '🎯': '[target]', // Target
-    '⭐': '*', // Star (filled)
-    '❤': '<3', // Heart
-    '👍': '[+1]', // Thumbs up
+    '\u2605': '*', // Star symbol
+    '\u2713': 'v', // Checkmark
+    '\u2717': 'x', // X mark
+    '\u2192': '->', // Right arrow
+    '\u2190': '<-', // Left arrow
+    '\u2191': '^', // Up arrow
+    '\u2193': 'v', // Down arrow
+    '\u2022': '-', // Bullet point
+    '\u2013': '--', // En dash
+    '\u2014': '---', // Em dash
+    '\u201C': '"', // Left double quote
+    '\u201D': '"', // Right double quote
+    '\u2018': "'", // Left single quote
+    '\u2019': "'", // Right single quote
+    '\u2026': '...', // Ellipsis
+    '\u2122': '(TM)', // Trademark
+    '\u00A9': '(C)', // Copyright
+    '\u00AE': '(R)', // Registered
+    '\u00B0': ' degrees', // Degree symbol
+    '\u00B1': '+/-', // Plus-minus
+    '\u00D7': 'x', // Multiplication
+    '\u00F7': '/', // Division
+    '\u2248': '~=', // Approximately equal
+    '\u2260': '!=', // Not equal
+    '\u2264': '<=', // Less than or equal
+    '\u2265': '>=', // Greater than or equal
+    '\u221E': 'infinity', // Infinity
+    '\u2211': 'sum', // Summation
+    '\u220F': 'product', // Product
+    '\u221A': 'sqrt', // Square root
+    '\u2202': 'd', // Partial derivative
+    '\u222B': 'integral', // Integral
+    '\u26A1': '[!]', // Lightning/Energy
+    '\uD83D\uDE80': '[rocket]', // Rocket
+    '\uD83D\uDCA1': '[idea]', // Light bulb
+    '\uD83D\uDCC8': '[growth]', // Chart increasing
+    '\uD83D\uDCCA': '[chart]', // Bar chart
+    '\uD83D\uDCB0': '[$]', // Money bag
+    '\uD83C\uDFAF': '[target]', // Target
+    '\u2B50': '*', // Star (filled)
+    '\u2764': '<3', // Heart
+    '\uD83D\uDC4D': '[+1]', // Thumbs up
   }
 
   let sanitized = content
