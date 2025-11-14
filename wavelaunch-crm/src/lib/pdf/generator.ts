@@ -6,6 +6,71 @@ import { format } from 'date-fns'
 
 const execAsync = promisify(exec)
 
+/**
+ * Sanitize content for LaTeX PDF generation
+ * Replaces Unicode characters that LaTeX cannot handle
+ */
+function sanitizeContentForLaTeX(content: string): string {
+  // Map of Unicode characters to LaTeX-safe replacements
+  const replacements: Record<string, string> = {
+    '★': '*', // Star symbol
+    '✓': '\\checkmark', // Checkmark (will need amssymb package)
+    '✗': 'x', // X mark
+    '→': '->', // Right arrow
+    '←': '<-', // Left arrow
+    '↑': '^', // Up arrow
+    '↓': 'v', // Down arrow
+    '•': '-', // Bullet point (Markdown will handle this)
+    '–': '--', // En dash
+    '—': '---', // Em dash
+    '"': '"', // Left double quote
+    '"': '"', // Right double quote
+    ''': "'", // Left single quote
+    ''': "'", // Right single quote
+    '…': '...', // Ellipsis
+    '™': '(TM)', // Trademark
+    '©': '(C)', // Copyright
+    '®': '(R)', // Registered
+    '°': ' degrees', // Degree symbol
+    '±': '+/-', // Plus-minus
+    '×': 'x', // Multiplication
+    '÷': '/', // Division
+    '≈': '~=', // Approximately equal
+    '≠': '!=', // Not equal
+    '≤': '<=', // Less than or equal
+    '≥': '>=', // Greater than or equal
+    '∞': 'infinity', // Infinity
+    '∑': 'sum', // Summation
+    '∏': 'product', // Product
+    '√': 'sqrt', // Square root
+    '∂': 'd', // Partial derivative
+    '∫': 'integral', // Integral
+    '⚡': '[!]', // Lightning/Energy
+    '🚀': '[rocket]', // Rocket
+    '💡': '[idea]', // Light bulb
+    '📈': '[growth]', // Chart increasing
+    '📊': '[chart]', // Bar chart
+    '💰': '[$]', // Money bag
+    '🎯': '[target]', // Target
+    '⭐': '*', // Star (filled)
+    '❤': '<3', // Heart
+    '👍': '[+1]', // Thumbs up
+  }
+
+  let sanitized = content
+
+  // Replace special Unicode characters
+  for (const [unicode, replacement] of Object.entries(replacements)) {
+    sanitized = sanitized.replace(new RegExp(unicode, 'g'), replacement)
+  }
+
+  // Remove any remaining emoji or problematic Unicode characters
+  // This regex matches most emoji and special symbols
+  sanitized = sanitized.replace(/[\u{1F300}-\u{1F9FF}]/gu, '[emoji]')
+
+  return sanitized
+}
+
 export type PDFQuality = 'draft' | 'final'
 
 export interface PDFGenerationOptions {
@@ -49,8 +114,9 @@ export async function generatePDF(
     const markdownPath = path.join(tempDir, `business-plan-${timestamp}.md`)
     const yamlPath = path.join(tempDir, `metadata-${timestamp}.yaml`)
 
-    // Write Markdown content
-    await fs.writeFile(markdownPath, content, 'utf-8')
+    // Sanitize and write Markdown content
+    const sanitizedContent = sanitizeContentForLaTeX(content)
+    await fs.writeFile(markdownPath, sanitizedContent, 'utf-8')
 
     // Create YAML metadata
     const yamlMetadata = createYAMLMetadata(metadata, quality)
@@ -59,13 +125,15 @@ export async function generatePDF(
     // LaTeX template path
     const templatePath = path.join(process.cwd(), 'templates', 'business-plan.tex')
 
-    // Pandoc command
+    // Pandoc command - use pdflatex for better compatibility
+    // Note: Using pdflatex instead of xelatex as it's more commonly available
+    // Content is pre-sanitized to handle Unicode characters
     const pandocCommand = [
       'pandoc',
       `"${markdownPath}"`,
       `--metadata-file="${yamlPath}"`,
       `--template="${templatePath}"`,
-      '--pdf-engine=xelatex',
+      '--pdf-engine=pdflatex',
       '--toc',
       '--toc-depth=3',
       '--number-sections',
@@ -74,11 +142,20 @@ export async function generatePDF(
       `--output="${outputPath}"`,
     ].join(' ')
 
+    console.log('Executing Pandoc command:', pandocCommand)
+
     // Execute Pandoc
     const { stdout, stderr } = await execAsync(pandocCommand, {
       timeout: 120000, // 2 minutes timeout
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer
     })
+
+    if (stderr && stderr.length > 0) {
+      console.warn('Pandoc stderr:', stderr)
+    }
+    if (stdout && stdout.length > 0) {
+      console.log('Pandoc stdout:', stdout)
+    }
 
     // Check if PDF was created
     const stats = await fs.stat(outputPath)
