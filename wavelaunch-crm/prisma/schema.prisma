@@ -97,6 +97,10 @@ model Client {
   activities    Activity[]
   applications  Application[]
 
+  // Client Portal Relations
+  portalUser    ClientPortalUser?
+  portalMessages PortalMessage[]
+
   @@map("clients")
 }
 
@@ -648,6 +652,7 @@ model TokenBudget {
   // Auto-Pause
   autoPauseAtLimit Boolean @default(false)
   isPaused         Boolean @default(false)
+  isActive         Boolean @default(true)
 
   @@index([period])
   @@index([endDate])
@@ -655,7 +660,81 @@ model TokenBudget {
 }
 
 
-// Update Client model to include reverse relation
-// Note: Add this to the Client model's relations section:
-// applications Application[]
+// ============================================================================
+// CLIENT PORTAL
+// ============================================================================
+
+model ClientPortalUser {
+  id                    String    @id @default(cuid())
+  clientId              String    @unique
+  email                 String    @unique
+  passwordHash          String
+  isActive              Boolean   @default(false)
+  invitedAt             DateTime  @default(now())
+  activatedAt           DateTime?
+  lastLoginAt           DateTime?
+  passwordChangedAt     DateTime?
+  emailVerified         Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Email preferences
+  notifyNewDeliverable    Boolean @default(true)
+  notifyNewMessage        Boolean @default(true)
+  notifyMilestoneReminder Boolean @default(true)
+  notifyWeeklySummary     Boolean @default(false)
+
+  // Relations
+  client        Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages      PortalMessage[]
+  notifications PortalNotification[]
+
+  @@index([email])
+  @@index([clientId])
+  @@map("client_portal_users")
+}
+
+model PortalMessage {
+  id             String    @id @default(cuid())
+  threadId       String    // Group messages into conversations
+  clientUserId   String?   // If from client
+  adminUserId    String?   // If from admin
+  clientId       String    // Always reference client
+  subject        String
+  body           String
+  isFromAdmin    Boolean
+  isRead         Boolean   @default(false)
+  attachmentUrl  String?
+  attachmentName String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  clientUser ClientPortalUser? @relation(fields: [clientUserId], references: [id])
+  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@map("portal_messages")
+}
+
+model PortalNotification {
+  id           String   @id @default(cuid())
+  clientUserId String
+  type         String   // NEW_DELIVERABLE, NEW_MESSAGE, MILESTONE_REMINDER, ACCOUNT_UPDATE
+  title        String
+  message      String
+  actionUrl    String?  // Link to relevant page
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  clientUser ClientPortalUser @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clientUserId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("portal_notifications")
+}
 
