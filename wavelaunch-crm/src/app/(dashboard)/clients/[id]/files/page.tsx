@@ -13,6 +13,9 @@ import {
   Upload as UploadIcon,
   Filter,
   HardDrive,
+  CheckSquare,
+  Square,
+  DownloadCloud,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -90,6 +93,11 @@ export default function FilesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
+  // Bulk operations state
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [bulkDownloading, setBulkDownloading] = useState(false)
+
   useEffect(() => {
     fetchData()
   }, [clientId])
@@ -164,6 +172,85 @@ export default function FilesPage() {
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+  }
+
+  // Bulk operations handlers
+  const toggleFileSelection = (fileId: string) => {
+    const newSelected = new Set(selectedFiles)
+    if (newSelected.has(fileId)) {
+      newSelected.delete(fileId)
+    } else {
+      newSelected.add(fileId)
+    }
+    setSelectedFiles(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedFiles.size === filteredFiles.length) {
+      setSelectedFiles(new Set())
+    } else {
+      setSelectedFiles(new Set(filteredFiles.map((f) => f.id)))
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedFiles.size === 0) return
+
+    try {
+      setBulkDeleting(true)
+      const res = await fetch('/api/files/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileIds: Array.from(selectedFiles) }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setSelectedFiles(new Set())
+        await fetchData()
+      } else {
+        setError(data.error || 'Failed to delete files')
+      }
+    } catch (err) {
+      console.error('Error bulk deleting files:', err)
+      setError('Failed to delete files')
+    } finally {
+      setBulkDeleting(false)
+    }
+  }
+
+  const handleBulkDownload = async () => {
+    if (selectedFiles.size === 0) return
+
+    try {
+      setBulkDownloading(true)
+      const res = await fetch('/api/files/bulk-download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileIds: Array.from(selectedFiles) }),
+      })
+
+      if (res.ok) {
+        const blob = await res.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `files-${new Date().toISOString().split('T')[0]}.zip`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Failed to download files')
+      }
+    } catch (err) {
+      console.error('Error bulk downloading files:', err)
+      setError('Failed to download files')
+    } finally {
+      setBulkDownloading(false)
+    }
   }
 
   if (loading) {
@@ -273,13 +360,48 @@ export default function FilesPage() {
         </Card>
       )}
 
-      {/* Category Filter */}
+      {/* Category Filter & Bulk Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filter by Category
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filter by Category
+            </CardTitle>
+            {selectedFiles.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedFiles.size} selected
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkDownload}
+                  disabled={bulkDownloading}
+                >
+                  {bulkDownloading ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <DownloadCloud className="h-4 w-4 mr-2" />
+                  )}
+                  Download ZIP
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={bulkDeleting}
+                >
+                  {bulkDeleting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 mr-2" />
+                  )}
+                  Delete Selected
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2 flex-wrap">
@@ -327,58 +449,97 @@ export default function FilesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {filteredFiles.map((file) => {
-            const categoryInfo = categoryConfig[file.category]
+        <>
+          {/* Select All */}
+          {filteredFiles.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSelectAll}
+                className="gap-2"
+              >
+                {selectedFiles.size === filteredFiles.length ? (
+                  <CheckSquare className="h-4 w-4" />
+                ) : (
+                  <Square className="h-4 w-4" />
+                )}
+                {selectedFiles.size === filteredFiles.length ? 'Deselect All' : 'Select All'}
+              </Button>
+            </div>
+          )}
 
-            return (
-              <Card key={file.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <FileText className="h-8 w-8 text-gray-400 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg truncate">{file.filename}</CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
-                          <Badge className={categoryInfo.color}>{categoryInfo.label}</Badge>
-                          <span>{formatFileSize(file.fileSize)}</span>
-                          <span>•</span>
-                          <span>{file.fileType}</span>
-                        </CardDescription>
+          <div className="grid gap-4">
+            {filteredFiles.map((file) => {
+              const categoryInfo = categoryConfig[file.category]
+              const isSelected = selectedFiles.has(file.id)
+
+              return (
+                <Card
+                  key={file.id}
+                  className={`hover:shadow-lg transition-all ${
+                    isSelected ? 'ring-2 ring-primary' : ''
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {/* Checkbox */}
+                        <button
+                          onClick={() => toggleFileSelection(file.id)}
+                          className="flex-shrink-0 hover:opacity-70 transition-opacity"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          ) : (
+                            <Square className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
+
+                        <FileText className="h-8 w-8 text-gray-400 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <CardTitle className="text-lg truncate">{file.filename}</CardTitle>
+                          <CardDescription className="flex items-center gap-2 mt-1">
+                            <Badge className={categoryInfo.color}>{categoryInfo.label}</Badge>
+                            <span>{formatFileSize(file.fileSize)}</span>
+                            <span>•</span>
+                            <span>{file.fileType}</span>
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(`/api/files/${file.id}/download`, '_blank')}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => setDeleteConfirm(file.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(`/api/files/${file.id}/download`, '_blank')}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setDeleteConfirm(file.id)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm text-muted-foreground">
+                      <p>
+                        Uploaded by {file.uploadedByUser.name} on{' '}
+                        {format(new Date(file.createdAt), 'MMM dd, yyyy h:mm a')}
+                      </p>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-muted-foreground">
-                    <p>
-                      Uploaded by {file.uploadedByUser.name} on{' '}
-                      {format(new Date(file.createdAt), 'MMM dd, yyyy h:mm a')}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </>
       )}
 
       {/* Upload Dialog */}
