@@ -489,6 +489,172 @@ model Application {
   @@map("applications")
 }
 
+// ============================================================================
+// TOKEN USAGE TRACKING & OPTIMIZATION
+// ============================================================================
+
+model TokenUsage {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Request Details
+  operation      String // GENERATE_BUSINESS_PLAN, GENERATE_DELIVERABLE, etc.
+  model          String // gpt-4, claude-3-opus, etc.
+  promptTokens   Int
+  completionTokens Int
+  totalTokens    Int
+
+  // Cost Tracking
+  estimatedCost  Float // In USD
+
+  // Context
+  clientId       String?
+  userId         String?
+  jobId          String?
+  documentId     String? // Business plan or deliverable ID
+  documentType   String? // BUSINESS_PLAN, DELIVERABLE
+
+  // Caching Info
+  cacheHit       Boolean @default(false)
+  cacheKey       String?
+
+  // Metadata
+  requestDuration Int? // milliseconds
+  success        Boolean @default(true)
+  errorMessage   String?
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([clientId])
+  @@index([cacheKey])
+  @@map("token_usage")
+}
+
+model PromptCache {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  // Cache Key (hash of prompt + model + params)
+  cacheKey   String   @unique
+
+  // Cached Content
+  promptHash String // SHA-256 hash of the prompt
+  response   String // The generated content
+  model      String
+
+  // Usage Stats
+  hitCount   Int      @default(0)
+  lastUsedAt DateTime @default(now())
+
+  // Metadata
+  tokensSaved Int     @default(0) // Cumulative tokens saved by cache hits
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+  @@map("prompt_cache")
+}
+
+model GenerationCheckpoint {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Job Details
+  jobId      String   @unique
+  jobType    String   // BUSINESS_PLAN, DELIVERABLE
+  status     String   // IN_PROGRESS, PAUSED, FAILED, COMPLETED
+
+  // Progress Tracking
+  totalSections     Int
+  completedSections Int
+  currentSection    Int
+
+  // Context Preservation
+  documentId     String?
+  clientId       String
+  generatedContent String // JSON: { section1: "...", section2: "..." }
+  promptContext    String // JSON: stored context for resuming
+
+  // Resume Info
+  canResume      Boolean  @default(true)
+  lastCheckpoint DateTime @default(now())
+  errorMessage   String?
+
+  @@index([jobId])
+  @@index([clientId])
+  @@index([status])
+  @@map("generation_checkpoints")
+}
+
+model DocumentSection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Document Reference
+  documentId   String
+  documentType String // BUSINESS_PLAN, DELIVERABLE
+
+  // Section Details
+  sectionName  String // e.g., "Executive Summary", "Market Analysis"
+  sectionOrder Int
+  content      String
+
+  // Metadata
+  generatedBy    String?
+  generatedAt    DateTime?
+  tokensUsed     Int?
+  version        Int      @default(1)
+
+  @@index([documentId, documentType])
+  @@index([sectionName])
+  @@map("document_sections")
+}
+
+// ============================================================================
+// TOKEN BUDGET ALERTS
+// ============================================================================
+
+model TokenBudget {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Budget Period
+  period     String   // DAILY, WEEKLY, MONTHLY
+  startDate  DateTime
+  endDate    DateTime
+
+  // Budget Limits
+  tokenLimit Int // Maximum tokens allowed
+  costLimit  Float // Maximum cost in USD
+
+  // Current Usage
+  tokensUsed Int   @default(0)
+  costUsed   Float @default(0)
+
+  // Alert Thresholds
+  alertAt50  Boolean @default(true)
+  alertAt75  Boolean @default(true)
+  alertAt90  Boolean @default(true)
+  alertAt100 Boolean @default(true)
+
+  // Alert Status
+  alert50Sent  Boolean @default(false)
+  alert75Sent  Boolean @default(false)
+  alert90Sent  Boolean @default(false)
+  alert100Sent Boolean @default(false)
+
+  // Auto-Pause
+  autoPauseAtLimit Boolean @default(false)
+  isPaused         Boolean @default(false)
+
+  @@index([period])
+  @@index([endDate])
+  @@map("token_budgets")
+}
+
+
 // Update Client model to include reverse relation
 // Note: Add this to the Client model's relations section:
 // applications Application[]
