@@ -5,10 +5,10 @@ import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
 const listDeliverablesSchema = z.object({
-  clientId: z.string().cuid(),
+  clientId: z.string().cuid().optional(),
 })
 
-// GET /api/deliverables?clientId=xxx - List all deliverables for a client
+// GET /api/deliverables - List all deliverables (optionally filtered by clientId)
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
@@ -17,34 +17,41 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
-    const clientId = searchParams.get('clientId')
-
-    if (!clientId) {
-      return NextResponse.json(
-        { success: false, error: 'clientId is required' },
-        { status: 400 }
-      )
-    }
+    const clientId = searchParams.get('clientId') || undefined
 
     const { clientId: validatedClientId } = listDeliverablesSchema.parse({ clientId })
 
-    // Verify client exists
-    const client = await db.client.findUnique({
-      where: { id: validatedClientId, deletedAt: null },
-    })
+    // Build where clause
+    const where: any = {}
 
-    if (!client) {
-      return NextResponse.json(
-        { success: false, error: 'Client not found' },
-        { status: 404 }
-      )
+    // If clientId provided, filter by client and verify it exists
+    if (validatedClientId) {
+      const client = await db.client.findUnique({
+        where: { id: validatedClientId, deletedAt: null },
+      })
+
+      if (!client) {
+        return NextResponse.json(
+          { success: false, error: 'Client not found' },
+          { status: 404 }
+        )
+      }
+
+      where.clientId = validatedClientId
     }
 
-    // Get all deliverables for client, ordered by month
+    // Get deliverables
     const deliverables = await db.deliverable.findMany({
-      where: { clientId: validatedClientId },
-      orderBy: { month: 'asc' },
+      where,
+      orderBy: [{ createdAt: 'desc' }],
       include: {
+        client: {
+          select: {
+            id: true,
+            creatorName: true,
+            brandName: true,
+          },
+        },
         generatedByUser: {
           select: {
             id: true,
