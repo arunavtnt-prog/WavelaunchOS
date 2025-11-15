@@ -50,9 +50,21 @@ export async function generateDeliverable(
     // Render prompt
     const prompt = promptLoader.renderPrompt(template, context)
 
-    // Generate with Claude
+    // Generate with Claude (with caching and token tracking)
     const claudeClient = getClaudeClient()
-    const content = await claudeClient.generate(prompt, template.systemPrompt)
+    const content = await claudeClient.generate(prompt, {
+      systemPrompt: template.systemPrompt,
+      useCache: true,
+      cacheTTLHours: 72, // 3 days for deliverables
+      operation: `DELIVERABLE_M${month}_GENERATION`,
+      clientId,
+      userId,
+      metadata: {
+        month,
+        templateId: template.id,
+        monthTitle: context.month_title,
+      },
+    })
 
     // Save to database
     const deliverable = await db.deliverable.create({
