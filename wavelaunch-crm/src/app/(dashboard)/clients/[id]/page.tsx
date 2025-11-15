@@ -1,16 +1,33 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, FileText, Folder, StickyNote, Activity } from 'lucide-react'
+import { ArrowLeft, FileText, Folder, StickyNote, Activity, Archive, ArchiveRestore } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useToast } from '@/hooks/use-toast'
 import type { ClientWithRelations } from '@/types'
 
 export default function ClientDetailPage() {
   const params = useParams()
+  const router = useRouter()
+  const { toast } = useToast()
   const [client, setClient] = useState<ClientWithRelations | null>(null)
   const [loading, setLoading] = useState(true)
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
+  const [archiving, setArchiving] = useState(false)
+  const [restoring, setRestoring] = useState(false)
 
   useEffect(() => {
     fetchClient()
@@ -28,6 +45,72 @@ export default function ClientDetailPage() {
       console.error('Failed to fetch client:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleArchive = async () => {
+    try {
+      setArchiving(true)
+      const res = await fetch(`/api/clients/${params.id}/archive`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast({
+          title: 'Client archived',
+          description: 'The client has been archived successfully.',
+        })
+        router.push('/clients')
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to archive client',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to archive client',
+        variant: 'destructive',
+      })
+    } finally {
+      setArchiving(false)
+      setArchiveDialogOpen(false)
+    }
+  }
+
+  const handleRestore = async () => {
+    try {
+      setRestoring(true)
+      const res = await fetch(`/api/clients/${params.id}/restore`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast({
+          title: 'Client restored',
+          description: 'The client has been restored successfully.',
+        })
+        fetchClient()
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to restore client',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to restore client',
+        variant: 'destructive',
+      })
+    } finally {
+      setRestoring(false)
+      setRestoreDialogOpen(false)
     }
   }
 
@@ -60,7 +143,28 @@ export default function ClientDetailPage() {
             <p className="text-muted-foreground">{client.brandName}</p>
           )}
         </div>
-        <Button>Edit Client</Button>
+        {client.deletedAt ? (
+          <Button
+            onClick={() => setRestoreDialogOpen(true)}
+            disabled={restoring}
+            variant="outline"
+          >
+            <ArchiveRestore className="mr-2 h-4 w-4" />
+            {restoring ? 'Restoring...' : 'Restore Client'}
+          </Button>
+        ) : (
+          <>
+            <Button>Edit Client</Button>
+            <Button
+              onClick={() => setArchiveDialogOpen(true)}
+              disabled={archiving}
+              variant="outline"
+            >
+              <Archive className="mr-2 h-4 w-4" />
+              Archive Client
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Stats */}
@@ -223,6 +327,42 @@ export default function ClientDetailPage() {
           <p className="text-sm text-muted-foreground">No activity yet</p>
         )}
       </div>
+
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive Client?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will archive {client.creatorName}. You can restore them later from the archived clients page.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archiving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleArchive} disabled={archiving}>
+              {archiving ? 'Archiving...' : 'Archive Client'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Restore Confirmation Dialog */}
+      <AlertDialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restore Client?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will restore {client.creatorName} and mark them as active again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={restoring}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestore} disabled={restoring}>
+              {restoring ? 'Restoring...' : 'Restore Client'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
