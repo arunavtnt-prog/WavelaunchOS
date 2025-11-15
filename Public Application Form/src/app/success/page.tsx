@@ -45,7 +45,7 @@ export default function SuccessPage() {
   const wavelaunchUrl = process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       <div className="container mx-auto max-w-3xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -138,7 +138,7 @@ export default function SuccessPage() {
             <Button
               size="lg"
               onClick={() => window.open(wavelaunchUrl, '_blank')}
-              className="gradient-luxury text-white px-8 py-6 text-lg"
+              className="bg-primary text-primary-foreground px-8 py-6 text-lg"
             >
               Visit Wavelaunch VC
               <ExternalLink className="w-5 h-5 ml-2" />
