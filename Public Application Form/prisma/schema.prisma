@@ -1,0 +1,276 @@
+// Prisma schema for Wavelaunch Studio Intake Application
+// Connects to existing CRM database
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Application model for intake form submissions
+model Application {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Basic Information
+  fullName         String
+  email            String
+  instagramHandle  String?
+  tiktokHandle     String?
+  country          String
+  industryNiche    String
+  age              Int
+
+  // Career Background
+  professionalMilestones String // Significant milestones in professional career
+  personalTurningPoints  String // Main turning points in personal career
+  visionForVenture       String // Vision for new venture
+  hopeToAchieve          String // What they hope to achieve
+
+  // Audience & Demographics
+  targetAudience         String // Who is target audience
+  demographicProfile     String // Gender, location, interests
+  targetDemographicAge   String // Age of target demographic
+  audienceGenderSplit    String // Male or female
+  audienceMaritalStatus  String // Single or married
+  currentChannels        String // How audience finds them
+
+  // Audience Pain Points & Needs
+  keyPainPoints  String // Pain points to address
+  brandValues    String // Values/principles brand must embody
+
+  // Competition & Market Understanding
+  differentiation        String // How to differentiate
+  uniqueValueProps       String // Unique value propositions
+  emergingCompetitors    String // Competitors they monitor
+
+  // Brand Identity Preferences
+  idealBrandImage        String // Ideal brand image
+  inspirationBrands      String // Influencers/brands they admire
+  brandingAesthetics     String // Visual identity/tone of voice
+  emotionsBrandEvokes    String // Emotions/adjectives brand should evoke
+  brandPersonality       String // Brand personality words
+  preferredFont          String // Font preference
+
+  // Product Direction
+  productCategories      String // Categories interested in (JSON array)
+  otherProductIdeas      String? // Other product ideas
+
+  // Business Goals
+  scalingGoals           String // Personal goals for scaling
+  growthStrategies       String // Strategies/channels to explore
+  longTermVision         String // Long-term vision
+  specificDeadlines      String? // Deadlines/milestones
+  additionalInfo         String? // Other relevant info
+
+  // Logistics
+  zipFilePath            String? // Path to uploaded ZIP file
+  zipFileName            String? // Original ZIP filename
+  zipFileSize            Int?    // ZIP file size in bytes
+  termsAccepted          Boolean @default(false) // Terms acceptance
+
+  // Status tracking
+  status                 String  @default("PENDING") // PENDING, REVIEWED, APPROVED, REJECTED
+  reviewedAt             DateTime?
+  reviewNotes            String?
+
+  // Relations to existing CRM (optional - for when approved and converted)
+  convertedToClientId    String?
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([status])
+}
+
+// Reference existing Client model from CRM (read-only, for conversion)
+model Client {
+  id                          String    @id @default(cuid())
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+  deletedAt                   DateTime?
+
+  // Required fields
+  creatorName                 String
+  email                       String    @unique
+  visionStatement             String
+  targetIndustry              String
+  targetAudience              String
+  demographics                String
+  painPoints                  String
+  uniqueValueProps            String
+  targetDemographicAge        String
+  brandImage                  String
+  brandPersonality            String
+  preferredFont               String
+
+  // Optional fields
+  brandName                   String?
+  niche                       String?
+  goals                       String?
+  socialHandles               String?
+  professionalMilestones      String?
+  personalTurningPoints       String?
+  competitiveDifferentiation  String?
+  emergingCompetitors         String?
+  inspirationBrands           String?
+  brandingAesthetics          String?
+  emotionsBrandEvokes         String?
+  scalingGoals                String?
+  growthStrategies            String?
+  longTermVision              String?
+  additionalInfo              String?
+  specificDeadlines           String?
+  currentChannels             String?
+  audienceGenderSplit         String?
+  audienceMaritalStatus       String?
+  brandValues                 String?
+
+  status                      String    @default("ACTIVE")
+
+  businessPlans               BusinessPlan[]
+  deliverables                Deliverable[]
+  files                       File[]
+  notes                       Note[]
+  activities                  Activity[]
+
+  @@index([email])
+  @@index([status])
+}
+
+// Reference models (for Activity logging)
+model Activity {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  type        String
+  description String
+  metadata    String?
+
+  clientId    String?
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model User {
+  id                      String         @id @default(cuid())
+  email                   String         @unique
+  passwordHash            String
+  name                    String
+  role                    String         @default("CLIENT")
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+
+  businessPlansGenerated  BusinessPlan[]
+  deliverablesGenerated   Deliverable[]
+  filesUploaded           File[]
+  notes                   Note[]
+  activities              Activity[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model BusinessPlan {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  version         Int       @default(1)
+  content         String
+  pdfPath         String?
+  status          String    @default("DRAFT")
+  generatedAt     DateTime?
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+
+  clientId        String
+  client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  generatedById   String?
+  generatedBy     User?     @relation(fields: [generatedById], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([generatedAt])
+}
+
+model Deliverable {
+  id              String        @id @default(cuid())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  month           Int
+  type            String        @default("MAIN")
+  content         String
+  pdfPath         String?
+  status          String        @default("DRAFT")
+  generatedAt     DateTime?
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+
+  clientId        String
+  client          Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  generatedById   String?
+  generatedBy     User?         @relation(fields: [generatedById], references: [id], onDelete: SetNull)
+
+  parentId        String?
+  parent          Deliverable?  @relation("DeliverableHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children        Deliverable[] @relation("DeliverableHierarchy")
+
+  @@index([clientId])
+  @@index([status])
+  @@index([month])
+  @@index([generatedAt])
+}
+
+model File {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  filename    String
+  filepath    String
+  filesize    Int
+  mimetype    String
+  category    String    @default("UPLOAD")
+
+  clientId    String?
+  client      Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([category])
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  content     String
+  tags        String?
+  important   Boolean  @default(false)
+  category    String?
+
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([important])
+  @@index([category])
+}
