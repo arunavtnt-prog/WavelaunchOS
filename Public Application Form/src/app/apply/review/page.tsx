@@ -168,7 +168,7 @@ export default function ReviewPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <div className="container mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -191,7 +191,7 @@ export default function ReviewPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="glass-effect">
+              <Card className="">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl">{section.title}</CardTitle>
                   <Button
@@ -239,7 +239,7 @@ export default function ReviewPage() {
 
           <Button
             onClick={() => setShowConfirmDialog(true)}
-            className="gradient-luxury text-white"
+            className="bg-primary text-primary-foreground"
             size="lg"
           >
             <Send className="w-4 h-4 mr-2" />
@@ -265,7 +265,7 @@ export default function ReviewPage() {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="gradient-luxury text-white"
+                className="bg-primary text-primary-foreground"
               >
                 {isSubmitting ? (
                   <>

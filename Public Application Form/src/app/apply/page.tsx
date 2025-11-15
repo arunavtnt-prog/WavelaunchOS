@@ -123,7 +123,7 @@ export default function ApplicationPage() {
   const currentStepData = FORM_STEPS[currentStep]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <div className="container mx-auto max-w-4xl">
         {/* Header */}
         <motion.div
@@ -191,7 +191,7 @@ export default function ApplicationPage() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="glass-effect border-2">
+            <Card className=" border-2">
               <CardHeader>
                 <CardTitle className="text-2xl">{currentStepData.title}</CardTitle>
                 <CardDescription>{currentStepData.description}</CardDescription>
@@ -215,7 +215,7 @@ export default function ApplicationPage() {
                     <Button
                       type="button"
                       onClick={handleNext}
-                      className="gradient-luxury text-white"
+                      className="bg-primary text-primary-foreground"
                     >
                       {currentStep === FORM_STEPS.length - 1 ? (
                         <>
