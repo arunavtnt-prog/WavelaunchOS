@@ -95,6 +95,7 @@ model Client {
   files         File[]
   notes         Note[]
   activities    Activity[]
+  applications  Application[]
 
   @@map("clients")
 }
@@ -406,3 +407,89 @@ model Settings {
 
   @@map("settings")
 }
+
+// ============================================================================
+// APPLICATIONS (Intake Form Submissions)
+// ============================================================================
+
+model Application {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Basic Information
+  fullName         String
+  email            String
+  instagramHandle  String?
+  tiktokHandle     String?
+  country          String
+  industryNiche    String
+  age              Int
+
+  // Career Background
+  professionalMilestones String
+  personalTurningPoints  String
+  visionForVenture       String
+  hopeToAchieve          String
+
+  // Audience & Demographics
+  targetAudience        String
+  demographicProfile    String
+  targetDemographicAge  String
+  audienceGenderSplit   String
+  audienceMaritalStatus String
+  currentChannels       String
+
+  // Audience Pain Points & Needs
+  keyPainPoints String
+  brandValues   String
+
+  // Competition & Market Understanding
+  differentiation     String
+  uniqueValueProps    String
+  emergingCompetitors String
+
+  // Brand Identity Preferences
+  idealBrandImage     String
+  inspirationBrands   String
+  brandingAesthetics  String
+  emotionsBrandEvokes String
+  brandPersonality    String
+  preferredFont       String
+
+  // Product Direction
+  productCategories String // JSON array
+  otherProductIdeas String?
+
+  // Business Goals
+  scalingGoals      String
+  growthStrategies  String
+  longTermVision    String
+  specificDeadlines String?
+  additionalInfo    String?
+
+  // Logistics
+  zipFilePath String?
+  zipFileName String?
+  zipFileSize Int?
+  termsAccepted Boolean @default(false)
+
+  // Status tracking
+  status      String    @default("PENDING") // PENDING, REVIEWED, APPROVED, REJECTED
+  reviewedAt  DateTime?
+  reviewNotes String?
+
+  // Relation to CRM (for conversion)
+  convertedToClientId String?
+  convertedToClient   Client? @relation(fields: [convertedToClientId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([status])
+  @@map("applications")
+}
+
+// Update Client model to include reverse relation
+// Note: Add this to the Client model's relations section:
+// applications Application[]
+
