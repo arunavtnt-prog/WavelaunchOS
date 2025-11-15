@@ -12,7 +12,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { Search, Download, Folder, FileText, Image, Film, Music, File as FileIcon } from 'lucide-react'
+import { Search, Download, Folder, FileText, Image, Film, Music, File as FileIcon, Eye, Filter, X } from 'lucide-react'
+import { FilePreviewDialog } from '@/components/files/FilePreviewDialog'
+import { Label } from '@/components/ui/label'
 
 interface File {
   id: string
@@ -47,6 +49,18 @@ export default function FilesPage() {
   const [clientFilter, setClientFilter] = useState('all')
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
 
+  // Advanced filters
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [minSize, setMinSize] = useState('')
+  const [maxSize, setMaxSize] = useState('')
+  const [fileTypeFilter, setFileTypeFilter] = useState('all')
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+
+  // Preview dialog
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewFile, setPreviewFile] = useState<File | null>(null)
+
   // Stats
   const [totalSize, setTotalSize] = useState(0)
   const [fileCount, setFileCount] = useState(0)
@@ -58,7 +72,7 @@ export default function FilesPage() {
 
   useEffect(() => {
     filterFiles()
-  }, [files, search, categoryFilter, clientFilter])
+  }, [files, search, categoryFilter, clientFilter, dateFrom, dateTo, minSize, maxSize, fileTypeFilter])
 
   const fetchClients = async () => {
     try {
@@ -129,6 +143,52 @@ export default function FilesPage() {
       filtered = filtered.filter((file) => file.client?.id === clientFilter)
     }
 
+    // Date range filter
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom)
+      filtered = filtered.filter((file) => new Date(file.uploadedAt) >= fromDate)
+    }
+    if (dateTo) {
+      const toDate = new Date(dateTo)
+      toDate.setHours(23, 59, 59, 999) // End of day
+      filtered = filtered.filter((file) => new Date(file.uploadedAt) <= toDate)
+    }
+
+    // File size filter
+    if (minSize) {
+      const minBytes = parseFloat(minSize) * 1024 * 1024 // Convert MB to bytes
+      filtered = filtered.filter((file) => file.filesize >= minBytes)
+    }
+    if (maxSize) {
+      const maxBytes = parseFloat(maxSize) * 1024 * 1024 // Convert MB to bytes
+      filtered = filtered.filter((file) => file.filesize <= maxBytes)
+    }
+
+    // File type filter
+    if (fileTypeFilter !== 'all') {
+      if (fileTypeFilter === 'image') {
+        filtered = filtered.filter((file) => file.mimetype.startsWith('image/'))
+      } else if (fileTypeFilter === 'video') {
+        filtered = filtered.filter((file) => file.mimetype.startsWith('video/'))
+      } else if (fileTypeFilter === 'audio') {
+        filtered = filtered.filter((file) => file.mimetype.startsWith('audio/'))
+      } else if (fileTypeFilter === 'pdf') {
+        filtered = filtered.filter((file) => file.mimetype.includes('pdf'))
+      } else if (fileTypeFilter === 'document') {
+        filtered = filtered.filter(
+          (file) =>
+            file.mimetype.includes('document') ||
+            file.mimetype.includes('msword') ||
+            file.mimetype.includes('officedocument')
+        )
+      } else if (fileTypeFilter === 'text') {
+        filtered = filtered.filter(
+          (file) =>
+            file.mimetype.startsWith('text/') || file.mimetype.includes('json')
+        )
+      }
+    }
+
     setFilteredFiles(filtered)
     calculateStats(filtered)
   }
@@ -147,6 +207,22 @@ export default function FilesPage() {
     if (mimetype.startsWith('audio/')) return <Music className="h-4 w-4" />
     if (mimetype.includes('pdf')) return <FileText className="h-4 w-4" />
     return <FileIcon className="h-4 w-4" />
+  }
+
+  const handlePreview = (file: File) => {
+    setPreviewFile(file)
+    setPreviewOpen(true)
+  }
+
+  const clearAllFilters = () => {
+    setSearch('')
+    setCategoryFilter('all')
+    setClientFilter('all')
+    setDateFrom('')
+    setDateTo('')
+    setMinSize('')
+    setMaxSize('')
+    setFileTypeFilter('all')
   }
 
   const handleDownload = async (file: File) => {
@@ -223,41 +299,134 @@ export default function FilesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search files or clients..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+      <div className="space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search files or clients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              {FILE_CATEGORIES.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={clientFilter} onValueChange={setClientFilter}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Client" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clients</SelectItem>
+              {clients.map((client) => (
+                <SelectItem key={client.id} value={client.id}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            {showAdvancedFilters ? 'Hide' : 'Show'} Filters
+          </Button>
+          {(search ||
+            categoryFilter !== 'all' ||
+            clientFilter !== 'all' ||
+            dateFrom ||
+            dateTo ||
+            minSize ||
+            maxSize ||
+            fileTypeFilter !== 'all') && (
+            <Button variant="ghost" onClick={clearAllFilters}>
+              <X className="mr-2 h-4 w-4" />
+              Clear
+            </Button>
+          )}
         </div>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {FILE_CATEGORIES.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
-                {cat.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={clientFilter} onValueChange={setClientFilter}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Client" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Clients</SelectItem>
-            {clients.map((client) => (
-              <SelectItem key={client.id} value={client.id}>
-                {client.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Advanced Filters Panel */}
+        {showAdvancedFilters && (
+          <div className="rounded-lg border bg-card p-4">
+            <h3 className="font-medium mb-4">Advanced Filters</h3>
+            <div className="grid gap-4 md:grid-cols-3">
+              {/* Date Range */}
+              <div className="space-y-2">
+                <Label htmlFor="dateFrom">From Date</Label>
+                <Input
+                  id="dateFrom"
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dateTo">To Date</Label>
+                <Input
+                  id="dateTo"
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                />
+              </div>
+
+              {/* File Type */}
+              <div className="space-y-2">
+                <Label htmlFor="fileType">File Type</Label>
+                <Select value={fileTypeFilter} onValueChange={setFileTypeFilter}>
+                  <SelectTrigger id="fileType">
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="image">Images</SelectItem>
+                    <SelectItem value="video">Videos</SelectItem>
+                    <SelectItem value="audio">Audio</SelectItem>
+                    <SelectItem value="pdf">PDFs</SelectItem>
+                    <SelectItem value="document">Documents</SelectItem>
+                    <SelectItem value="text">Text Files</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* File Size Range */}
+              <div className="space-y-2">
+                <Label htmlFor="minSize">Min Size (MB)</Label>
+                <Input
+                  id="minSize"
+                  type="number"
+                  step="0.1"
+                  placeholder="0"
+                  value={minSize}
+                  onChange={(e) => setMinSize(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxSize">Max Size (MB)</Label>
+                <Input
+                  id="maxSize"
+                  type="number"
+                  step="0.1"
+                  placeholder="No limit"
+                  value={maxSize}
+                  onChange={(e) => setMaxSize(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Files List */}
@@ -321,14 +490,14 @@ export default function FilesPage() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        {file.client && (
-                          <Link href={`/clients/${file.client.id}/files`}>
-                            <Button variant="ghost" size="sm">
-                              <Folder className="mr-2 h-4 w-4" />
-                              View in Client
-                            </Button>
-                          </Link>
-                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handlePreview(file)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Preview
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -345,6 +514,19 @@ export default function FilesPage() {
             </table>
           </div>
         </div>
+      )}
+
+      {/* File Preview Dialog */}
+      {previewFile && (
+        <FilePreviewDialog
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          fileId={previewFile.id}
+          fileName={previewFile.filename}
+          fileUrl={`/api/files/${previewFile.id}/download`}
+          fileType={previewFile.mimetype}
+          fileSize={previewFile.filesize}
+        />
       )}
     </div>
   )

@@ -27,9 +27,20 @@ export async function generateBusinessPlan(
     // Render prompt
     const prompt = promptLoader.renderPrompt(template, context)
 
-    // Generate with Claude
+    // Generate with Claude (with caching and token tracking)
     const claudeClient = getClaudeClient()
-    const content = await claudeClient.generate(prompt, template.systemPrompt)
+    const content = await claudeClient.generate(prompt, {
+      systemPrompt: template.systemPrompt,
+      useCache: true,
+      cacheTTLHours: 168, // 7 days for business plans
+      operation: 'BUSINESS_PLAN_GENERATION',
+      clientId,
+      userId,
+      metadata: {
+        version,
+        templateId: template.id,
+      },
+    })
 
     // Get current version
     const existingPlans = await db.businessPlan.findMany({
