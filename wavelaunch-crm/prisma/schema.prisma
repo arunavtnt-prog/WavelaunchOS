@@ -224,12 +224,16 @@ enum FileCategory {
 // ============================================================================
 
 model PromptTemplate {
-  id       String              @id @default(cuid())
-  name     String
-  type     PromptTemplateType
-  yamlPath String
-  isActive Boolean             @default(false)
-  version  Int                 @default(1)
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  type        PromptTemplateType
+  content     String // The actual prompt text
+  variables   String? // JSON array of variable names like {clientName}, {industry}
+  yamlPath    String? // Optional, for backward compatibility
+  isActive    Boolean             @default(false)
+  isDefault   Boolean             @default(false)
+  version     Int                 @default(1)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -248,6 +252,7 @@ enum PromptTemplateType {
   DELIVERABLE_M6
   DELIVERABLE_M7
   DELIVERABLE_M8
+  CUSTOM
 }
 
 // ============================================================================
@@ -338,6 +343,8 @@ enum ActivityType {
   CLIENT_CREATED
   CLIENT_UPDATED
   CLIENT_DELETED
+  CLIENT_ARCHIVED
+  CLIENT_RESTORED
   BUSINESS_PLAN_GENERATED
   BUSINESS_PLAN_UPDATED
   BUSINESS_PLAN_APPROVED
@@ -353,6 +360,9 @@ enum ActivityType {
   NOTE_CREATED
   NOTE_UPDATED
   NOTE_DELETED
+  PROMPT_CREATED
+  PROMPT_UPDATED
+  PROMPT_DELETED
   BACKUP_CREATED
   BACKUP_RESTORED
   SETTINGS_UPDATED
