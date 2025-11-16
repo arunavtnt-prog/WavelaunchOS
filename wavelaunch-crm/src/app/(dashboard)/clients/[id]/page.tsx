@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
 import { PortalUserCard } from '@/components/admin/portal-user-card'
+import { ClientMessaging } from '@/components/admin/client-messaging'
 import type { ClientWithRelations } from '@/types'
 
 export default function ClientDetailPage() {
@@ -267,6 +268,14 @@ export default function ClientDetailPage() {
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
+          creatorName={client.creatorName}
+        />
+      )}
+
+      {/* Client Messaging */}
+      {!client.deletedAt && (
+        <ClientMessaging
+          clientId={client.id}
           creatorName={client.creatorName}
         />
       )}

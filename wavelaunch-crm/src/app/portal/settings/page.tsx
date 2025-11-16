@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Settings as SettingsIcon, User, Bell, Lock } from 'lucide-react'
 import { ChangePasswordForm } from '@/components/portal/change-password-form'
+import { NotificationPreferences } from '@/components/portal/notification-preferences'
 
 export default async function PortalSettingsPage() {
   const session = await getPortalSession()
@@ -106,56 +107,15 @@ export default async function PortalSettingsPage() {
             Choose which notifications you want to receive
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">New Deliverables</p>
-                <p className="text-sm text-muted-foreground">
-                  Get notified when a new deliverable is ready
-                </p>
-              </div>
-              <Badge variant={portalUser.notifyNewDeliverable ? 'default' : 'outline'}>
-                {portalUser.notifyNewDeliverable ? 'On' : 'Off'}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">New Messages</p>
-                <p className="text-sm text-muted-foreground">
-                  Get notified when you receive a new message
-                </p>
-              </div>
-              <Badge variant={portalUser.notifyNewMessage ? 'default' : 'outline'}>
-                {portalUser.notifyNewMessage ? 'On' : 'Off'}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Milestone Reminders</p>
-                <p className="text-sm text-muted-foreground">
-                  Get reminders about upcoming milestones
-                </p>
-              </div>
-              <Badge variant={portalUser.notifyMilestoneReminder ? 'default' : 'outline'}>
-                {portalUser.notifyMilestoneReminder ? 'On' : 'Off'}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">Weekly Summary</p>
-                <p className="text-sm text-muted-foreground">
-                  Receive a weekly summary of your progress
-                </p>
-              </div>
-              <Badge variant={portalUser.notifyWeeklySummary ? 'default' : 'outline'}>
-                {portalUser.notifyWeeklySummary ? 'On' : 'Off'}
-              </Badge>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Notification preference management will be available soon
-          </p>
+        <CardContent>
+          <NotificationPreferences
+            initialPreferences={{
+              notifyNewDeliverable: portalUser.notifyNewDeliverable,
+              notifyNewMessage: portalUser.notifyNewMessage,
+              notifyMilestoneReminder: portalUser.notifyMilestoneReminder,
+              notifyWeeklySummary: portalUser.notifyWeeklySummary,
+            }}
+          />
         </CardContent>
       </Card>
     </div>
