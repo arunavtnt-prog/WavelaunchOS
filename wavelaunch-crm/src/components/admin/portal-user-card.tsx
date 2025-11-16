@@ -27,6 +27,9 @@ import {
   Loader2,
   Key,
   Copy,
+  Link as LinkIcon,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react'
 
 interface PortalUserCardProps {
@@ -43,6 +46,10 @@ interface PortalUser {
   invitedAt: string
   activatedAt: string | null
   lastLoginAt: string | null
+  inviteToken: string | null
+  inviteTokenExpiry: string | null
+  completedOnboarding: boolean
+  onboardingCompletedAt: string | null
 }
 
 export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUserCardProps) {
@@ -56,6 +63,8 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
   const [temporaryPassword, setTemporaryPassword] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null)
+  const [generatingInvite, setGeneratingInvite] = useState(false)
 
   useEffect(() => {
     fetchPortalUser()
@@ -83,37 +92,56 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
   const handleInvite = async () => {
     try {
       setInviting(true)
-      const res = await fetch('/api/admin/portal-users', {
+
+      // First create the portal user
+      const createRes = await fetch('/api/admin/portal-users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId,
           email,
-          sendWelcomeEmail: sendEmail,
+          sendWelcomeEmail: false, // We'll handle invite separately
         }),
       })
 
-      const data = await res.json()
+      const createData = await createRes.json()
 
-      if (data.success) {
+      if (!createData.success) {
+        toast({
+          title: 'Error',
+          description: createData.error || 'Failed to create portal access',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      // Then generate invite link
+      const inviteRes = await fetch('/api/admin/portal-users/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          portalUserId: createData.data.id,
+        }),
+      })
+
+      const inviteData = await inviteRes.json()
+
+      if (inviteData.success) {
+        setInviteUrl(inviteData.data.inviteUrl)
         toast({
           title: 'Portal access created',
-          description: data.message,
+          description: 'Invite link generated. Copy and send to client.',
         })
-
-        if (data.data.temporaryPassword) {
-          setTemporaryPassword(data.data.temporaryPassword)
-          setShowPassword(true)
-        }
-
         await fetchPortalUser()
         setInviteDialogOpen(false)
       } else {
         toast({
-          title: 'Error',
-          description: data.error || 'Failed to create portal access',
+          title: 'Warning',
+          description: 'Portal created but invite generation failed. Try regenerating.',
           variant: 'destructive',
         })
+        await fetchPortalUser()
+        setInviteDialogOpen(false)
       }
     } catch (error) {
       toast({
@@ -174,6 +202,103 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
         description: 'Password copied to clipboard',
       })
     }
+  }
+
+  const handleGenerateInvite = async () => {
+    if (!portalUser) return
+
+    try {
+      setGeneratingInvite(true)
+      const res = await fetch('/api/admin/portal-users/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          portalUserId: portalUser.id,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setInviteUrl(data.data.inviteUrl)
+        await fetchPortalUser() // Refresh to get updated token
+        toast({
+          title: 'Invite link generated',
+          description: 'Copy the link and send it to your client',
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to generate invite link',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to generate invite link',
+        variant: 'destructive',
+      })
+    } finally {
+      setGeneratingInvite(false)
+    }
+  }
+
+  const handleRegenerateInvite = async () => {
+    if (!portalUser) return
+
+    try {
+      setGeneratingInvite(true)
+      const res = await fetch('/api/admin/portal-users/invite', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          portalUserId: portalUser.id,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
+        setInviteUrl(data.data.inviteUrl)
+        await fetchPortalUser() // Refresh to get updated token
+        toast({
+          title: 'Invite link regenerated',
+          description: 'New invite link created and ready to send',
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to regenerate invite link',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to regenerate invite link',
+        variant: 'destructive',
+      })
+    } finally {
+      setGeneratingInvite(false)
+    }
+  }
+
+  const copyInviteLink = () => {
+    const link = inviteUrl || (portalUser?.inviteToken ? `${window.location.origin}/portal/invite/${portalUser.inviteToken}` : null)
+
+    if (link) {
+      navigator.clipboard.writeText(link)
+      toast({
+        title: 'Copied',
+        description: 'Invite link copied to clipboard',
+      })
+    }
+  }
+
+  const isInviteExpired = () => {
+    if (!portalUser?.inviteTokenExpiry) return false
+    return new Date() > new Date(portalUser.inviteTokenExpiry)
   }
 
   if (loading) {
@@ -348,6 +473,149 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
     )
   }
 
+  // Portal user exists but not activated (pending invite)
+  if (portalUser && !portalUser.activatedAt) {
+    const hasInviteToken = Boolean(portalUser.inviteToken)
+    const expired = isInviteExpired()
+    const inviteLink = inviteUrl || (portalUser.inviteToken ? `${window.location.origin}/portal/invite/${portalUser.inviteToken}` : null)
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-yellow-600" />
+            Portal Invitation Pending
+          </CardTitle>
+          <CardDescription>
+            Client has been invited but hasn't activated their account yet
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Email</p>
+              <p className="mt-1 flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                {portalUser.email}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Invited</p>
+              <p className="mt-1">
+                {new Date(portalUser.invitedAt).toLocaleDateString()}
+              </p>
+            </div>
+
+            {hasInviteToken && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Invite Status</p>
+                  <div className="mt-1">
+                    {expired ? (
+                      <Badge variant="destructive" className="flex items-center gap-1 w-fit">
+                        <AlertCircle className="h-3 w-3" />
+                        Expired
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                        <Clock className="h-3 w-3" />
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Expires</p>
+                  <p className="mt-1">
+                    {portalUser.inviteTokenExpiry
+                      ? new Date(portalUser.inviteTokenExpiry).toLocaleDateString()
+                      : 'N/A'}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          {hasInviteToken && inviteLink && (
+            <Alert>
+              <LinkIcon className="h-4 w-4" />
+              <AlertDescription>
+                <p className="font-medium mb-2">Invite Link:</p>
+                <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                  <code className="flex-1 text-xs truncate">{inviteLink}</code>
+                  <Button size="sm" variant="ghost" onClick={copyInviteLink}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {expired && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                This invite link has expired. Generate a new link to send to the client.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-2 pt-4 border-t">
+            {!hasInviteToken ? (
+              <Button onClick={handleGenerateInvite} disabled={generatingInvite}>
+                {generatingInvite ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="mr-2 h-4 w-4" />
+                    Generate Invite Link
+                  </>
+                )}
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={copyInviteLink}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copy Invite Link
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleRegenerateInvite}
+                  disabled={generatingInvite}
+                >
+                  {generatingInvite ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Regenerate Link
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Send this invite link to your client. They will use it to set their password and activate their account.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Portal user activated
   return (
     <Card>
       <CardHeader>
