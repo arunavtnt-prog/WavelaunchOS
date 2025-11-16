@@ -14,8 +14,16 @@ import {
   Download,
   User,
   UserCircle,
+  FileDown,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { exportConversationToHTML, exportMessagesToText, exportToJSON } from '@/lib/utils/export'
 
 interface Message {
   id: string
@@ -73,6 +81,30 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleExport = (format: 'html' | 'text' | 'json') => {
+    const filename = `conversation_${threadId}_${Date.now()}`
+
+    switch (format) {
+      case 'html':
+        exportConversationToHTML({
+          subject,
+          messages,
+        }, `${filename}.html`)
+        break
+      case 'text':
+        exportMessagesToText(messages, `${filename}.txt`)
+        break
+      case 'json':
+        exportToJSON({ subject, threadId, messages }, `${filename}.json`)
+        break
+    }
+
+    toast({
+      title: 'Exported successfully',
+      description: `Conversation exported as ${format.toUpperCase()}`,
+    })
   }
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -235,6 +267,26 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
               </p>
             </div>
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('html')}>
+                Export as HTML
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('text')}>
+                Export as Text
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
