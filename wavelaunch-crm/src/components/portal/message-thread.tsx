@@ -14,8 +14,16 @@ import {
   Download,
   User,
   UserCircle,
+  FileDown,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { exportConversationToHTML, exportMessagesToText, exportToJSON } from '@/lib/utils/export'
 
 interface Message {
   id: string
@@ -40,7 +48,10 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [messageBody, setMessageBody] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchMessages()
@@ -72,6 +83,92 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  const handleExport = (format: 'html' | 'text' | 'json') => {
+    const filename = `conversation_${threadId}_${Date.now()}`
+
+    switch (format) {
+      case 'html':
+        exportConversationToHTML({
+          subject,
+          messages,
+        }, `${filename}.html`)
+        break
+      case 'text':
+        exportMessagesToText(messages, `${filename}.txt`)
+        break
+      case 'json':
+        exportToJSON({ subject, threadId, messages }, `${filename}.json`)
+        break
+    }
+
+    toast({
+      title: 'Exported successfully',
+      description: `Conversation exported as ${format.toUpperCase()}`,
+    })
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'File size must be less than 10MB',
+          variant: 'destructive',
+        })
+        return
+      }
+      setSelectedFile(file)
+    }
+  }
+
+  const handleFileRemove = () => {
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const uploadFile = async (file: File): Promise<{ url: string; filename: string } | null> => {
+    try {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/portal/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        return {
+          url: data.data.url,
+          filename: data.data.filename,
+        }
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to upload file',
+          variant: 'destructive',
+        })
+        return null
+      }
+    } catch (error) {
+      console.error('File upload error:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to upload file',
+        variant: 'destructive',
+      })
+      return null
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSend = async () => {
     if (!messageBody.trim()) {
       toast({
@@ -85,6 +182,21 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
     try {
       setSending(true)
 
+      let attachmentUrl: string | undefined
+      let attachmentName: string | undefined
+
+      // Upload file if selected
+      if (selectedFile) {
+        const uploadResult = await uploadFile(selectedFile)
+        if (uploadResult) {
+          attachmentUrl = uploadResult.url
+          attachmentName = uploadResult.filename
+        } else {
+          // Upload failed, stop sending
+          return
+        }
+      }
+
       const response = await fetch('/api/portal/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,6 +204,8 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
           threadId,
           subject,
           body: messageBody,
+          attachmentUrl,
+          attachmentName,
         }),
       })
 
@@ -99,6 +213,10 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
 
       if (data.success) {
         setMessageBody('')
+        setSelectedFile(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
         await fetchMessages()
         toast({
           title: 'Message sent',
@@ -149,6 +267,26 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
               </p>
             </div>
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileDown className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleExport('html')}>
+                Export as HTML
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('text')}>
+                Export as Text
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport('json')}>
+                Export as JSON
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -225,37 +363,77 @@ export function MessageThread({ threadId, subject, onBack }: MessageThreadProps)
 
       {/* Reply Input */}
       <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Textarea
-            placeholder="Type your message..."
-            value={messageBody}
-            onChange={(e) => setMessageBody(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-            rows={3}
-            disabled={sending}
-            className="resize-none"
+        <div className="space-y-2">
+          {selectedFile && (
+            <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+              <Paperclip className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {(selectedFile.size / 1024).toFixed(1)} KB
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleFileRemove}
+                disabled={sending || uploading}
+              >
+                ×
+              </Button>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Textarea
+              placeholder="Type your message..."
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              rows={3}
+              disabled={sending || uploading}
+              className="resize-none"
+            />
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || uploading}
+                className="flex-shrink-0"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={handleSend}
+                disabled={sending || uploading || !messageBody.trim()}
+                size="icon"
+                className="flex-shrink-0"
+              >
+                {sending || uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={handleFileSelect}
+            className="hidden"
+            accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
           />
-          <Button
-            onClick={handleSend}
-            disabled={sending || !messageBody.trim()}
-            size="icon"
-            className="flex-shrink-0"
-          >
-            {sending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
+
+          <p className="text-xs text-muted-foreground">
+            Press Enter to send, Shift+Enter for new line. Max file size: 10MB
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Press Enter to send, Shift+Enter for new line
-        </p>
       </div>
     </div>
   )
