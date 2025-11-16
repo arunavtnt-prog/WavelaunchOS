@@ -27,8 +27,16 @@ import {
   Paperclip,
   Download,
   X,
+  FileDown,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { formatDistanceToNow } from 'date-fns'
+import { exportConversationToHTML, exportMessagesToText, exportToJSON } from '@/lib/utils/export'
 
 interface ClientMessagingProps {
   clientId: string
@@ -363,6 +371,31 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
     }
   }
 
+  const handleExport = (format: 'html' | 'text' | 'json') => {
+    const filename = `conversation_${selectedThread}_${Date.now()}`
+
+    switch (format) {
+      case 'html':
+        exportConversationToHTML({
+          subject: selectedSubject,
+          messages,
+          creatorName,
+        }, `${filename}.html`)
+        break
+      case 'text':
+        exportMessagesToText(messages, `${filename}.txt`)
+        break
+      case 'json':
+        exportToJSON({ subject: selectedSubject, threadId: selectedThread, messages }, `${filename}.json`)
+        break
+    }
+
+    toast({
+      title: 'Exported successfully',
+      description: `Conversation exported as ${format.toUpperCase()}`,
+    })
+  }
+
   // Thread view
   if (selectedThread) {
     return (
@@ -387,6 +420,26 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
               </CardTitle>
               <CardDescription>Conversation with {creatorName}</CardDescription>
             </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('html')}>
+                  Export as HTML
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('text')}>
+                  Export as Text
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')}>
+                  Export as JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
