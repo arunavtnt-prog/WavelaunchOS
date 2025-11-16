@@ -150,6 +150,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Create welcome notification for client
+    await prisma.portalNotification.create({
+      data: {
+        clientUserId: session.userId,
+        type: 'ACCOUNT_UPDATE',
+        title: '🎉 Welcome to Wavelaunch!',
+        message: 'Your onboarding is complete! Our team is reviewing your information and will create your personalized business plan soon.',
+        actionUrl: '/portal/dashboard',
+      },
+    })
+
     return NextResponse.json({
       success: true,
       message: 'Onboarding completed successfully',
