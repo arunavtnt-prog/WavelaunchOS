@@ -24,8 +24,19 @@ import {
   Plus,
   User,
   UserCog,
+  Paperclip,
+  Download,
+  X,
+  FileDown,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { formatDistanceToNow } from 'date-fns'
+import { exportConversationToHTML, exportMessagesToText, exportToJSON } from '@/lib/utils/export'
 
 interface ClientMessagingProps {
   clientId: string
@@ -39,6 +50,8 @@ interface Message {
   body: string
   isFromAdmin: boolean
   isRead: boolean
+  attachmentUrl: string | null
+  attachmentName: string | null
   createdAt: string
 }
 
@@ -62,7 +75,12 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
   const [newMessageDialogOpen, setNewMessageDialogOpen] = useState(false)
   const [newSubject, setNewSubject] = useState('')
   const [newBody, setNewBody] = useState('')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [newMessageFile, setNewMessageFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const newMessageFileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetchThreads()
@@ -130,11 +148,109 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
     }
   }
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'File size must be less than 10MB',
+          variant: 'destructive',
+        })
+        return
+      }
+      setSelectedFile(file)
+    }
+  }
+
+  const handleNewMessageFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: 'Error',
+          description: 'File size must be less than 10MB',
+          variant: 'destructive',
+        })
+        return
+      }
+      setNewMessageFile(file)
+    }
+  }
+
+  const handleFileRemove = () => {
+    setSelectedFile(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleNewMessageFileRemove = () => {
+    setNewMessageFile(null)
+    if (newMessageFileInputRef.current) {
+      newMessageFileInputRef.current.value = ''
+    }
+  }
+
+  const uploadFile = async (file: File): Promise<{ url: string; filename: string } | null> => {
+    try {
+      setUploading(true)
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        return {
+          url: data.data.url,
+          filename: data.data.filename,
+        }
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error || 'Failed to upload file',
+          variant: 'destructive',
+        })
+        return null
+      }
+    } catch (error) {
+      console.error('File upload error:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to upload file',
+        variant: 'destructive',
+      })
+      return null
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleSend = async () => {
     if (!messageBody.trim() || !selectedThread) return
 
     try {
       setSending(true)
+
+      let attachmentUrl: string | undefined
+      let attachmentName: string | undefined
+
+      // Upload file if selected
+      if (selectedFile) {
+        const uploadResult = await uploadFile(selectedFile)
+        if (uploadResult) {
+          attachmentUrl = uploadResult.url
+          attachmentName = uploadResult.filename
+        } else {
+          return
+        }
+      }
+
       const response = await fetch('/api/admin/messages', {
         method: 'POST',
         headers: {
@@ -145,6 +261,8 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
           threadId: selectedThread,
           subject: selectedSubject,
           body: messageBody,
+          attachmentUrl,
+          attachmentName,
         }),
       })
 
@@ -152,6 +270,10 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
 
       if (data.success) {
         setMessageBody('')
+        setSelectedFile(null)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
         await fetchMessages()
         toast({
           title: 'Message sent',
@@ -180,6 +302,21 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
 
     try {
       setSending(true)
+
+      let attachmentUrl: string | undefined
+      let attachmentName: string | undefined
+
+      // Upload file if selected
+      if (newMessageFile) {
+        const uploadResult = await uploadFile(newMessageFile)
+        if (uploadResult) {
+          attachmentUrl = uploadResult.url
+          attachmentName = uploadResult.filename
+        } else {
+          return
+        }
+      }
+
       const response = await fetch('/api/admin/messages', {
         method: 'POST',
         headers: {
@@ -189,6 +326,8 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
           clientId,
           subject: newSubject,
           body: newBody,
+          attachmentUrl,
+          attachmentName,
         }),
       })
 
@@ -197,6 +336,10 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
       if (data.success) {
         setNewSubject('')
         setNewBody('')
+        setNewMessageFile(null)
+        if (newMessageFileInputRef.current) {
+          newMessageFileInputRef.current.value = ''
+        }
         setNewMessageDialogOpen(false)
         await fetchThreads()
         toast({
@@ -228,6 +371,31 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
     }
   }
 
+  const handleExport = (format: 'html' | 'text' | 'json') => {
+    const filename = `conversation_${selectedThread}_${Date.now()}`
+
+    switch (format) {
+      case 'html':
+        exportConversationToHTML({
+          subject: selectedSubject,
+          messages,
+          creatorName,
+        }, `${filename}.html`)
+        break
+      case 'text':
+        exportMessagesToText(messages, `${filename}.txt`)
+        break
+      case 'json':
+        exportToJSON({ subject: selectedSubject, threadId: selectedThread, messages }, `${filename}.json`)
+        break
+    }
+
+    toast({
+      title: 'Exported successfully',
+      description: `Conversation exported as ${format.toUpperCase()}`,
+    })
+  }
+
   // Thread view
   if (selectedThread) {
     return (
@@ -252,6 +420,26 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
               </CardTitle>
               <CardDescription>Conversation with {creatorName}</CardDescription>
             </div>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <FileDown className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleExport('html')}>
+                  Export as HTML
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('text')}>
+                  Export as Text
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('json')}>
+                  Export as JSON
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -282,6 +470,22 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
                     }`}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.body}</p>
+
+                    {message.attachmentUrl && (
+                      <div className="mt-2 flex items-center gap-2 rounded bg-background/10 p-2">
+                        <Paperclip className="h-4 w-4" />
+                        <a
+                          href={message.attachmentUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm underline flex-1 truncate"
+                        >
+                          {message.attachmentName || 'Attachment'}
+                        </a>
+                        <Download className="h-4 w-4" />
+                      </div>
+                    )}
+
                     <p
                       className={`text-xs mt-1 ${
                         message.isFromAdmin
@@ -308,6 +512,25 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
           {/* Reply Input */}
           <div className="space-y-2">
             <Label htmlFor="reply">Reply</Label>
+
+            {selectedFile && (
+              <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                <Paperclip className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(selectedFile.size / 1024).toFixed(1)} KB
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleFileRemove}
+                  disabled={sending || uploading}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
             <Textarea
               id="reply"
               placeholder="Type your message..."
@@ -315,13 +538,32 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
               onChange={(e) => setMessageBody(e.target.value)}
               onKeyPress={handleKeyPress}
               rows={3}
+              disabled={sending || uploading}
             />
-            <div className="flex justify-end">
-              <Button onClick={handleSend} disabled={sending || !messageBody.trim()}>
-                {sending ? (
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileSelect}
+              className="hidden"
+              accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+            />
+
+            <div className="flex justify-between items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || uploading}
+              >
+                <Paperclip className="mr-2 h-4 w-4" />
+                Attach File
+              </Button>
+              <Button onClick={handleSend} disabled={sending || uploading || !messageBody.trim()}>
+                {sending || uploading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
+                    {uploading ? 'Uploading...' : 'Sending...'}
                   </>
                 ) : (
                   <>
@@ -331,6 +573,9 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
                 )}
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Max file size: 10MB. Supported formats: Images, PDF, Word, Excel, Text
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -433,6 +678,7 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
                 placeholder="Message subject"
                 value={newSubject}
                 onChange={(e) => setNewSubject(e.target.value)}
+                disabled={sending || uploading}
               />
             </div>
 
@@ -444,26 +690,73 @@ export function ClientMessaging({ clientId, creatorName }: ClientMessagingProps)
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}
                 rows={5}
+                disabled={sending || uploading}
               />
+            </div>
+
+            {newMessageFile && (
+              <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                <Paperclip className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm flex-1 truncate">{newMessageFile.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {(newMessageFile.size / 1024).toFixed(1)} KB
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNewMessageFileRemove}
+                  disabled={sending || uploading}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            <div>
+              <input
+                ref={newMessageFileInputRef}
+                type="file"
+                onChange={handleNewMessageFileSelect}
+                className="hidden"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => newMessageFileInputRef.current?.click()}
+                disabled={sending || uploading}
+              >
+                <Paperclip className="mr-2 h-4 w-4" />
+                Attach File (Optional)
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1">
+                Max file size: 10MB
+              </p>
             </div>
           </div>
 
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setNewMessageDialogOpen(false)}
-              disabled={sending}
+              onClick={() => {
+                setNewMessageDialogOpen(false)
+                setNewMessageFile(null)
+                if (newMessageFileInputRef.current) {
+                  newMessageFileInputRef.current.value = ''
+                }
+              }}
+              disabled={sending || uploading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleNewMessage}
-              disabled={sending || !newSubject.trim() || !newBody.trim()}
+              disabled={sending || uploading || !newSubject.trim() || !newBody.trim()}
             >
-              {sending ? (
+              {sending || uploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
+                  {uploading ? 'Uploading...' : 'Sending...'}
                 </>
               ) : (
                 <>
