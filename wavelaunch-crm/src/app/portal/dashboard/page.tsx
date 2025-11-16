@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { DashboardClientWrapper } from '@/components/portal/dashboard-client-wrapper'
 import {
   CheckCircle2,
   Clock,
@@ -11,6 +12,8 @@ import {
   TrendingUp,
   MessageSquare,
   Calendar,
+  Sparkles,
+  AlertCircle,
 } from 'lucide-react'
 
 export default async function PortalDashboardPage() {
@@ -28,6 +31,9 @@ export default async function PortalDashboardPage() {
   }
 
   const client = portalUser.client
+
+  // Check if should show first-time welcome
+  const showWelcome = portalUser.completedOnboarding === true
 
   // Get client's deliverables
   const deliverables = await prisma.deliverable.findMany({
@@ -71,17 +77,69 @@ export default async function PortalDashboardPage() {
     }
   })
 
-  return (
+  const dashboardContent = (
     <div className="container mx-auto p-6 space-y-6">
       {/* Welcome Section */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
           Welcome back, {client.creatorName}!
+          {portalUser.completedOnboarding && <Sparkles className="h-6 w-6 text-yellow-500" />}
         </h1>
         <p className="text-muted-foreground">
           Here's an overview of your journey with Wavelaunch
         </p>
       </div>
+
+      {/* Business Plan Spotlight - Show prominently for new users */}
+      {!latestBusinessPlan && portalUser.completedOnboarding && (
+        <Card className="border-primary/50 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="flex items-center gap-2">
+                  Your Business Plan is Being Created
+                </CardTitle>
+                <CardDescription>
+                  Our team is reviewing your onboarding information
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  Based on the comprehensive information you provided during onboarding, our team is crafting a personalized business plan tailored specifically to {client.brandName || 'your brand'}.
+                </p>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    You'll receive a notification when it's ready for review
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 pt-2">
+              <div className="flex items-center gap-2 text-xs">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span>Onboarding Complete</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <span>Plan in Progress</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>Review Pending</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -267,5 +325,15 @@ export default async function PortalDashboardPage() {
         </Card>
       </div>
     </div>
+  )
+
+  return (
+    <DashboardClientWrapper
+      clientName={client.creatorName}
+      brandName={client.brandName}
+      showWelcome={showWelcome}
+    >
+      {dashboardContent}
+    </DashboardClientWrapper>
   )
 }
