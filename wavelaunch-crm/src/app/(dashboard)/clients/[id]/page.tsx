@@ -18,6 +18,8 @@ import {
 import { useToast } from '@/hooks/use-toast'
 import { PortalUserCard } from '@/components/admin/portal-user-card'
 import { ClientMessaging } from '@/components/admin/client-messaging'
+import { OnboardingDetails } from '@/components/admin/onboarding-details'
+import { BusinessPlanGenerator } from '@/components/admin/business-plan-generator'
 import type { ClientWithRelations } from '@/types'
 
 export default function ClientDetailPage() {
@@ -270,6 +272,21 @@ export default function ClientDetailPage() {
           clientEmail={client.email}
           creatorName={client.creatorName}
         />
+      )}
+
+      {/* Business Plan Generator - Show if onboarding complete but no business plan */}
+      {!client.deletedAt && (
+        <BusinessPlanGenerator
+          clientId={client.id}
+          clientName={client.creatorName}
+          hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
+          hasCompletedOnboarding={client.portalUser?.completedOnboarding || false}
+        />
+      )}
+
+      {/* Onboarding Details - Show all collected information */}
+      {!client.deletedAt && (
+        <OnboardingDetails client={client} />
       )}
 
       {/* Client Messaging */}
