@@ -104,7 +104,89 @@ async function main() {
     }
   }
 
+  // Create sample clients with portal users for testing
+  const sampleClients = [
+    {
+      creatorName: 'Sarah Johnson',
+      brandName: 'Mindful Growth',
+      email: 'sarah@mindfulgrowth.com',
+      niche: 'Personal Development',
+      status: 'ACTIVE' as const,
+      onboardedAt: new Date('2024-01-15'),
+      portalEmail: 'sarah@mindfulgrowth.com',
+      portalPassword: 'Test1234',
+    },
+    {
+      creatorName: 'Mike Chen',
+      brandName: 'Tech Simplified',
+      email: 'mike@techsimplified.io',
+      niche: 'Technology Education',
+      status: 'ACTIVE' as const,
+      onboardedAt: new Date('2024-02-01'),
+      portalEmail: 'mike@techsimplified.io',
+      portalPassword: 'Test1234',
+    },
+    {
+      creatorName: 'Emily Rodriguez',
+      brandName: 'Fitness Forward',
+      email: 'emily@fitnessforward.com',
+      niche: 'Health & Fitness',
+      status: 'ACTIVE' as const,
+      onboardedAt: new Date('2024-03-10'),
+      portalEmail: 'emily@fitnessforward.com',
+      portalPassword: 'Test1234',
+    },
+  ]
+
+  for (const clientData of sampleClients) {
+    const existingClient = await prisma.client.findUnique({
+      where: { email: clientData.email },
+    })
+
+    if (!existingClient) {
+      // Create client
+      const client = await prisma.client.create({
+        data: {
+          creatorName: clientData.creatorName,
+          brandName: clientData.brandName,
+          email: clientData.email,
+          niche: clientData.niche,
+          status: clientData.status,
+          onboardedAt: clientData.onboardedAt,
+        },
+      })
+
+      // Create portal user for this client
+      const portalPasswordHash = await hash(clientData.portalPassword, 12)
+
+      await prisma.clientPortalUser.create({
+        data: {
+          clientId: client.id,
+          email: clientData.portalEmail,
+          passwordHash: portalPasswordHash,
+          isActive: true,
+          emailVerified: true,
+          activatedAt: new Date(),
+          invitedAt: new Date(),
+          notifyNewDeliverable: true,
+          notifyNewMessage: true,
+          notifyMilestoneReminder: true,
+          notifyWeeklySummary: false,
+        },
+      })
+
+      console.log(`✅ Created client with portal access: ${clientData.creatorName}`)
+    } else {
+      console.log(`ℹ️  Client already exists: ${clientData.creatorName}`)
+    }
+  }
+
   console.log('🎉 Seeding complete!')
+  console.log('')
+  console.log('📋 Test Portal Users:')
+  console.log('  sarah@mindfulgrowth.com / Test1234')
+  console.log('  mike@techsimplified.io / Test1234')
+  console.log('  emily@fitnessforward.com / Test1234')
 }
 
 main()
