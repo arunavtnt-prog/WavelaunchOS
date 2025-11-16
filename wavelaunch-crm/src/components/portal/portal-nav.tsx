@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   User,
+  TrendingUp,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,10 +23,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
+import { useState, useEffect } from 'react'
 
 const navigation = [
   { name: 'Dashboard', href: '/portal/dashboard', icon: LayoutDashboard },
+  { name: 'Progress', href: '/portal/progress', icon: TrendingUp },
   { name: 'Documents', href: '/portal/documents', icon: FileText },
   { name: 'Messages', href: '/portal/messages', icon: MessageSquare },
   { name: 'Notifications', href: '/portal/notifications', icon: Bell },
@@ -46,6 +49,34 @@ export function PortalNav({ user }: PortalNavProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  const [unreadNotifications, setUnreadNotifications] = useState(0)
+
+  useEffect(() => {
+    fetchUnreadCounts()
+    const interval = setInterval(fetchUnreadCounts, 30000) // Poll every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
+
+  const fetchUnreadCounts = async () => {
+    try {
+      // Fetch unread messages count
+      const messagesResponse = await fetch('/api/portal/messages/unread')
+      const messagesData = await messagesResponse.json()
+      if (messagesData.success) {
+        setUnreadMessages(messagesData.data.unreadCount)
+      }
+
+      // Fetch unread notifications count
+      const notificationsResponse = await fetch('/api/portal/notifications?unreadOnly=true')
+      const notificationsData = await notificationsResponse.json()
+      if (notificationsData.success) {
+        setUnreadNotifications(notificationsData.data.unreadCount)
+      }
+    } catch (error) {
+      console.error('Failed to fetch unread counts:', error)
+    }
+  }
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -85,12 +116,18 @@ export function PortalNav({ user }: PortalNavProps) {
           <div className="hidden md:flex md:items-center md:space-x-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+              const showBadge =
+                (item.name === 'Messages' && unreadMessages > 0) ||
+                (item.name === 'Notifications' && unreadNotifications > 0)
+              const badgeCount =
+                item.name === 'Messages' ? unreadMessages : unreadNotifications
+
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors relative',
                     isActive
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -98,6 +135,11 @@ export function PortalNav({ user }: PortalNavProps) {
                 >
                   <item.icon className="h-4 w-4" />
                   {item.name}
+                  {showBadge && (
+                    <Badge variant="default" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
+                      {badgeCount > 99 ? '99+' : badgeCount}
+                    </Badge>
+                  )}
                 </Link>
               )
             })}
@@ -156,12 +198,18 @@ export function PortalNav({ user }: PortalNavProps) {
         <div className="flex overflow-x-auto px-4 py-2">
           {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const showBadge =
+              (item.name === 'Messages' && unreadMessages > 0) ||
+              (item.name === 'Notifications' && unreadNotifications > 0)
+            const badgeCount =
+              item.name === 'Messages' ? unreadMessages : unreadNotifications
+
             return (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex min-w-fit items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  'flex min-w-fit items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors relative',
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
@@ -169,6 +217,11 @@ export function PortalNav({ user }: PortalNavProps) {
               >
                 <item.icon className="h-4 w-4" />
                 {item.name}
+                {showBadge && (
+                  <Badge variant="default" className="ml-1 h-5 min-w-5 px-1.5 text-xs">
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                  </Badge>
+                )}
               </Link>
             )
           })}
