@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { clientId, threadId, subject, body: messageBody } = body
+    const { clientId, threadId, subject, body: messageBody, attachmentUrl, attachmentName } = body
 
     if (!clientId || !messageBody) {
       return NextResponse.json(
@@ -129,6 +129,8 @@ export async function POST(request: NextRequest) {
         body: messageBody,
         isFromAdmin: true,
         isRead: false, // Client hasn't read it yet
+        attachmentUrl,
+        attachmentName,
       },
     })
 
