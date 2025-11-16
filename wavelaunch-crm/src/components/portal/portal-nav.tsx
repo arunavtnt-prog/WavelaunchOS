@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   User,
+  TrendingUp,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,6 +27,7 @@ import { useState } from 'react'
 
 const navigation = [
   { name: 'Dashboard', href: '/portal/dashboard', icon: LayoutDashboard },
+  { name: 'Progress', href: '/portal/progress', icon: TrendingUp },
   { name: 'Documents', href: '/portal/documents', icon: FileText },
   { name: 'Messages', href: '/portal/messages', icon: MessageSquare },
   { name: 'Notifications', href: '/portal/notifications', icon: Bell },
