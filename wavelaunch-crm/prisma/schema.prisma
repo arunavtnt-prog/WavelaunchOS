@@ -129,6 +129,9 @@ model Client {
   portalUser    ClientPortalUser?
   portalMessages PortalMessage[]
 
+  // Notification preferences
+  notificationPreferences NotificationPreferences?
+
   @@map("clients")
 }
 
@@ -775,5 +778,44 @@ model PortalNotification {
   @@index([isRead])
   @@index([createdAt])
   @@map("portal_notifications")
+}
+
+// ============================================================================
+// NOTIFICATION PREFERENCES
+// ============================================================================
+
+model NotificationPreferences {
+  id       String  @id @default(cuid())
+  clientId String  @unique
+
+  // Email notifications
+  emailWelcome             Boolean @default(true)  // Welcome email on account creation
+  emailActivation          Boolean @default(true)  // Account activated notification
+  emailBusinessPlanReady   Boolean @default(true)  // Business plan completed
+  emailDeliverableReady    Boolean @default(true)  // New deliverable available
+  emailDeliverableOverdue  Boolean @default(true)  // Overdue reminders
+  emailMilestoneReached    Boolean @default(true)  // Milestone celebrations
+  emailJourneyCompleted    Boolean @default(true)  // 8-month journey completion
+  emailWeeklyDigest        Boolean @default(false) // Weekly progress digest
+  emailMarketingUpdates    Boolean @default(false) // Marketing and promotional emails
+
+  // In-app notifications (portal)
+  portalNewDeliverable     Boolean @default(true)  // New deliverable notification
+  portalNewMessage         Boolean @default(true)  // New message from team
+  portalMilestoneReminder  Boolean @default(true)  // Upcoming milestone reminders
+  portalAccountUpdate      Boolean @default(true)  // Account status changes
+
+  // Communication preferences
+  preferredContactMethod   String  @default("email") // "email", "portal", "both"
+  reminderFrequency        String  @default("daily")  // "daily", "weekly", "none"
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 

@@ -527,16 +527,29 @@ class BullMQJobQueue {
   }
 
   private async sendEmail(payload: any): Promise<JobResult> {
-    // Email sending will be implemented in Sprint 3
-    // For now, just log the email that would be sent
-    logInfo('Email job executed (email system not yet implemented)', {
-      type: payload.type,
-      to: payload.to,
-    })
+    const { sendTemplatedEmail } = await import('@/lib/email/sender')
 
-    return {
-      success: true,
-      data: { message: 'Email queued (not yet implemented)' },
+    try {
+      const success = await sendTemplatedEmail(
+        payload.to,
+        payload.type,
+        payload.context || {}
+      )
+
+      return {
+        success,
+        data: { emailSent: success },
+      }
+    } catch (error) {
+      logError('Email send job failed', error as Error, {
+        type: payload.type,
+        to: payload.to,
+      })
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Email send failed',
+      }
     }
   }
 
