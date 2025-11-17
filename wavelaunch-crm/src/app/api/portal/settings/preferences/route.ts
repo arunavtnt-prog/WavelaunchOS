@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 import { z } from 'zod'
 
 // Update notification preferences
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest) {
 
     // Update preferences
     await prisma.clientPortalUser.update({
-      where: { id: session.userId },
+      where: { id: auth.session.userId },
       data: preferences,
     })
 

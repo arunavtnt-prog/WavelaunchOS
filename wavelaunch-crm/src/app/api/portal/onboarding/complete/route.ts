@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 import { z } from 'zod'
 
 const onboardingSchema = z.object({
@@ -48,9 +48,9 @@ const onboardingSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -73,13 +73,10 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data
 
-    // Get portal user to find associated client
-    const portalUser = await prisma.clientPortalUser.findUnique({
-      where: { id: session.userId },
-      include: { client: true },
-    })
+    // Portal user and client are already verified by getVerifiedPortalSession
+    const portalUser = auth.portalUser
 
-    if (!portalUser || !portalUser.client) {
+    if (!portalUser.client) {
       return NextResponse.json(
         { success: false, error: 'Client not found' },
         { status: 404 }
@@ -137,7 +134,7 @@ export async function POST(request: NextRequest) {
 
       // Mark onboarding as completed on portal user
       await tx.clientPortalUser.update({
-        where: { id: session.userId },
+        where: { id: auth.session.userId },
         data: {
           completedOnboarding: true,
           onboardingCompletedAt: new Date(),
@@ -155,7 +152,7 @@ export async function POST(request: NextRequest) {
       // Create welcome notification for client
       await tx.portalNotification.create({
         data: {
-          clientUserId: session.userId,
+          clientUserId: auth.session.userId,
           type: 'ACCOUNT_UPDATE',
           title: '🎉 Welcome to Wavelaunch!',
           message: 'Your onboarding is complete! Our team is reviewing your information and will create your personalized business plan soon.',
