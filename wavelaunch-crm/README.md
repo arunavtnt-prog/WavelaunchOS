@@ -143,6 +143,7 @@ Visit `http://localhost:3000` and login with:
 - **[SETUP.md](./docs/SETUP.md)** - Complete setup guide
 - **[MIGRATION_GUIDE.md](./docs/MIGRATION_GUIDE.md)** - SQLite to PostgreSQL migration
 - **[AUTOMATION.md](./docs/AUTOMATION.md)** - Automated workflows & scheduled tasks
+- **[EMAIL_SYSTEM.md](./docs/EMAIL_SYSTEM.md)** - Email & notification system guide
 - **[SECURITY.md](./docs/SECURITY.md)** - Security features & best practices
 - **[API.md](./docs/API.md)** - API documentation
 - **[PRD.md](./PRD.md)** - Product requirements
@@ -176,23 +177,28 @@ Visit `http://localhost:3000` and login with:
 
 ### Database Schema
 
-11 models with comprehensive relationships:
-- User, Client, BusinessPlan, Deliverable
-- File, PromptTemplate, Job, Note
-- Activity, BackupLog, Settings
+16 models with comprehensive relationships:
+- **Core**: User, Client, BusinessPlan, Deliverable
+- **Content**: File, Note, PromptTemplate
+- **System**: Job, Activity, BackupLog, Settings
+- **Support**: Ticket, TicketComment, TicketAttachment
+- **Help**: HelpCategory, HelpArticle
+- **Notifications**: NotificationPreferences
 
 ### Key Services
 
 - `/src/lib/ai/` - Claude API integration
-- `/src/lib/jobs/` - Background job queue
+- `/src/lib/jobs/` - Background job queue (BullMQ + Redis)
 - `/src/lib/pdf/` - PDF generation pipeline
+- `/src/lib/email/` - Email service with multi-provider support
+- `/src/lib/workflows/` - Client journey automation
 - `/src/lib/backup/` - Database backup service
 - `/src/lib/files/` - File management
 - `/src/lib/prompts/` - Template loading
 
 ### API Routes
 
-28+ endpoints covering:
+35+ endpoints covering:
 - Authentication (`/api/auth/*`)
 - Clients (`/api/clients/*`)
 - Business Plans (`/api/business-plans/*`)
@@ -201,6 +207,10 @@ Visit `http://localhost:3000` and login with:
 - Notes (`/api/notes/*`)
 - Jobs (`/api/jobs/*`)
 - Backups (`/api/backups/*`)
+- Tickets (`/api/tickets/*`)
+- Help Center (`/api/help/*`)
+- Email (`/api/email/*`)
+- Preferences (`/api/preferences/*`)
 - System (`/api/health`, `/api/storage/*`)
 
 ---
@@ -279,14 +289,24 @@ ANTHROPIC_API_KEY="sk-ant-..."
 # ALLOWED_ORIGINS="https://yourdomain.com,https://www.yourdomain.com"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
-# Email (optional)
+# Email (optional - choose one provider)
+# Option 1: Resend (recommended)
 RESEND_API_KEY="re_..."
-# Or use SMTP
+EMAIL_FROM="noreply@wavelaunch.studio"
+EMAIL_FROM_NAME="Wavelaunch Studio"
+
+# Option 2: SMTP (e.g., Gmail, SendGrid)
 SMTP_HOST="smtp.gmail.com"
 SMTP_PORT="587"
+SMTP_SECURE="false"  # true for port 465
 SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-password"
-SMTP_FROM="noreply@wavelaunch.studio"
+SMTP_PASSWORD="your-app-password"
+EMAIL_FROM="noreply@wavelaunch.studio"
+EMAIL_FROM_NAME="Wavelaunch Studio"
+
+# Email Feature Flags
+ENABLE_EMAIL_WORKFLOWS="true"  # Enable automatic workflow emails
+# FORCE_CONSOLE_EMAIL="true"  # Force console mode (development only)
 
 # Logging & Storage
 LOG_LEVEL="info"  # debug, info, warn, error
@@ -325,18 +345,18 @@ See [.env.example](./.env.example) for complete configuration options.
 
 **Client Journey Automation** - Zero-touch progression through 8-month deliverable program:
 - **Auto-Generation**: Next month's deliverable automatically created when current completes
-- **Welcome Flow**: New clients receive automated onboarding
-- **Smart Activation**: Business plan + M1 deliverable auto-generated on activation
-- **Overdue Detection**: Automatic reminders for pending deliverables
-- **Milestone Tracking**: Celebration notifications for completion events
+- **Welcome Flow**: New clients receive automated welcome emails
+- **Smart Activation**: Business plan + M1 deliverable auto-generated on activation with notifications
+- **Overdue Detection**: Automatic reminders for pending deliverables via email
+- **Milestone Tracking**: Celebration emails for completion events
 - **Event-Driven**: 7 workflow triggers (created, activated, completed, overdue, etc.)
-- **Email Ready**: Infrastructure for welcome emails, reminders, notifications (Sprint 3)
+- **Email Integration**: All workflows send contextual notifications based on user preferences
 
 **Scheduled Background Tasks** - Cron-based automation:
 - **Daily Backups**: Automatic database backups at midnight
 - **File Cleanup**: Temp file removal at 2 AM daily
 - **Job Cleanup**: Remove old completed jobs weekly
-- **Reminder Emails**: Daily check for overdue deliverables (Sprint 3)
+- **Reminder Emails**: Daily check for overdue deliverables
 - **Metrics Updates**: Client engagement tracking (Future)
 
 **Job Queue System** - BullMQ + Redis for production-grade processing:
@@ -371,6 +391,43 @@ See [.env.example](./.env.example) for complete configuration options.
 - **SEO-friendly URLs**: Slug-based URLs for better discoverability
 - **Publish Control**: Draft/published workflow for content management
 - **Public Access**: Published articles available without authentication
+
+---
+
+### Email & Notifications
+
+**Multi-Provider Email System** - Professional email infrastructure with flexible provider support:
+- **Provider Support**: Resend (recommended), SMTP, or console logging for development
+- **Auto-Detection**: Automatically selects provider based on environment configuration
+- **Email Templates**: 9 professional responsive HTML templates with plain-text fallbacks
+  - Welcome emails for new clients
+  - Activation notifications
+  - Business plan ready alerts
+  - Deliverable completion notifications
+  - Overdue reminders
+  - Milestone celebrations
+  - Journey completion congratulations
+  - Password reset emails
+  - User invitation emails
+- **Template Features**: Variable substitution, responsive design, brand consistency
+- **Job Queue Integration**: All emails sent asynchronously through BullMQ
+- **Development Mode**: Console logging for local testing without actual email sending
+
+**Notification Preferences** - Granular per-client control:
+- **Email Preferences**: 9 different notification types (welcome, activation, deliverables, etc.)
+- **Portal Notifications**: In-app notifications for deliverables, tickets, announcements
+- **Communication Settings**: Preferred contact method, reminder frequency
+- **Default Behavior**: All essential notifications ON, marketing OFF by default
+- **User Control**: Self-service preferences management via API
+- **Admin Override**: Admins can manage client preferences when needed
+- **Fail-Open**: Important notifications sent even if preference check fails
+
+**Email Workflow Integration**:
+- All 7 workflow events trigger appropriate email notifications
+- Preference checking before every email send
+- Contextual variables passed to templates (client name, progress %, dates, etc.)
+- Automatic logging of all email activity
+- Error handling with graceful degradation
 
 ---
 

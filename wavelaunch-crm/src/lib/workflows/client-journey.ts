@@ -160,7 +160,30 @@ export class ClientJourneyWorkflow {
 
     logInfo('Client activated workflow started', { clientId: client.id })
 
-    // 1. Auto-generate business plan (if not exists)
+    // 1. Send activation email (if email system is enabled and client wants it)
+    if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
+      const { shouldSendEmail } = await import('@/lib/email/preferences')
+      const sendEmail = await shouldSendEmail(client.id, 'emailActivation')
+
+      if (sendEmail) {
+        await jobQueue.enqueue(
+          'SEND_EMAIL',
+          {
+            type: 'CLIENT_ACTIVATED',
+            clientId: client.id,
+            to: client.email,
+            context: {
+              clientName: client.creatorName,
+              portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client-portal`,
+            },
+          },
+          { priority: JOB_PRIORITY.NORMAL }
+        )
+        logDebug('Enqueued activation email', { clientId: client.id })
+      }
+    }
+
+    // 2. Auto-generate business plan (if not exists)
     const existingPlan = await db.businessPlan.findFirst({
       where: { clientId: client.id },
     })
@@ -264,20 +287,26 @@ export class ClientJourneyWorkflow {
           })
 
           if (client) {
-            await jobQueue.enqueue(
-              'SEND_EMAIL',
-              {
-                type: 'DELIVERABLE_READY',
-                clientId: client.id,
-                to: client.email,
-                context: {
-                  clientName: client.name,
-                  month: nextMonth,
-                  deliverableTitle: `Month ${nextMonth} Deliverable`,
+            const { shouldSendEmail } = await import('@/lib/email/preferences')
+            const sendEmail = await shouldSendEmail(client.id, 'emailDeliverableReady')
+
+            if (sendEmail) {
+              await jobQueue.enqueue(
+                'SEND_EMAIL',
+                {
+                  type: 'DELIVERABLE_READY',
+                  clientId: client.id,
+                  to: client.email,
+                  context: {
+                    clientName: client.name,
+                    month: nextMonth,
+                    deliverableTitle: `Month ${nextMonth} Deliverable`,
+                  },
                 },
-              },
-              { priority: JOB_PRIORITY.NORMAL }
-            )
+                { priority: JOB_PRIORITY.NORMAL }
+              )
+              logDebug('Enqueued deliverable ready email', { clientId: client.id, month: nextMonth })
+            }
           }
         }
       } else {
@@ -298,18 +327,24 @@ export class ClientJourneyWorkflow {
         })
 
         if (client) {
-          await jobQueue.enqueue(
-            'SEND_EMAIL',
-            {
-              type: 'JOURNEY_COMPLETED',
-              clientId: client.id,
-              to: client.email,
-              context: {
-                clientName: client.name,
+          const { shouldSendEmail } = await import('@/lib/email/preferences')
+          const sendEmail = await shouldSendEmail(client.id, 'emailJourneyCompleted')
+
+          if (sendEmail) {
+            await jobQueue.enqueue(
+              'SEND_EMAIL',
+              {
+                type: 'JOURNEY_COMPLETED',
+                clientId: client.id,
+                to: client.email,
+                context: {
+                  clientName: client.name,
+                },
               },
-            },
-            { priority: JOB_PRIORITY.NORMAL }
-          )
+              { priority: JOB_PRIORITY.NORMAL }
+            )
+            logDebug('Enqueued journey completed email', { clientId: client.id })
+          }
         }
       }
 
@@ -354,20 +389,26 @@ export class ClientJourneyWorkflow {
       })
 
       if (client) {
-        await jobQueue.enqueue(
-          'SEND_EMAIL',
-          {
-            type: 'DELIVERABLE_OVERDUE',
-            clientId: client.id,
-            to: client.email,
-            context: {
-              clientName: client.name,
-              deliverableTitle: deliverable.title,
-              dueDate: deliverable.dueDate,
+        const { shouldSendEmail } = await import('@/lib/email/preferences')
+        const sendEmail = await shouldSendEmail(client.id, 'emailDeliverableOverdue')
+
+        if (sendEmail) {
+          await jobQueue.enqueue(
+            'SEND_EMAIL',
+            {
+              type: 'DELIVERABLE_OVERDUE',
+              clientId: client.id,
+              to: client.email,
+              context: {
+                clientName: client.name,
+                deliverableTitle: deliverable.title,
+                dueDate: deliverable.dueDate,
+              },
             },
-          },
-          { priority: JOB_PRIORITY.NORMAL }
-        )
+            { priority: JOB_PRIORITY.NORMAL }
+          )
+          logDebug('Enqueued overdue reminder email', { clientId: client.id })
+        }
       }
     }
 
@@ -429,18 +470,24 @@ export class ClientJourneyWorkflow {
       })
 
       if (client) {
-        await jobQueue.enqueue(
-          'SEND_EMAIL',
-          {
-            type: 'BUSINESS_PLAN_READY',
-            clientId: client.id,
-            to: client.email,
-            context: {
-              clientName: client.name,
+        const { shouldSendEmail } = await import('@/lib/email/preferences')
+        const sendEmail = await shouldSendEmail(client.id, 'emailBusinessPlanReady')
+
+        if (sendEmail) {
+          await jobQueue.enqueue(
+            'SEND_EMAIL',
+            {
+              type: 'BUSINESS_PLAN_READY',
+              clientId: client.id,
+              to: client.email,
+              context: {
+                clientName: client.name,
+              },
             },
-          },
-          { priority: JOB_PRIORITY.NORMAL }
-        )
+            { priority: JOB_PRIORITY.NORMAL }
+          )
+          logDebug('Enqueued business plan ready email', { clientId: client.id })
+        }
       }
     }
 
@@ -532,19 +579,25 @@ export class ClientJourneyWorkflow {
       })
 
       if (client) {
-        await jobQueue.enqueue(
-          'SEND_EMAIL',
-          {
-            type: 'MILESTONE_REACHED',
-            clientId: client.id,
-            to: client.email,
-            context: {
-              clientName: client.name,
-              milestone,
+        const { shouldSendEmail } = await import('@/lib/email/preferences')
+        const sendEmail = await shouldSendEmail(client.id, 'emailMilestoneReached')
+
+        if (sendEmail) {
+          await jobQueue.enqueue(
+            'SEND_EMAIL',
+            {
+              type: 'MILESTONE_REACHED',
+              clientId: client.id,
+              to: client.email,
+              context: {
+                clientName: client.name,
+                milestone,
+              },
             },
-          },
-          { priority: JOB_PRIORITY.NORMAL }
-        )
+            { priority: JOB_PRIORITY.NORMAL }
+          )
+          logDebug('Enqueued milestone reached email', { clientId: client.id, milestone })
+        }
       }
     }
 
