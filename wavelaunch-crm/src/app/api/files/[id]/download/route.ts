@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
+import { requireAuth, authorizeResourceOwnership } from '@/lib/auth/authorize'
+import { forbiddenResponse, notFoundResponse } from '@/lib/api/responses'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
@@ -11,10 +12,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Verify authentication
+    const user = await requireAuth()
 
     // Fetch file record
     const file = await db.file.findUnique({
@@ -22,10 +21,13 @@ export async function GET(
     })
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'File not found' },
-        { status: 404 }
-      )
+      return notFoundResponse('File')
+    }
+
+    // Verify authorization to download this file
+    const hasAccess = await authorizeResourceOwnership(user.id, 'file', params.id)
+    if (!hasAccess) {
+      return forbiddenResponse('You do not have permission to download this file')
     }
 
     // Read file from disk

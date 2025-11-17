@@ -22,12 +22,20 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // Security fields
+  lockedUntil      DateTime? // Account locked until this time
+  failedLoginCount Int       @default(0)
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  sessionExpiry    DateTime? // Session expires at this time
+
   // Relations
   businessPlansGenerated BusinessPlan[]
   deliverablesGenerated  Deliverable[]
   filesUploaded          File[]
   notes                  Note[]
   activities             Activity[]
+  loginAttempts          LoginAttempt[]
 
   @@map("users")
 }
@@ -35,6 +43,26 @@ model User {
 enum Role {
   ADMIN
   CLIENT
+}
+
+// Login attempt tracking for security
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String
+  userAgent String?
+  success   Boolean
+  reason    String?  // Failure reason: 'invalid_password', 'account_locked', etc.
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@index([userId, createdAt])
+  @@map("login_attempts")
 }
 
 // ============================================================================
