@@ -5,6 +5,7 @@ import {
   createPortalToken,
   setPortalCookie,
 } from '@/lib/auth/portal-auth'
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limiter'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -13,6 +14,26 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 attempts per 15 minutes per IP
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = checkRateLimit({
+      identifier: clientId,
+      endpoint: 'portal-login',
+      maxRequests: 5,
+      windowSeconds: 15 * 60, // 15 minutes
+    })
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many login attempts. Please try again in ${Math.ceil(rateLimitResult.resetIn / 60)} minutes.`,
+          resetIn: rateLimitResult.resetIn,
+        },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
 
     // Validate input

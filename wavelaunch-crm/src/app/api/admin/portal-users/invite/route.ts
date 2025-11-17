@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-import { randomBytes } from 'crypto'
+import { randomBytes, createHash } from 'crypto'
+import { checkRateLimit } from '@/lib/rate-limiter'
+
+/**
+ * Hash a token for secure storage
+ * Uses SHA-256 to create a one-way hash
+ */
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
 
 // Generate invite token for portal user
 export async function POST(request: NextRequest) {
@@ -13,6 +22,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Rate limiting: 20 invites per hour per admin user
+    const rateLimitResult = checkRateLimit({
+      identifier: session.user.id,
+      endpoint: 'generate-invite',
+      maxRequests: 20,
+      windowSeconds: 60 * 60, // 1 hour
+    })
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many invite requests. Please try again in ${Math.ceil(rateLimitResult.resetIn / 60)} minutes.`,
+          resetIn: rateLimitResult.resetIn,
+        },
+        { status: 429 }
       )
     }
 
@@ -47,15 +75,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique invite token
+    // Generate unique invite token (plain text for URL)
     const inviteToken = randomBytes(32).toString('hex')
     const inviteTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    // Update portal user with invite token
+    // Hash the token before storing (security best practice)
+    const inviteTokenHash = hashToken(inviteToken)
+
+    // Update portal user with hashed invite token
     await prisma.clientPortalUser.update({
       where: { id: portalUserId },
       data: {
-        inviteToken,
+        inviteToken: inviteTokenHash,
         inviteTokenExpiry,
         invitedBy: session.user.id,
       },
@@ -128,15 +159,18 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    // Generate new invite token
+    // Generate new invite token (plain text for URL)
     const inviteToken = randomBytes(32).toString('hex')
     const inviteTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-    // Update portal user with new invite token
+    // Hash the token before storing (security best practice)
+    const inviteTokenHash = hashToken(inviteToken)
+
+    // Update portal user with hashed invite token
     await prisma.clientPortalUser.update({
       where: { id: portalUserId },
       data: {
-        inviteToken,
+        inviteToken: inviteTokenHash,
         inviteTokenExpiry,
         invitedBy: session.user.id,
       },

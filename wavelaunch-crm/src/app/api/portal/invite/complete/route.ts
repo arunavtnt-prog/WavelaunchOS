@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { createHash } from 'crypto'
 import { createPortalToken } from '@/lib/auth/portal-auth'
+
+/**
+ * Hash a token for secure storage
+ * Uses SHA-256 to create a one-way hash
+ */
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
 
 const completeRegistrationSchema = z.object({
   token: z.string().min(1, 'Invite token is required'),
@@ -36,9 +45,12 @@ export async function POST(request: NextRequest) {
 
     const { token, password } = validation.data
 
-    // Find portal user by invite token
+    // Hash the token to compare with stored hash
+    const tokenHash = hashToken(token)
+
+    // Find portal user by hashed invite token
     const portalUser = await prisma.clientPortalUser.findUnique({
-      where: { inviteToken: token },
+      where: { inviteToken: tokenHash },
       include: {
         client: true,
       },
