@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { updateClientSchema } from '@/schemas/client'
 import { NotFoundError, handleError } from '@/lib/utils/errors'
+import { requireAuth, authorizeClientAccess } from '@/lib/auth/authorize'
+import { forbiddenResponse, notFoundResponse } from '@/lib/api/responses'
 
 // GET /api/clients/[id] - Get single client
 export async function GET(
@@ -10,9 +11,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Verify authentication
+    const user = await requireAuth()
+
+    // Verify authorization to access this client
+    const hasAccess = await authorizeClientAccess(user.id, params.id)
+    if (!hasAccess) {
+      return forbiddenResponse('You do not have permission to access this client')
     }
 
     const client = await db.client.findUnique({
@@ -77,9 +82,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Verify authentication and admin role (only admins can update clients)
+    const user = await requireAuth()
+
+    if (user.role !== 'ADMIN') {
+      return forbiddenResponse('Only administrators can update clients')
     }
 
     const body = await request.json()
@@ -90,7 +97,7 @@ export async function PATCH(
     })
 
     if (!client) {
-      throw new NotFoundError('Client', params.id)
+      return notFoundResponse('Client')
     }
 
     const updated = await db.client.update({
@@ -104,7 +111,7 @@ export async function PATCH(
         clientId: updated.id,
         type: 'CLIENT_UPDATED',
         description: `Updated client: ${updated.creatorName}`,
-        userId: session.user.id,
+        userId: user.id,
       },
     })
 
@@ -128,9 +135,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Verify authentication and admin role (only admins can delete clients)
+    const user = await requireAuth()
+
+    if (user.role !== 'ADMIN') {
+      return forbiddenResponse('Only administrators can delete clients')
     }
 
     const client = await db.client.findUnique({
@@ -138,7 +147,7 @@ export async function DELETE(
     })
 
     if (!client) {
-      throw new NotFoundError('Client', params.id)
+      return notFoundResponse('Client')
     }
 
     // Soft delete
@@ -153,7 +162,7 @@ export async function DELETE(
         clientId: client.id,
         type: 'CLIENT_DELETED',
         description: `Deleted client: ${client.creatorName}`,
-        userId: session.user.id,
+        userId: user.id,
       },
     })
 
