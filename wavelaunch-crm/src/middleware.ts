@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { generateCsrfToken, verifyCsrfToken } from '@/lib/security/csrf'
 
 /**
  * Add security headers to response
@@ -55,6 +56,47 @@ export default auth(async (req) => {
   const isAdminLoggedIn = !!req.auth
 
   let response: NextResponse
+
+  // CSRF Protection for API routes (POST, PUT, PATCH, DELETE)
+  const isApiRoute = pathname.startsWith('/api/')
+  const isStateChangingMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
+
+  // Exclude auth endpoints from CSRF check (they use other protections)
+  const isAuthEndpoint = pathname.startsWith('/api/auth/') ||
+                         pathname.startsWith('/portal/api/auth/')
+
+  if (isApiRoute && isStateChangingMethod && !isAuthEndpoint) {
+    const isValid = await verifyCsrfToken(req)
+    if (!isValid) {
+      response = NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid CSRF token. Please refresh the page and try again.',
+        },
+        { status: 403 }
+      )
+      return addSecurityHeaders(response)
+    }
+  }
+
+  // Set CSRF token for all page loads (not API requests)
+  if (!isApiRoute) {
+    const cookieStore = await cookies()
+    const existingToken = cookieStore.get('csrf-token')?.value
+
+    if (!existingToken) {
+      const token = generateCsrfToken()
+      // Token will be set in response cookies
+      response = NextResponse.next()
+      response.cookies.set('csrf-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 60 * 60 * 24, // 24 hours
+      })
+    }
+  }
 
   // Portal routes - check for portal authentication
   if (pathname.startsWith('/portal')) {
