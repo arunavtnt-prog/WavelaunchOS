@@ -106,22 +106,29 @@ export class ClientJourneyWorkflow {
       clientName: client.name,
     })
 
-    // 1. Send welcome email (if email system is enabled)
+    // 1. Send welcome email (if email system is enabled and client wants it)
     if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-      await jobQueue.enqueue(
-        'SEND_EMAIL',
-        {
-          type: 'WELCOME',
-          clientId: client.id,
-          to: client.email,
-          context: {
-            clientName: client.name,
-            portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client-portal`,
+      const { shouldSendEmail } = await import('@/lib/email/preferences')
+      const sendEmail = await shouldSendEmail(client.id, 'emailWelcome')
+
+      if (sendEmail) {
+        await jobQueue.enqueue(
+          'SEND_EMAIL',
+          {
+            type: 'WELCOME',
+            clientId: client.id,
+            to: client.email,
+            context: {
+              clientName: client.creatorName,
+              portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client-portal`,
+            },
           },
-        },
-        { priority: JOB_PRIORITY.NORMAL }
-      )
-      logDebug('Enqueued welcome email', { clientId: client.id })
+          { priority: JOB_PRIORITY.NORMAL }
+        )
+        logDebug('Enqueued welcome email', { clientId: client.id })
+      } else {
+        logDebug('Welcome email disabled in client preferences', { clientId: client.id })
+      }
     }
 
     // 2. Create activity log

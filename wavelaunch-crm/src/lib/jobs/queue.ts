@@ -244,10 +244,24 @@ export class JobQueue {
   }
 
   private async sendEmail(payload: any): Promise<JobResult> {
-    // Email sending will be implemented in Sprint 3
-    return {
-      success: true,
-      data: { message: 'Email queued (not yet implemented)' },
+    const { sendTemplatedEmail } = await import('@/lib/email/sender')
+
+    try {
+      const success = await sendTemplatedEmail(
+        payload.to,
+        payload.type,
+        payload.context || {}
+      )
+
+      return {
+        success,
+        data: { emailSent: success },
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Email send failed',
+      }
     }
   }
 
