@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Download business plan PDF
 export async function GET(
@@ -8,10 +8,10 @@ export async function GET(
   { params }: { params: { planId: string } }
 ) {
   try {
-    // Check authentication
-    const session = await getPortalSession()
+    // Check authentication and verify session
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         {
           success: false,
@@ -40,7 +40,7 @@ export async function GET(
     }
 
     // Verify client owns this business plan
-    if (businessPlan.clientId !== session.clientId) {
+    if (businessPlan.clientId !== auth.portalUser.clientId) {
       return NextResponse.json(
         {
           success: false,

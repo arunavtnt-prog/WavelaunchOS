@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Mark all notifications as read
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.portalNotification.updateMany({
       where: {
-        clientUserId: session.userId,
+        clientUserId: auth.session.userId,
         isRead: false,
       },
       data: { isRead: true },

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Mark thread as read
 export async function POST(
@@ -8,9 +8,9 @@ export async function POST(
   { params }: { params: { threadId: string } }
 ) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -21,7 +21,7 @@ export async function POST(
     await prisma.portalMessage.updateMany({
       where: {
         threadId: params.threadId,
-        clientId: session.clientId,
+        clientId: auth.portalUser.clientId,
         isFromAdmin: true,
         isRead: false,
       },

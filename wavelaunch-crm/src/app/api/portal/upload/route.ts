@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { existsSync } from 'fs'
@@ -21,9 +21,9 @@ const ALLOWED_TYPES = [
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Get all notifications for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const unreadOnly = searchParams.get('unreadOnly') === 'true'
     const limit = parseInt(searchParams.get('limit') || '50')
 
-    const where: any = { clientUserId: session.userId }
+    const where: any = { clientUserId: auth.session.userId }
     if (unreadOnly) {
       where.isRead = false
     }
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     const unreadCount = await prisma.portalNotification.count({
       where: {
-        clientUserId: session.userId,
+        clientUserId: auth.session.userId,
         isRead: false,
       },
     })
@@ -55,9 +55,9 @@ export async function GET(request: NextRequest) {
 // Create a notification (internal use, could be called from other APIs)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     const notification = await prisma.portalNotification.create({
       data: {
-        clientUserId: session.userId,
+        clientUserId: auth.session.userId,
         type,
         title,
         message,

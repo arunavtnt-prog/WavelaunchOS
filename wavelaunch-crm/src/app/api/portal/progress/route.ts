@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Get progress data for authenticated client
 export async function GET(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         {
           success: false,
@@ -19,13 +19,13 @@ export async function GET(request: NextRequest) {
 
     // Get client deliverables
     const deliverables = await prisma.deliverable.findMany({
-      where: { clientId: session.clientId },
+      where: { clientId: auth.portalUser.clientId },
       orderBy: { month: 'asc' },
     })
 
     // Get client data
     const client = await prisma.client.findUnique({
-      where: { id: session.clientId },
+      where: { id: auth.portalUser.clientId },
     })
 
     if (!client) {
