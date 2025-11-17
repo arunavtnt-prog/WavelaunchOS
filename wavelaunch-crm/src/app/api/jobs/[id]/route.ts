@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { jobQueue } from '@/lib/jobs/queue'
+import { jobQueue } from '@/lib/jobs'
 import { handleError } from '@/lib/utils/errors'
 
 // GET /api/jobs/[id] - Get job status

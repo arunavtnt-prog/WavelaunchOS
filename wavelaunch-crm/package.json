@@ -41,6 +41,7 @@
     "@uiw/react-codemirror": "^4.23.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^5.63.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",

@@ -2,7 +2,7 @@ import { db } from '@/lib/db'
 import { getClaudeClient } from './claude'
 import { promptLoader } from '@/lib/prompts/loader'
 import { buildDeliverableContext } from '@/lib/prompts/context-builder'
-import type { JobResult } from '@/lib/jobs/queue'
+import type { JobResult } from '@/lib/jobs'
 import type { PromptTemplateType } from '@prisma/client'
 
 export async function generateDeliverable(
