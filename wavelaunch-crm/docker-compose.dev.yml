@@ -1,0 +1,28 @@
+version: '3.8'
+
+# Development-specific overrides
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    environment:
+      # More verbose logging in development
+      POSTGRES_LOG_STATEMENT: all
+      POSTGRES_LOG_DURATION: "on"
+    # Expose all PostgreSQL logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  redis:
+    # Enable Redis command logging in development
+    command: redis-server --appendonly yes --loglevel debug
+
+  # Auto-start tools in development
+  redis-commander:
+    profiles: []  # Override to start by default
+
+  pgadmin:
+    profiles: []  # Override to start by default

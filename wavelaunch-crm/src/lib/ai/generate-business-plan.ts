@@ -2,7 +2,7 @@ import { db } from '@/lib/db'
 import { getClaudeClient } from './claude'
 import { promptLoader } from '@/lib/prompts/loader'
 import { buildClientContext } from '@/lib/prompts/context-builder'
-import type { JobResult } from '@/lib/jobs/queue'
+import type { JobResult } from '@/lib/jobs'
 
 export async function generateBusinessPlan(
   clientId: string,
