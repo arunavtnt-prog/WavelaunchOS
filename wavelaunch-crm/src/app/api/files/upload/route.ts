@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { handleError, StorageError } from '@/lib/utils/errors'
-import { MAX_FILE_SIZE_BYTES, STORAGE_LIMIT_BYTES } from '@/lib/utils/constants'
+import { STORAGE_LIMIT_BYTES } from '@/lib/utils/constants'
+import { requireAuth, authorizeClientAccess } from '@/lib/auth/authorize'
+import { forbiddenResponse, badRequestResponse, validationErrorResponse } from '@/lib/api/responses'
+import { validateUploadedFile, sanitizeFilename, generateSafeUploadPath } from '@/lib/files/validation'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { z } from 'zod'
+import os from 'os'
 
 const uploadSchema = z.object({
   clientId: z.string().cuid(),
@@ -14,11 +17,11 @@ const uploadSchema = z.object({
 
 // POST /api/files/upload - Upload a file
 export async function POST(request: NextRequest) {
+  let tempFilePath: string | null = null
+
   try {
-    const session = await auth()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    // Verify authentication
+    const user = await requireAuth()
 
     // Parse form data
     const formData = await request.formData()
@@ -27,10 +30,7 @@ export async function POST(request: NextRequest) {
     const category = formData.get('category') as string
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      )
+      return badRequestResponse('No file provided')
     }
 
     // Validate inputs
@@ -39,30 +39,22 @@ export async function POST(request: NextRequest) {
       category,
     })
 
+    // Verify authorization to upload to this client
+    const hasAccess = await authorizeClientAccess(user.id, validatedClientId)
+    if (!hasAccess) {
+      return forbiddenResponse('You do not have permission to upload files for this client')
+    }
+
     // Verify client exists
     const client = await db.client.findUnique({
       where: { id: validatedClientId, deletedAt: null },
     })
 
     if (!client) {
-      return NextResponse.json(
-        { success: false, error: 'Client not found' },
-        { status: 404 }
-      )
+      return badRequestResponse('Client not found')
     }
 
-    // Check file size
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `File too large. Maximum size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024}MB`,
-        },
-        { status: 413 }
-      )
-    }
-
-    // Check total storage
+    // Check total storage before processing file
     const totalStorage = await db.file.aggregate({
       _sum: {
         fileSize: true,
@@ -74,37 +66,61 @@ export async function POST(request: NextRequest) {
       throw new StorageError('Storage limit exceeded', STORAGE_LIMIT_BYTES)
     }
 
-    // Create upload directory
-    const uploadDir = path.join(
-      process.cwd(),
-      'data',
-      'clients',
-      validatedClientId,
-      'files'
-    )
-    await fs.mkdir(uploadDir, { recursive: true })
+    // Write file to temporary location for validation
+    const tempDir = os.tmpdir()
+    const tempFileName = `upload_${Date.now()}_${Math.random().toString(36).slice(2)}`
+    tempFilePath = path.join(tempDir, tempFileName)
 
-    // Generate unique filename
-    const timestamp = Date.now()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filename = `${timestamp}-${sanitizedName}`
-    const filepath = path.join(uploadDir, filename)
-
-    // Write file to disk
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    await fs.writeFile(filepath, buffer)
+    await fs.writeFile(tempFilePath, buffer)
+
+    // Validate uploaded file (content, size, type, etc.)
+    const validation = await validateUploadedFile({
+      filename: file.name,
+      mimeType: file.type || 'application/octet-stream',
+      size: file.size,
+      path: tempFilePath,
+    })
+
+    if (!validation.valid) {
+      // Clean up temp file
+      await fs.unlink(tempFilePath)
+      tempFilePath = null
+
+      return validationErrorResponse(
+        'File validation failed',
+        { errors: validation.errors, warnings: validation.warnings }
+      )
+    }
+
+    // Generate safe upload path
+    const uploadDir = path.join(process.cwd(), 'data', 'clients', validatedClientId, 'files')
+    await fs.mkdir(uploadDir, { recursive: true })
+
+    const finalPath = generateSafeUploadPath(
+      path.join(process.cwd(), 'data', 'clients'),
+      validatedClientId,
+      validation.sanitizedFilename
+    )
+
+    // Ensure final directory exists
+    await fs.mkdir(path.dirname(finalPath), { recursive: true })
+
+    // Move file from temp to final location
+    await fs.rename(tempFilePath, finalPath)
+    tempFilePath = null // Moved successfully
 
     // Create file record
     const fileRecord = await db.file.create({
       data: {
         clientId: validatedClientId,
-        filename,
-        filepath,
+        filename: validation.sanitizedFilename,
+        filepath: finalPath,
         fileType: file.type || 'application/octet-stream',
         fileSize: file.size,
         category: validatedCategory,
-        uploadedBy: session.user.id,
+        uploadedBy: user.id,
       },
     })
 
@@ -113,8 +129,8 @@ export async function POST(request: NextRequest) {
       data: {
         clientId: validatedClientId,
         type: 'FILE_UPLOADED',
-        description: `Uploaded file: ${file.name}`,
-        userId: session.user.id,
+        description: `Uploaded file: ${validation.sanitizedFilename}`,
+        userId: user.id,
       },
     })
 
@@ -122,8 +138,18 @@ export async function POST(request: NextRequest) {
       success: true,
       data: fileRecord,
       message: 'File uploaded successfully',
+      warnings: validation.warnings.length > 0 ? validation.warnings : undefined,
     })
   } catch (error) {
+    // Clean up temporary file if it still exists
+    if (tempFilePath) {
+      try {
+        await fs.unlink(tempFilePath)
+      } catch (unlinkError) {
+        console.error('Failed to clean up temp file:', unlinkError)
+      }
+    }
+
     const err = handleError(error)
     return NextResponse.json(
       { success: false, error: err.message },
