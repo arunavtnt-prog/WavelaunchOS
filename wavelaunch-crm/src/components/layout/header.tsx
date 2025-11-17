@@ -15,6 +15,8 @@ import Link from 'next/link'
 const getPageTitle = (pathname: string): string => {
   if (pathname.includes('/clients')) return 'Clients'
   if (pathname.includes('/dashboard')) return 'Dashboard'
+  if (pathname.includes('/portal-users')) return 'Portal Users'
+  if (pathname.includes('/messages')) return 'Messages'
   if (pathname.includes('/business-plans')) return 'Business Plans'
   if (pathname.includes('/deliverables')) return 'Deliverables'
   if (pathname.includes('/files')) return 'Files'

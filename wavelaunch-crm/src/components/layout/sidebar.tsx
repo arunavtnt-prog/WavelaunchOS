@@ -17,6 +17,8 @@ import {
   Inbox,
   Ticket,
   HelpCircle,
+  UserCog,
+  MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { signOut } from 'next-auth/react'
@@ -24,6 +26,8 @@ import { signOut } from 'next-auth/react'
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients', href: '/clients', icon: Users },
+  { name: 'Portal Users', href: '/portal-users', icon: UserCog },
+  { name: 'Messages', href: '/messages', icon: MessageSquare },
   { name: 'Business Plans', href: '/business-plans', icon: BookMarked },
   { name: 'Deliverables', href: '/deliverables', icon: Package },
   { name: 'Files', href: '/files', icon: Folders },

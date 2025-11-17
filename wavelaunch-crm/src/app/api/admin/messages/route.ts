@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Get all messages for a specific client (admin view)
+// Get all messages (admin view) - supports filtering by clientId and threadId
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,15 +19,8 @@ export async function GET(request: NextRequest) {
     const clientId = searchParams.get('clientId')
     const threadId = searchParams.get('threadId')
 
-    if (!clientId) {
-      return NextResponse.json(
-        { success: false, error: 'Client ID is required' },
-        { status: 400 }
-      )
-    }
-
-    // If threadId provided, get messages for that thread
-    if (threadId) {
+    // If both clientId and threadId provided, get messages for that specific thread
+    if (clientId && threadId) {
       const messages = await prisma.portalMessage.findMany({
         where: {
           clientId,
@@ -42,19 +35,39 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Otherwise, get all threads for the client
+    // Build where clause
+    const whereClause: any = {}
+    if (clientId) {
+      whereClause.clientId = clientId
+    }
+
+    // Get all messages (across all clients or for specific client)
     const messages = await prisma.portalMessage.findMany({
-      where: { clientId },
+      where: whereClause,
+      include: {
+        client: {
+          select: {
+            id: true,
+            creatorName: true,
+            brandName: true,
+            email: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     })
 
-    // Group messages by threadId
+    // Group messages by threadId (and clientId for cross-client view)
     const threadsMap = new Map()
 
     for (const message of messages) {
-      if (!threadsMap.has(message.threadId)) {
-        threadsMap.set(message.threadId, {
+      const key = `${message.clientId}_${message.threadId}`
+
+      if (!threadsMap.has(key)) {
+        threadsMap.set(key, {
           threadId: message.threadId,
+          clientId: message.clientId,
+          client: message.client,
           subject: message.subject,
           latestMessage: message,
           unreadCount: 0,
@@ -62,7 +75,7 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      const thread = threadsMap.get(message.threadId)
+      const thread = threadsMap.get(key)
       thread.messageCount++
 
       // Count unread messages (from client, not read by admin)
@@ -88,6 +101,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: { threads },
+      count: threads.length,
     })
   } catch (error) {
     console.error('Get admin messages error:', error)

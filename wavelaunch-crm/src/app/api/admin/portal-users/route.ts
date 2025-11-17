@@ -142,24 +142,76 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Get portal user for a client
+// Get portal user(s) - if clientId provided, get single user, otherwise get all
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const clientId = searchParams.get('clientId')
+    const status = searchParams.get('status') // 'active', 'invited', 'inactive'
 
-    if (!clientId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Client ID is required',
+    // If clientId is provided, get single user
+    if (clientId) {
+      const portalUser = await prisma.clientPortalUser.findUnique({
+        where: { clientId },
+        include: {
+          client: {
+            select: {
+              id: true,
+              creatorName: true,
+              brandName: true,
+              email: true,
+            },
+          },
         },
-        { status: 400 }
-      )
+      })
+
+      if (!portalUser) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Portal user not found for this client',
+          },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: portalUser.id,
+          email: portalUser.email,
+          isActive: portalUser.isActive,
+          emailVerified: portalUser.emailVerified,
+          invitedAt: portalUser.invitedAt,
+          activatedAt: portalUser.activatedAt,
+          lastLoginAt: portalUser.lastLoginAt,
+          client: portalUser.client,
+          preferences: {
+            notifyNewDeliverable: portalUser.notifyNewDeliverable,
+            notifyNewMessage: portalUser.notifyNewMessage,
+            notifyMilestoneReminder: portalUser.notifyMilestoneReminder,
+            notifyWeeklySummary: portalUser.notifyWeeklySummary,
+          },
+        },
+      })
     }
 
-    const portalUser = await prisma.clientPortalUser.findUnique({
-      where: { clientId },
+    // Otherwise, get all portal users
+    const whereClause: any = {}
+
+    // Filter by status if provided
+    if (status === 'active') {
+      whereClause.isActive = true
+      whereClause.activatedAt = { not: null }
+    } else if (status === 'invited') {
+      whereClause.activatedAt = null
+      whereClause.inviteToken = { not: null }
+    } else if (status === 'inactive') {
+      whereClause.isActive = false
+    }
+
+    const portalUsers = await prisma.clientPortalUser.findMany({
+      where: whereClause,
       include: {
         client: {
           select: {
@@ -167,46 +219,37 @@ export async function GET(request: NextRequest) {
             creatorName: true,
             brandName: true,
             email: true,
+            status: true,
           },
         },
       },
+      orderBy: {
+        invitedAt: 'desc',
+      },
     })
-
-    if (!portalUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Portal user not found for this client',
-        },
-        { status: 404 }
-      )
-    }
 
     return NextResponse.json({
       success: true,
-      data: {
-        id: portalUser.id,
-        email: portalUser.email,
-        isActive: portalUser.isActive,
-        emailVerified: portalUser.emailVerified,
-        invitedAt: portalUser.invitedAt,
-        activatedAt: portalUser.activatedAt,
-        lastLoginAt: portalUser.lastLoginAt,
-        client: portalUser.client,
-        preferences: {
-          notifyNewDeliverable: portalUser.notifyNewDeliverable,
-          notifyNewMessage: portalUser.notifyNewMessage,
-          notifyMilestoneReminder: portalUser.notifyMilestoneReminder,
-          notifyWeeklySummary: portalUser.notifyWeeklySummary,
-        },
-      },
+      data: portalUsers.map((user) => ({
+        id: user.id,
+        email: user.email,
+        isActive: user.isActive,
+        emailVerified: user.emailVerified,
+        invitedAt: user.invitedAt,
+        activatedAt: user.activatedAt,
+        lastLoginAt: user.lastLoginAt,
+        hasInviteToken: !!user.inviteToken,
+        inviteTokenExpiry: user.inviteTokenExpiry,
+        client: user.client,
+      })),
+      count: portalUsers.length,
     })
   } catch (error) {
     console.error('Get portal user error:', error)
     return NextResponse.json(
       {
         success: false,
-        error: 'An error occurred while fetching the portal user',
+        error: 'An error occurred while fetching the portal user(s)',
       },
       { status: 500 }
     )
