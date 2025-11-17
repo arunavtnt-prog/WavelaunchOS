@@ -444,6 +444,18 @@ class BullMQJobQueue {
       case 'CLEANUP_FILES':
         return this.cleanupFiles(payload)
 
+      case 'CLEANUP_OLD_JOBS':
+        return this.cleanupOldJobs(payload)
+
+      case 'SEND_EMAIL':
+        return this.sendEmail(payload)
+
+      case 'SEND_REMINDER_EMAILS':
+        return this.sendReminderEmails(payload)
+
+      case 'UPDATE_CLIENT_METRICS':
+        return this.updateClientMetrics(payload)
+
       default:
         throw new Error(`Unknown job type: ${type}`)
     }
@@ -487,6 +499,67 @@ class BullMQJobQueue {
   private async cleanupFiles(payload: any): Promise<JobResult> {
     const { cleanupTempFiles } = await import('@/lib/files/cleanup')
     return cleanupTempFiles()
+  }
+
+  private async cleanupOldJobs(payload: any): Promise<JobResult> {
+    const olderThanDays = payload.olderThanDays || 30
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
+
+    const deleted = await db.job.deleteMany({
+      where: {
+        status: 'COMPLETED',
+        completedAt: {
+          lt: cutoffDate,
+        },
+      },
+    })
+
+    logInfo(`Cleaned up ${deleted.count} old completed jobs`, {
+      olderThanDays,
+      cutoffDate,
+    })
+
+    return {
+      success: true,
+      data: { deletedCount: deleted.count },
+    }
+  }
+
+  private async sendEmail(payload: any): Promise<JobResult> {
+    // Email sending will be implemented in Sprint 3
+    // For now, just log the email that would be sent
+    logInfo('Email job executed (email system not yet implemented)', {
+      type: payload.type,
+      to: payload.to,
+    })
+
+    return {
+      success: true,
+      data: { message: 'Email queued (not yet implemented)' },
+    }
+  }
+
+  private async sendReminderEmails(payload: any): Promise<JobResult> {
+    // Check for overdue deliverables and send reminders
+    const { clientJourneyWorkflow } = await import('@/lib/workflows/client-journey')
+    await clientJourneyWorkflow.checkOverdueDeliverables(payload.userId || 'system')
+
+    return {
+      success: true,
+      data: { message: 'Reminder emails processed' },
+    }
+  }
+
+  private async updateClientMetrics(payload: any): Promise<JobResult> {
+    // This will be implemented when metrics system is added
+    // For now, just return success
+    logInfo('Client metrics update job executed (metrics system not yet implemented)')
+
+    return {
+      success: true,
+      data: { message: 'Metrics updated (not yet implemented)' },
+    }
   }
 
   /**
