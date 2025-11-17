@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Get all documents for authenticated client
 export async function GET(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         {
           success: false,
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch business plans
     if (!type || type === 'all' || type === 'business-plans') {
-      const planWhere: any = { clientId: session.clientId }
+      const planWhere: any = { clientId: auth.portalUser.clientId }
       if (status) {
         planWhere.status = status
       }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch deliverables
     if (!type || type === 'all' || type === 'deliverables') {
-      const deliverableWhere: any = { clientId: session.clientId }
+      const deliverableWhere: any = { clientId: auth.portalUser.clientId }
       if (status) {
         deliverableWhere.status = status
       }

@@ -1,24 +1,116 @@
 import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
-export default auth((req) => {
+/**
+ * Add security headers to response
+ * Protects against XSS, clickjacking, MIME sniffing, etc.
+ */
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  // Prevent clickjacking attacks
+  response.headers.set('X-Frame-Options', 'DENY')
+
+  // Prevent MIME type sniffing
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+
+  // Control referrer information
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+  // Restrict access to browser features
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+  )
+
+  // Content Security Policy (CSP)
+  // Note: Next.js uses inline styles, so we need 'unsafe-inline' for style-src
+  const cspDirectives = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // unsafe-eval needed for Next.js dev
+    "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for Tailwind
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ')
+
+  response.headers.set('Content-Security-Policy', cspDirectives)
+
+  // Strict Transport Security (HTTPS only)
+  // Only enable in production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains'
+    )
+  }
+
+  return response
+}
+
+export default auth(async (req) => {
   const { pathname } = req.nextUrl
-  const isLoggedIn = !!req.auth
+  const isAdminLoggedIn = !!req.auth
 
-  // Public routes
+  let response: NextResponse
+
+  // Portal routes - check for portal authentication
+  if (pathname.startsWith('/portal')) {
+    // Public portal routes (login, invite pages)
+    const isPublicPortalRoute =
+      pathname === '/portal/login' ||
+      pathname.startsWith('/portal/invite/') ||
+      pathname.startsWith('/portal/api/auth/login') ||
+      pathname.startsWith('/portal/api/auth/forgot-password') ||
+      pathname.startsWith('/portal/api/auth/reset-password') ||
+      pathname.startsWith('/portal/api/invite')
+
+    if (isPublicPortalRoute) {
+      response = NextResponse.next()
+      return addSecurityHeaders(response)
+    }
+
+    // Check for portal authentication token
+    const cookieStore = await cookies()
+    const portalToken = cookieStore.get('portal_token')
+
+    if (!portalToken) {
+      // Redirect to portal login if accessing protected portal routes
+      if (pathname.startsWith('/portal/api/')) {
+        response = NextResponse.json(
+          { success: false, error: 'Unauthorized - Portal authentication required' },
+          { status: 401 }
+        )
+        return addSecurityHeaders(response)
+      }
+      response = NextResponse.redirect(new URL('/portal/login', req.url))
+      return addSecurityHeaders(response)
+    }
+
+    response = NextResponse.next()
+    return addSecurityHeaders(response)
+  }
+
+  // Admin routes - check for admin authentication
+  // Public admin routes
   const isPublicRoute = pathname === '/login' || pathname.startsWith('/api/auth')
 
   // Redirect logged-in users away from login page
-  if (isLoggedIn && pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', req.url))
+  if (isAdminLoggedIn && pathname === '/login') {
+    response = NextResponse.redirect(new URL('/dashboard', req.url))
+    return addSecurityHeaders(response)
   }
 
   // Redirect non-logged-in users to login page
-  if (!isLoggedIn && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/login', req.url))
+  if (!isAdminLoggedIn && !isPublicRoute) {
+    response = NextResponse.redirect(new URL('/login', req.url))
+    return addSecurityHeaders(response)
   }
 
-  return NextResponse.next()
+  response = NextResponse.next()
+  return addSecurityHeaders(response)
 })
 
 export const config = {

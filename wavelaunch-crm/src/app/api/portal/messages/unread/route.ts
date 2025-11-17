@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Get unread message count
 export async function GET(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const unreadCount = await prisma.portalMessage.count({
       where: {
-        clientId: session.clientId,
+        clientId: auth.portalUser.clientId,
         isFromAdmin: true,
         isRead: false,
       },

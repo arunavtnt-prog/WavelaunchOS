@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 
 // Mark notification as read
 export async function POST(
@@ -8,9 +8,9 @@ export async function POST(
   { params }: { params: { notificationId: string } }
 ) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function POST(
       )
     }
 
-    if (notification.clientUserId !== session.userId) {
+    if (notification.clientUserId !== auth.session.userId) {
       return NextResponse.json(
         { success: false, error: 'Forbidden' },
         { status: 403 }
