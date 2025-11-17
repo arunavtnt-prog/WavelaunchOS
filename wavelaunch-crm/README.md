@@ -12,11 +12,13 @@ WavelaunchOS CRM is a comprehensive system for managing creator/influencer partn
 
 - **Client Management** - Comprehensive onboarding with 29 data points, capacity management (100 clients max)
 - **AI Document Generation** - Automated business plans and monthly deliverables using Claude AI (70%+ time reduction)
+- **Automated Client Journeys** - Zero-touch progression through 8-month deliverable program with event-driven workflows
 - **Professional PDF Export** - Wavelaunch-branded PDFs via Pandoc/XeLaTeX (300 DPI print-ready)
 - **File Management** - Drag-and-drop uploads, 50GB storage limit, automatic cleanup
 - **Rich Text Notes** - TipTap editor with tags, importance flags, and full-text search
 - **Database Backups** - Manual and automated daily backups with safe restore
-- **Job Queue System** - Background processing with exponential backoff retry logic
+- **Distributed Job Queue** - BullMQ + Redis for persistent background processing (falls back to in-memory)
+- **Scheduled Tasks** - Cron-based automation for maintenance, backups, and notifications
 - **System Monitoring** - Real-time health metrics, storage analytics, job queue dashboard
 
 ### AI-Powered Features
@@ -137,6 +139,7 @@ Visit `http://localhost:3000` and login with:
 
 - **[SETUP.md](./docs/SETUP.md)** - Complete setup guide
 - **[MIGRATION_GUIDE.md](./docs/MIGRATION_GUIDE.md)** - SQLite to PostgreSQL migration
+- **[AUTOMATION.md](./docs/AUTOMATION.md)** - Automated workflows & scheduled tasks
 - **[SECURITY.md](./docs/SECURITY.md)** - Security features & best practices
 - **[API.md](./docs/API.md)** - API documentation
 - **[PRD.md](./PRD.md)** - Product requirements
@@ -302,13 +305,43 @@ See [.env.example](./.env.example) for complete configuration options.
 - **Client Capacity**: 100 clients max
 - **Storage Limit**: 50GB with warnings at 80%/100%
 - **Backup Retention**: 30 days
-- **Job Queue**: 5 types with 3 retry attempts
+- **Job Queue**: 10 job types, 5 specialized queues, distributed processing
+- **Scheduled Tasks**: 5 cron-based automated tasks
+- **Workflow Events**: 7 automated client journey triggers
 - **Document Formats**: Markdown → PDF (150/300 DPI)
 - **AI Model**: claude-sonnet-4-20250514
 
 ---
 
 ## Features in Detail
+
+### Automated Workflows
+
+**Client Journey Automation** - Zero-touch progression through 8-month deliverable program:
+- **Auto-Generation**: Next month's deliverable automatically created when current completes
+- **Welcome Flow**: New clients receive automated onboarding
+- **Smart Activation**: Business plan + M1 deliverable auto-generated on activation
+- **Overdue Detection**: Automatic reminders for pending deliverables
+- **Milestone Tracking**: Celebration notifications for completion events
+- **Event-Driven**: 7 workflow triggers (created, activated, completed, overdue, etc.)
+- **Email Ready**: Infrastructure for welcome emails, reminders, notifications (Sprint 3)
+
+**Scheduled Background Tasks** - Cron-based automation:
+- **Daily Backups**: Automatic database backups at midnight
+- **File Cleanup**: Temp file removal at 2 AM daily
+- **Job Cleanup**: Remove old completed jobs weekly
+- **Reminder Emails**: Daily check for overdue deliverables (Sprint 3)
+- **Metrics Updates**: Client engagement tracking (Future)
+
+**Job Queue System** - BullMQ + Redis for production-grade processing:
+- **Persistent Jobs**: Survive server restarts
+- **Distributed Workers**: Scale across multiple servers
+- **Priority Queues**: Critical, High, Normal, Low priorities
+- **Auto-Retry**: Exponential backoff with 3 attempts
+- **Queue Monitoring**: Real-time metrics and performance tracking
+- **Graceful Fallback**: In-memory queue when Redis unavailable
+
+---
 
 ### Client Onboarding
 
