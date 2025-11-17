@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 import { z } from 'zod'
 
 // Get all messages for authenticated client
 export async function GET(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       const messages = await prisma.portalMessage.findMany({
         where: {
           threadId,
-          clientId: session.clientId,
+          clientId: auth.portalUser.clientId,
         },
         orderBy: { createdAt: 'asc' },
       })
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       await prisma.portalMessage.updateMany({
         where: {
           threadId,
-          clientId: session.clientId,
+          clientId: auth.portalUser.clientId,
           isFromAdmin: true,
           isRead: false,
         },
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Otherwise, get all threads (grouped by threadId)
     const messages = await prisma.portalMessage.findMany({
-      where: { clientId: session.clientId },
+      where: { clientId: auth.portalUser.clientId },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -96,9 +96,9 @@ export async function GET(request: NextRequest) {
 // Send a new message
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -136,8 +136,8 @@ export async function POST(request: NextRequest) {
     const message = await prisma.portalMessage.create({
       data: {
         threadId: finalThreadId,
-        clientUserId: session.userId,
-        clientId: session.clientId,
+        clientUserId: auth.session.userId,
+        clientId: auth.portalUser.clientId,
         subject,
         body: messageBody,
         isFromAdmin: false,
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     // Log activity
     await prisma.activity.create({
       data: {
-        clientId: session.clientId,
+        clientId: auth.portalUser.clientId,
         type: 'MESSAGE_SENT',
         description: `Client sent a message: ${subject}`,
       },

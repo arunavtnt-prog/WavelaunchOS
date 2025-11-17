@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getPortalSession } from '@/lib/auth/portal-auth'
+import { getVerifiedPortalSession } from '@/lib/auth/portal-auth'
 import { z } from 'zod'
 
 const onboardingSchema = z.object({
@@ -48,9 +48,9 @@ const onboardingSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getPortalSession()
+    const auth = await getVerifiedPortalSession()
 
-    if (!session) {
+    if (!auth) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -73,13 +73,10 @@ export async function POST(request: NextRequest) {
 
     const data = validation.data
 
-    // Get portal user to find associated client
-    const portalUser = await prisma.clientPortalUser.findUnique({
-      where: { id: session.userId },
-      include: { client: true },
-    })
+    // Portal user and client are already verified by getVerifiedPortalSession
+    const portalUser = auth.portalUser
 
-    if (!portalUser || !portalUser.client) {
+    if (!portalUser.client) {
       return NextResponse.json(
         { success: false, error: 'Client not found' },
         { status: 404 }
@@ -94,71 +91,76 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update client with onboarding data
-    const updatedClient = await prisma.client.update({
-      where: { id: portalUser.clientId },
-      data: {
-        // Required fields
-        niche: data.niche,
-        visionStatement: data.visionStatement,
-        targetIndustry: data.targetIndustry,
-        targetAudience: data.targetAudience,
-        targetDemographicAge: data.targetDemographicAge,
-        demographics: data.demographics,
-        painPoints: data.painPoints,
-        uniqueValueProps: data.uniqueValueProps,
-        brandImage: data.brandImage,
-        brandPersonality: data.brandPersonality,
-        preferredFont: data.preferredFont,
+    // Wrap all database operations in a transaction for atomicity
+    const updatedClient = await prisma.$transaction(async (tx) => {
+      // Update client with onboarding data
+      const client = await tx.client.update({
+        where: { id: portalUser.clientId },
+        data: {
+          // Required fields
+          niche: data.niche,
+          visionStatement: data.visionStatement,
+          targetIndustry: data.targetIndustry,
+          targetAudience: data.targetAudience,
+          targetDemographicAge: data.targetDemographicAge,
+          demographics: data.demographics,
+          painPoints: data.painPoints,
+          uniqueValueProps: data.uniqueValueProps,
+          brandImage: data.brandImage,
+          brandPersonality: data.brandPersonality,
+          preferredFont: data.preferredFont,
 
-        // Optional fields (only update if provided)
-        ...(data.goals && { goals: data.goals }),
-        ...(data.audienceGenderSplit && { audienceGenderSplit: data.audienceGenderSplit }),
-        ...(data.audienceMaritalStatus && { audienceMaritalStatus: data.audienceMaritalStatus }),
-        ...(data.competitiveDifferentiation && { competitiveDifferentiation: data.competitiveDifferentiation }),
-        ...(data.emergingCompetitors && { emergingCompetitors: data.emergingCompetitors }),
-        ...(data.brandValues && { brandValues: data.brandValues }),
-        ...(data.brandingAesthetics && { brandingAesthetics: data.brandingAesthetics }),
-        ...(data.emotionsBrandEvokes && { emotionsBrandEvokes: data.emotionsBrandEvokes }),
-        ...(data.inspirationBrands && { inspirationBrands: data.inspirationBrands }),
-        ...(data.scalingGoals && { scalingGoals: data.scalingGoals }),
-        ...(data.growthStrategies && { growthStrategies: data.growthStrategies }),
-        ...(data.longTermVision && { longTermVision: data.longTermVision }),
-        ...(data.currentChannels && { currentChannels: data.currentChannels }),
-        ...(data.specificDeadlines && { specificDeadlines: data.specificDeadlines }),
-        ...(data.professionalMilestones && { professionalMilestones: data.professionalMilestones }),
-        ...(data.personalTurningPoints && { personalTurningPoints: data.personalTurningPoints }),
-        ...(data.socialHandles && { socialHandles: data.socialHandles }),
-        ...(data.additionalInfo && { additionalInfo: data.additionalInfo }),
-      },
-    })
+          // Optional fields (only update if provided)
+          ...(data.goals && { goals: data.goals }),
+          ...(data.audienceGenderSplit && { audienceGenderSplit: data.audienceGenderSplit }),
+          ...(data.audienceMaritalStatus && { audienceMaritalStatus: data.audienceMaritalStatus }),
+          ...(data.competitiveDifferentiation && { competitiveDifferentiation: data.competitiveDifferentiation }),
+          ...(data.emergingCompetitors && { emergingCompetitors: data.emergingCompetitors }),
+          ...(data.brandValues && { brandValues: data.brandValues }),
+          ...(data.brandingAesthetics && { brandingAesthetics: data.brandingAesthetics }),
+          ...(data.emotionsBrandEvokes && { emotionsBrandEvokes: data.emotionsBrandEvokes }),
+          ...(data.inspirationBrands && { inspirationBrands: data.inspirationBrands }),
+          ...(data.scalingGoals && { scalingGoals: data.scalingGoals }),
+          ...(data.growthStrategies && { growthStrategies: data.growthStrategies }),
+          ...(data.longTermVision && { longTermVision: data.longTermVision }),
+          ...(data.currentChannels && { currentChannels: data.currentChannels }),
+          ...(data.specificDeadlines && { specificDeadlines: data.specificDeadlines }),
+          ...(data.professionalMilestones && { professionalMilestones: data.professionalMilestones }),
+          ...(data.personalTurningPoints && { personalTurningPoints: data.personalTurningPoints }),
+          ...(data.socialHandles && { socialHandles: data.socialHandles }),
+          ...(data.additionalInfo && { additionalInfo: data.additionalInfo }),
+        },
+      })
 
-    // Mark onboarding as completed on portal user
-    await prisma.clientPortalUser.update({
-      where: { id: session.userId },
-      data: {
-        completedOnboarding: true,
-        onboardingCompletedAt: new Date(),
-      },
-    })
+      // Mark onboarding as completed on portal user
+      await tx.clientPortalUser.update({
+        where: { id: auth.session.userId },
+        data: {
+          completedOnboarding: true,
+          onboardingCompletedAt: new Date(),
+        },
+      })
 
-    // Log activity
-    await prisma.activity.create({
-      data: {
-        clientId: portalUser.clientId,
-        description: `Client completed onboarding questionnaire: ${portalUser.email}`,
-      },
-    })
+      // Log activity
+      await tx.activity.create({
+        data: {
+          clientId: portalUser.clientId,
+          description: `Client completed onboarding questionnaire: ${portalUser.email}`,
+        },
+      })
 
-    // Create welcome notification for client
-    await prisma.portalNotification.create({
-      data: {
-        clientUserId: session.userId,
-        type: 'ACCOUNT_UPDATE',
-        title: '🎉 Welcome to Wavelaunch!',
-        message: 'Your onboarding is complete! Our team is reviewing your information and will create your personalized business plan soon.',
-        actionUrl: '/portal/dashboard',
-      },
+      // Create welcome notification for client
+      await tx.portalNotification.create({
+        data: {
+          clientUserId: auth.session.userId,
+          type: 'ACCOUNT_UPDATE',
+          title: '🎉 Welcome to Wavelaunch!',
+          message: 'Your onboarding is complete! Our team is reviewing your information and will create your personalized business plan soon.',
+          actionUrl: '/portal/dashboard',
+        },
+      })
+
+      return client
     })
 
     return NextResponse.json({

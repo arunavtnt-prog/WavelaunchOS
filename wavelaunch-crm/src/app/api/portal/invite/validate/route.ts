@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { createHash } from 'crypto'
+
+/**
+ * Hash a token for secure storage
+ * Uses SHA-256 to create a one-way hash
+ */
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
 
 // Validate invite token
 export async function GET(request: NextRequest) {
@@ -14,9 +23,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Find portal user by invite token
+    // Hash the token to compare with stored hash
+    const tokenHash = hashToken(token)
+
+    // Find portal user by hashed invite token
     const portalUser = await prisma.clientPortalUser.findUnique({
-      where: { inviteToken: token },
+      where: { inviteToken: tokenHash },
       include: {
         client: {
           select: {

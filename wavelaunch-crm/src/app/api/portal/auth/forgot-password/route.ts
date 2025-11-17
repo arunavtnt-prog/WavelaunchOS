@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createPasswordResetToken } from '@/lib/auth/portal-auth'
+import { checkRateLimit, getClientIdentifier } from '@/lib/rate-limiter'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -8,6 +9,26 @@ const forgotPasswordSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 3 attempts per hour per IP
+    const clientId = getClientIdentifier(request)
+    const rateLimitResult = checkRateLimit({
+      identifier: clientId,
+      endpoint: 'forgot-password',
+      maxRequests: 3,
+      windowSeconds: 60 * 60, // 1 hour
+    })
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many password reset requests. Please try again in ${Math.ceil(rateLimitResult.resetIn / 60)} minutes.`,
+          resetIn: rateLimitResult.resetIn,
+        },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
 
     // Validate input
