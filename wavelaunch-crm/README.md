@@ -13,7 +13,10 @@ WavelaunchOS CRM is a comprehensive system for managing creator/influencer partn
 - **Client Management** - Comprehensive onboarding with 29 data points, capacity management (100 clients max)
 - **AI Document Generation** - Automated business plans and monthly deliverables using Claude AI (70%+ time reduction)
 - **Automated Client Journeys** - Zero-touch progression through 8-month deliverable program with event-driven workflows
+- **Support Ticket System** - Full-featured ticketing with priority levels, assignment, comments, and status workflows
+- **Help Center** - Knowledge base with markdown articles, categories, tagging, and full-text search
 - **Professional PDF Export** - Wavelaunch-branded PDFs via Pandoc/XeLaTeX (300 DPI print-ready)
+- **Email & Notifications** - Multi-provider email system (Resend/SMTP) with templated notifications and granular preferences
 - **File Management** - Drag-and-drop uploads, 50GB storage limit, automatic cleanup
 - **Rich Text Notes** - TipTap editor with tags, importance flags, and full-text search
 - **Database Backups** - Manual and automated daily backups with safe restore
@@ -308,6 +311,9 @@ See [.env.example](./.env.example) for complete configuration options.
 - **Job Queue**: 10 job types, 5 specialized queues, distributed processing
 - **Scheduled Tasks**: 5 cron-based automated tasks
 - **Workflow Events**: 7 automated client journey triggers
+- **Email Templates**: 9 professional responsive templates
+- **Ticket System**: 6 status states, 4 priority levels, unlimited tickets
+- **Help Center**: Unlimited articles, full-text search, view analytics
 - **Document Formats**: Markdown → PDF (150/300 DPI)
 - **AI Model**: claude-sonnet-4-20250514
 
@@ -340,6 +346,31 @@ See [.env.example](./.env.example) for complete configuration options.
 - **Auto-Retry**: Exponential backoff with 3 attempts
 - **Queue Monitoring**: Real-time metrics and performance tracking
 - **Graceful Fallback**: In-memory queue when Redis unavailable
+
+---
+
+### Support & Knowledge Base
+
+**Ticket System** - Comprehensive support ticket management:
+- **Status Workflow**: OPEN → IN_PROGRESS → WAITING_ON_CLIENT/TEAM → RESOLVED → CLOSED
+- **Priority Levels**: LOW, MEDIUM, HIGH, URGENT for effective triage
+- **Assignment System**: Assign tickets to specific team members
+- **Comment System**: Threaded conversations with internal notes for team communication
+- **Attachment Support**: Upload files directly to tickets
+- **Advanced Filtering**: Filter by status, priority, category, assignee, client
+- **Auto-timestamps**: Track creation, update, resolution, and closure times
+- **Role-based Access**: Clients see own tickets, admins see all
+
+**Help Center** - Self-service knowledge base:
+- **Markdown Articles**: Rich content with formatting support
+- **Category Organization**: Organize articles by topic with custom icons
+- **Full-text Search**: Search across titles, content, and excerpts
+- **Tag System**: Multiple tags per article for cross-referencing
+- **View Analytics**: Track article popularity with view counts
+- **Featured Articles**: Highlight important or popular content
+- **SEO-friendly URLs**: Slug-based URLs for better discoverability
+- **Publish Control**: Draft/published workflow for content management
+- **Public Access**: Published articles available without authentication
 
 ---
 
