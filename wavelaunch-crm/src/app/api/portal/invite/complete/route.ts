@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
-import { SignJWT } from 'jose'
 import { z } from 'zod'
+import { createPortalToken } from '@/lib/auth/portal-auth'
 
 const completeRegistrationSchema = z.object({
   token: z.string().min(1, 'Invite token is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number')
+    .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -62,40 +67,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10)
+    // Hash password with 12 rounds (consistent with portal-auth)
+    const passwordHash = await bcrypt.hash(password, 12)
 
-    // Activate account
-    const updatedUser = await prisma.clientPortalUser.update({
-      where: { id: portalUser.id },
-      data: {
-        passwordHash,
-        isActive: true,
-        activatedAt: new Date(),
-        emailVerified: true, // Auto-verify since they came from invite
-        inviteToken: null, // Clear token so it can't be reused
-        inviteTokenExpiry: null,
-      },
+    // Wrap database operations in a transaction for atomicity
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      // Activate account
+      const user = await tx.clientPortalUser.update({
+        where: { id: portalUser.id },
+        data: {
+          passwordHash,
+          isActive: true,
+          activatedAt: new Date(),
+          emailVerified: true, // Auto-verify since they came from invite
+          inviteToken: null, // Clear token so it can't be reused
+          inviteTokenExpiry: null,
+        },
+      })
+
+      // Log activity
+      await tx.activity.create({
+        data: {
+          clientId: portalUser.clientId,
+          description: `Client activated portal account: ${portalUser.email}`,
+        },
+      })
+
+      return user
     })
 
-    // Create session token
-    const secret = new TextEncoder().encode(process.env.PORTAL_JWT_SECRET || 'portal-secret-key')
-    const sessionToken = await new SignJWT({
+    // Create session token using centralized auth utility
+    const sessionToken = await createPortalToken({
       userId: updatedUser.id,
       clientId: updatedUser.clientId,
       email: updatedUser.email,
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setExpirationTime('7d')
-      .sign(secret)
-
-    // Log activity
-    await prisma.activity.create({
-      data: {
-        clientId: portalUser.clientId,
-        description: `Client activated portal account: ${portalUser.email}`,
-      },
     })
 
     // Create response with session cookie
