@@ -10,9 +10,15 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.NEXTAUTH_SECRET || 'wavelaunch-portal-secret-change-in-production'
-)
+// Ensure JWT_SECRET is configured - fail fast if missing
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error(
+    'NEXTAUTH_SECRET environment variable is required for portal authentication. ' +
+    'Please set it in your .env file.'
+  )
+}
+
+const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
 
 const PORTAL_TOKEN_NAME = 'portal-token'
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -112,6 +118,44 @@ export async function getPortalSession(): Promise<PortalSession | null> {
   if (!token) return null
 
   return verifyPortalToken(token)
+}
+
+/**
+ * Get and verify portal session with database validation
+ * This ensures the session's userId and clientId match what's in the database
+ * Use this for all portal API routes that access client data
+ */
+export async function getVerifiedPortalSession(): Promise<{
+  session: PortalSession
+  portalUser: Awaited<ReturnType<typeof getPortalUser>>
+} | null> {
+  const session = await getPortalSession()
+  if (!session) return null
+
+  // Verify the session data matches the database
+  const portalUser = await getPortalUser(session.userId)
+
+  if (!portalUser) {
+    // Session is invalid - user doesn't exist
+    return null
+  }
+
+  if (portalUser.clientId !== session.clientId) {
+    // Session data has been tampered with - clientId doesn't match
+    console.error('Session validation failed: clientId mismatch', {
+      sessionUserId: session.userId,
+      sessionClientId: session.clientId,
+      actualClientId: portalUser.clientId,
+    })
+    return null
+  }
+
+  if (!portalUser.isActive) {
+    // User account is deactivated
+    return null
+  }
+
+  return { session, portalUser }
 }
 
 /**
