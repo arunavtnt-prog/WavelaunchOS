@@ -23,6 +23,9 @@ WavelaunchOS CRM is a comprehensive system for managing creator/influencer partn
 - **Distributed Job Queue** - BullMQ + Redis for persistent background processing (falls back to in-memory)
 - **Scheduled Tasks** - Cron-based automation for maintenance, backups, and notifications
 - **System Monitoring** - Real-time health metrics, storage analytics, job queue dashboard
+- **Analytics Dashboard** - Comprehensive insights with 6 metric categories, time series data, client-specific analytics
+- **Advanced Reporting** - 7 report types with CSV/JSON/PDF export, flexible filtering and sorting
+- **Webhook Integrations** - Real-time HTTP callbacks for 12 event types with HMAC security
 
 ### AI-Powered Features
 
@@ -146,6 +149,7 @@ Visit `http://localhost:3000` and login with:
 - **[DEPLOYMENT_CHECKLIST.md](./docs/DEPLOYMENT_CHECKLIST.md)** - Pre-deployment checklist
 - **[AUTOMATION.md](./docs/AUTOMATION.md)** - Automated workflows & scheduled tasks
 - **[EMAIL_SYSTEM.md](./docs/EMAIL_SYSTEM.md)** - Email & notification system guide
+- **[ADVANCED_FEATURES.md](./docs/ADVANCED_FEATURES.md)** - Analytics, reporting, exports, and webhooks
 - **[SECURITY.md](./docs/SECURITY.md)** - Security features & best practices
 - **[API.md](./docs/API.md)** - API documentation
 - **[PRD.md](./PRD.md)** - Product requirements
@@ -483,6 +487,83 @@ See [.env.example](./.env.example) for complete configuration options.
 - **Backup Strategy**: Automated daily backups with verification
 - **Monitoring**: Health checks, log aggregation, performance dashboards
 - **Scaling Guide**: Vertical and horizontal scaling recommendations
+
+---
+
+### Analytics & Business Intelligence
+
+**Comprehensive Analytics Dashboard** - Real-time insights into CRM operations:
+- **Overview Metrics**: Total/active clients, business plans, deliverables, completion rates
+- **Client Metrics**: Breakdown by status and niche, recently onboarded, average deliverables per client
+- **Deliverable Metrics**: Distribution by month (M1-M8) and status, monthly completions, overdue tracking
+- **AI Usage Metrics**: Token consumption, estimated costs, generation counts, cost per document
+- **System Health**: Job queue statistics, success rates, storage utilization
+- **Activity Tracking**: Recent activities, active users, daily action counts
+
+**Time Series Analytics** - Historical trends and patterns:
+- Client growth over time (week/month/quarter/year views)
+- Deliverable completion trends
+- Workload distribution analysis
+- Performance benchmarking
+
+**Client-Specific Analytics** - Detailed per-client insights:
+- Comprehensive metrics dashboard
+- Activity timeline (last 20 events)
+- Deliverable progress tracking (completed/in-progress/pending)
+- Engagement metrics (files, notes, tickets)
+- Days active calculation
+
+### Advanced Reporting & Exports
+
+**7 Report Types** - Comprehensive data export capabilities:
+- **Clients Report**: Full client details with metrics, counts, status
+- **Deliverables Report**: Completion data with client and user info
+- **Business Plans Report**: Plan details with version and approval history
+- **Activities Report**: Complete activity log with type and user info
+- **Jobs Report**: Queue status, attempts, errors, completion times
+- **Tickets Report**: Support metrics with assignment and resolution data
+- **Token Usage Report**: AI consumption with costs and operation breakdown
+
+**3 Export Formats**:
+- **CSV**: Excel/Google Sheets compatible, proper escaping, date formatting
+- **JSON**: Structured data for integrations and data pipelines
+- **PDF**: Executive reports and presentations (basic implementation)
+
+**Flexible Filtering**:
+- Date range selection (start/end dates)
+- Status filtering
+- Client/user-specific reports
+- Type filtering (for activities, jobs)
+- Sort by any field (asc/desc)
+- Row limits (up to 10,000 rows)
+
+### Webhook Integrations
+
+**Real-time HTTP Callbacks** - Event-driven integrations with external systems:
+
+**12 Event Types**:
+- Client events: created, updated, activated, archived
+- Business plan events: created, approved
+- Deliverable events: created, completed, overdue
+- Ticket events: created, updated, resolved
+
+**Security Features**:
+- HMAC SHA256 signature authentication
+- Secret key configuration per webhook
+- Timestamp validation
+- 10-second timeout protection
+
+**Management**:
+- Subscribe to specific events only
+- Active/inactive toggle
+- Delivery tracking and logging
+- Response status and error logging
+
+**Integration Examples**:
+- Slack notifications for new clients
+- CRM sync on client updates
+- Task management integration for tickets
+- Analytics platform data export
 
 ---
 
