@@ -19,6 +19,8 @@ import {
   HelpCircle,
   UserCog,
   MessageSquare,
+  FileBarChart,
+  Webhook,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { signOut } from 'next-auth/react'
@@ -36,6 +38,8 @@ const navigation = [
   { name: 'Submissions', href: '/submissions', icon: Inbox },
   { name: 'Tickets', href: '/tickets', icon: Ticket },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Reports', href: '/reports', icon: FileBarChart },
+  { name: 'Webhooks', href: '/webhooks', icon: Webhook },
   { name: 'Help', href: '/help', icon: HelpCircle },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]

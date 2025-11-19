@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { jobQueue } from '@/lib/jobs/queue'
+import { jobQueue } from '@/lib/jobs'
 import { generateBusinessPlanSchema } from '@/schemas/business-plan'
 import { handleError } from '@/lib/utils/errors'
 

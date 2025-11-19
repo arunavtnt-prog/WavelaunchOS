@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -36,6 +36,14 @@ model User {
   notes                  Note[]
   activities             Activity[]
   loginAttempts          LoginAttempt[]
+
+  // Ticket system
+  assignedTickets        Ticket[]            @relation("AssignedTickets")
+  ticketComments         TicketComment[]
+  ticketAttachments      TicketAttachment[]
+
+  // Help center
+  helpArticles           HelpArticle[]
 
   @@map("users")
 }
@@ -128,6 +136,12 @@ model Client {
   // Client Portal Relations
   portalUser    ClientPortalUser?
   portalMessages PortalMessage[]
+
+  // Notification preferences
+  notificationPreferences NotificationPreferences?
+
+  // Support tickets
+  tickets Ticket[]
 
   @@map("clients")
 }
@@ -316,6 +330,10 @@ enum JobType {
   SUMMARIZE_THREAD
   BACKUP_DATABASE
   CLEANUP_FILES
+  CLEANUP_OLD_JOBS
+  SEND_EMAIL
+  SEND_REMINDER_EMAILS
+  UPDATE_CLIENT_METRICS
 }
 
 enum JobStatus {
@@ -771,5 +789,182 @@ model PortalNotification {
   @@index([isRead])
   @@index([createdAt])
   @@map("portal_notifications")
+}
+
+// ============================================================================
+// NOTIFICATION PREFERENCES
+// ============================================================================
+
+model NotificationPreferences {
+  id       String  @id @default(cuid())
+  clientId String  @unique
+
+  // Email notifications
+  emailWelcome             Boolean @default(true)  // Welcome email on account creation
+  emailActivation          Boolean @default(true)  // Account activated notification
+  emailBusinessPlanReady   Boolean @default(true)  // Business plan completed
+  emailDeliverableReady    Boolean @default(true)  // New deliverable available
+  emailDeliverableOverdue  Boolean @default(true)  // Overdue reminders
+  emailMilestoneReached    Boolean @default(true)  // Milestone celebrations
+  emailJourneyCompleted    Boolean @default(true)  // 8-month journey completion
+  emailWeeklyDigest        Boolean @default(false) // Weekly progress digest
+  emailMarketingUpdates    Boolean @default(false) // Marketing and promotional emails
+
+  // In-app notifications (portal)
+  portalNewDeliverable     Boolean @default(true)  // New deliverable notification
+  portalNewMessage         Boolean @default(true)  // New message from team
+  portalMilestoneReminder  Boolean @default(true)  // Upcoming milestone reminders
+  portalAccountUpdate      Boolean @default(true)  // Account status changes
+
+  // Communication preferences
+  preferredContactMethod   String  @default("email") // "email", "portal", "both"
+  reminderFrequency        String  @default("daily")  // "daily", "weekly", "none"
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+// ============================================================================
+// TICKET/SUPPORT SYSTEM
+// ============================================================================
+
+model Ticket {
+  id          String       @id @default(cuid())
+  clientId    String
+  assignedTo  String?      // Admin user assigned to ticket
+  title       String
+  description String
+  status      TicketStatus @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?      // "technical", "billing", "general", etc.
+
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  closedAt    DateTime?
+  resolvedAt  DateTime?
+
+  // Relations
+  client       Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  assignedUser User?           @relation("AssignedTickets", fields: [assignedTo], references: [id])
+  comments     TicketComment[]
+  attachments  TicketAttachment[]
+
+  @@index([clientId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  WAITING_ON_TEAM
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String   // User who wrote the comment
+  content   String
+  isInternal Boolean @default(false) // Internal notes not visible to client
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_comments")
+}
+
+model TicketAttachment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  uploadedBy String
+  filename  String
+  filepath  String
+  filesize  Int
+  mimetype  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  ticket       Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedByUser User @relation(fields: [uploadedBy], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+// ============================================================================
+// HELP CENTER
+// ============================================================================
+
+model HelpCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?  // Icon name for UI
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  articles HelpArticle[]
+
+  @@index([slug])
+  @@index([order])
+  @@map("help_categories")
+}
+
+model HelpArticle {
+  id          String   @id @default(cuid())
+  categoryId  String
+  title       String
+  slug        String   @unique
+  content     String   // Markdown content
+  excerpt     String?  // Short summary
+  tags        String?  // JSON array of tags
+  viewCount   Int      @default(0)
+  isPublished Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+
+  // Relations
+  category HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author   User         @relation(fields: [authorId], references: [id])
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([viewCount])
+  @@map("help_articles")
 }
 
