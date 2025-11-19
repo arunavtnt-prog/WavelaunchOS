@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  # =================================================================
+  # PostgreSQL Database
+  # =================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: wavelaunch-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-wavelaunch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-wavelaunch_crm}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - wavelaunch-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wavelaunch}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+  # =================================================================
+  # Redis Cache & Queue
+  # =================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: wavelaunch-redis-prod
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - wavelaunch-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  # =================================================================
+  # WavelaunchOS CRM Application
+  # =================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: wavelaunch-app-prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wavelaunch}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-wavelaunch_crm}?schema=public&connection_limit=20&pool_timeout=20
+
+      # Redis
+      REDIS_URL: redis://redis:6379
+
+      # Application
+      NODE_ENV: production
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL is required}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:?NEXT_PUBLIC_APP_URL is required}
+
+      # AI
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY is required}
+
+      # Email (optional)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@wavelaunch.studio}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Wavelaunch Studio}
+      ENABLE_EMAIL_WORKFLOWS: ${ENABLE_EMAIL_WORKFLOWS:-true}
+
+      # System
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-10}
+      STORAGE_LIMIT_GB: ${STORAGE_LIMIT_GB:-50}
+
+      # Admin
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?ADMIN_EMAIL is required}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+
+    volumes:
+      - app_data:/app/data
+      - ./prompts:/app/prompts:ro
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    networks:
+      - wavelaunch-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # =================================================================
+  # Nginx Reverse Proxy (optional but recommended)
+  # =================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: wavelaunch-nginx-prod
+    restart: unless-stopped
+    depends_on:
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - wavelaunch-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  wavelaunch-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_data:
+    driver: local
+  nginx_logs:
+    driver: local

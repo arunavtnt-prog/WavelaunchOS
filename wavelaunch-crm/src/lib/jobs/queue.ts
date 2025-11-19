@@ -160,6 +160,18 @@ export class JobQueue {
       case 'CLEANUP_FILES':
         return this.cleanupFiles(payload)
 
+      case 'CLEANUP_OLD_JOBS':
+        return this.cleanupOldJobs(payload)
+
+      case 'SEND_EMAIL':
+        return this.sendEmail(payload)
+
+      case 'SEND_REMINDER_EMAILS':
+        return this.sendReminderEmails(payload)
+
+      case 'UPDATE_CLIENT_METRICS':
+        return this.updateClientMetrics(payload)
+
       default:
         throw new Error(`Unknown job type: ${type}`)
     }
@@ -209,6 +221,67 @@ export class JobQueue {
   private async cleanupFiles(payload: any): Promise<JobResult> {
     const { cleanupTempFiles } = await import('@/lib/files/cleanup')
     return cleanupTempFiles()
+  }
+
+  private async cleanupOldJobs(payload: any): Promise<JobResult> {
+    const olderThanDays = payload.olderThanDays || 30
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
+
+    const deleted = await db.job.deleteMany({
+      where: {
+        status: 'COMPLETED',
+        completedAt: {
+          lt: cutoffDate,
+        },
+      },
+    })
+
+    return {
+      success: true,
+      data: { deletedCount: deleted.count },
+    }
+  }
+
+  private async sendEmail(payload: any): Promise<JobResult> {
+    const { sendTemplatedEmail } = await import('@/lib/email/sender')
+
+    try {
+      const success = await sendTemplatedEmail(
+        payload.to,
+        payload.type,
+        payload.context || {}
+      )
+
+      return {
+        success,
+        data: { emailSent: success },
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Email send failed',
+      }
+    }
+  }
+
+  private async sendReminderEmails(payload: any): Promise<JobResult> {
+    // Check for overdue deliverables and send reminders
+    const { clientJourneyWorkflow } = await import('@/lib/workflows/client-journey')
+    await clientJourneyWorkflow.checkOverdueDeliverables(payload.userId || 'system')
+
+    return {
+      success: true,
+      data: { message: 'Reminder emails processed' },
+    }
+  }
+
+  private async updateClientMetrics(payload: any): Promise<JobResult> {
+    // This will be implemented when metrics system is added
+    return {
+      success: true,
+      data: { message: 'Metrics updated (not yet implemented)' },
+    }
   }
 }
 
