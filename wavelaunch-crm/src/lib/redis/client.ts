@@ -175,3 +175,6 @@ export async function getTTL(key: string): Promise<number> {
 
 // Initialize Redis on module load
 initRedis()
+
+// Export redis instance for backward compatibility
+export { redis }
