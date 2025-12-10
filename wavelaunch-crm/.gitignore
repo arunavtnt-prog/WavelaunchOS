@@ -43,3 +43,4 @@ next-env.d.ts
 # Keep directories
 !.gitkeep
 ../wavelaunch-apply/node_modules/
+node_modules
