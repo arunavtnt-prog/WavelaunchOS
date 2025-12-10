@@ -487,7 +487,7 @@ model Application {
   demographicProfile    String
   targetDemographicAge  String
   audienceGenderSplit   String
-  audienceMaritalStatus String
+  audienceMaritalStatus String?
   currentChannels       String
 
   // Audience Pain Points & Needs
@@ -497,15 +497,15 @@ model Application {
   // Competition & Market Understanding
   differentiation     String
   uniqueValueProps    String
-  emergingCompetitors String
+  emergingCompetitors String?
 
   // Brand Identity Preferences
   idealBrandImage     String
-  inspirationBrands   String
+  inspirationBrands   String?
   brandingAesthetics  String
-  emotionsBrandEvokes String
+  emotionsBrandEvokes String?
   brandPersonality    String
-  preferredFont       String
+  preferredFont       String?
 
   // Product Direction
   productCategories String // JSON array
@@ -513,7 +513,7 @@ model Application {
 
   // Business Goals
   scalingGoals      String
-  growthStrategies  String
+  growthStrategies  String?
   longTermVision    String
   specificDeadlines String?
   additionalInfo    String?
