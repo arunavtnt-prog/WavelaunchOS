@@ -1,4 +1,4 @@
-import { NextAuthConfig } from 'next-auth'
+import NextAuth, { NextAuthConfig } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { db } from '@/lib/db'
 import { loginSchema } from '@/schemas/auth'
@@ -102,3 +102,9 @@ export const authConfig: NextAuthConfig = {
     strategy: 'jwt',
   },
 }
+
+// Export auth, signIn, signOut for direct import from config
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)
+
+// Export authConfig as authOptions for backward compatibility
+export const authOptions = authConfig
