@@ -27,8 +27,8 @@ export async function GET(
           select: {
             id: true,
             creatorName: true,
+            brandName: true,
             email: true,
-            company: true,
           },
         },
         assignedUser: {

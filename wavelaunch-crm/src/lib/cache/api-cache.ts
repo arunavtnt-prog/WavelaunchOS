@@ -38,7 +38,9 @@ class InMemoryCache {
     // Evict oldest if at capacity
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value
-      this.cache.delete(firstKey)
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey)
+      }
     }
 
     this.cache.set(key, {
@@ -65,11 +67,13 @@ class InMemoryCache {
   }
 
   deleteByPrefix(prefix: string): void {
-    for (const key of this.cache.keys()) {
+    const keysToDelete: string[] = []
+    this.cache.forEach((_, key) => {
       if (key.startsWith(prefix)) {
-        this.cache.delete(key)
+        keysToDelete.push(key)
       }
-    }
+    })
+    keysToDelete.forEach((key) => this.cache.delete(key))
   }
 
   clear(): void {
@@ -105,7 +109,7 @@ export class APICache {
    */
   async get<T = any>(key: string): Promise<T | null> {
     try {
-      if (this.useRedis) {
+      if (this.useRedis && redis) {
         const value = await redis.get(key)
         if (value) {
           logDebug(`Cache HIT: ${key}`)
@@ -123,7 +127,7 @@ export class APICache {
         return value
       }
     } catch (error) {
-      logWarn(`Cache get error for ${key}:`, error)
+      logWarn(`Cache get error for ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`)
       return null
     }
   }
@@ -133,7 +137,7 @@ export class APICache {
    */
   async set(key: string, value: any, ttl: number = CACHE_TTL.MEDIUM): Promise<void> {
     try {
-      if (this.useRedis) {
+      if (this.useRedis && redis) {
         await redis.setex(key, ttl, JSON.stringify(value))
         logDebug(`Cache SET: ${key} (TTL: ${ttl}s)`)
       } else {
@@ -141,7 +145,7 @@ export class APICache {
         logDebug(`Memory cache SET: ${key} (TTL: ${ttl}s)`)
       }
     } catch (error) {
-      logWarn(`Cache set error for ${key}:`, error)
+      logWarn(`Cache set error for ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -150,7 +154,7 @@ export class APICache {
    */
   async delete(key: string): Promise<void> {
     try {
-      if (this.useRedis) {
+      if (this.useRedis && redis) {
         await redis.del(key)
         logDebug(`Cache DELETE: ${key}`)
       } else {
@@ -158,7 +162,7 @@ export class APICache {
         logDebug(`Memory cache DELETE: ${key}`)
       }
     } catch (error) {
-      logWarn(`Cache delete error for ${key}:`, error)
+      logWarn(`Cache delete error for ${key}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -168,7 +172,7 @@ export class APICache {
    */
   async deleteByPrefix(prefix: string): Promise<void> {
     try {
-      if (this.useRedis) {
+      if (this.useRedis && redis) {
         const keys = await redis.keys(`${prefix}*`)
         if (keys.length > 0) {
           await redis.del(...keys)
@@ -179,7 +183,7 @@ export class APICache {
         logDebug(`Memory cache DELETE by prefix: ${prefix}`)
       }
     } catch (error) {
-      logWarn(`Cache deleteByPrefix error for ${prefix}:`, error)
+      logWarn(`Cache deleteByPrefix error for ${prefix}: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -189,7 +193,7 @@ export class APICache {
    */
   async clear(): Promise<void> {
     try {
-      if (this.useRedis) {
+      if (this.useRedis && redis) {
         await redis.flushdb()
         logInfo('Redis cache cleared')
       } else {
@@ -197,7 +201,7 @@ export class APICache {
         logInfo('Memory cache cleared')
       }
     } catch (error) {
-      logWarn('Cache clear error:', error)
+      logWarn(`Cache clear error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -240,7 +244,7 @@ export class APICache {
     size?: number
     memory?: string
   }> {
-    if (this.useRedis) {
+    if (this.useRedis && redis) {
       try {
         const info = await redis.info('memory')
         const memory = info.match(/used_memory_human:([^\r\n]+)/)?.[1]

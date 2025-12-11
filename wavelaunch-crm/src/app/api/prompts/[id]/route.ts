@@ -65,9 +65,11 @@ export async function PATCH(
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const existing = await prisma.promptTemplate.findUnique({
       where: { id: params.id },
@@ -119,7 +121,7 @@ export async function PATCH(
           promptId: prompt.id,
           promptType: prompt.type,
         }),
-        userId: session.user.id,
+        userId,
       },
     })
 
@@ -152,9 +154,11 @@ export async function DELETE(
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const prompt = await prisma.promptTemplate.findUnique({
       where: { id: params.id },
@@ -185,7 +189,7 @@ export async function DELETE(
           promptId: prompt.id,
           promptType: prompt.type,
         }),
-        userId: session.user.id,
+        userId,
       },
     })
 

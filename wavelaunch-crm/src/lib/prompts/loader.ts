@@ -32,6 +32,10 @@ export class PromptLoader {
       throw new Error(`No active template found for type: ${type}`)
     }
 
+    if (!template.yamlPath) {
+      throw new Error(`Template ${template.name} has no YAML path configured`)
+    }
+
     // Load YAML file
     const yamlPath = path.join(process.cwd(), template.yamlPath)
 

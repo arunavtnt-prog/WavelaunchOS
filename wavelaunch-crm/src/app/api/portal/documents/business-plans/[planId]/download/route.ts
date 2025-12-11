@@ -11,7 +11,7 @@ export async function GET(
     // Check authentication and verify session
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         {
           success: false,
@@ -51,7 +51,7 @@ export async function GET(
     }
 
     // Check if PDF exists
-    if (!businessPlan.pdfUrl) {
+    if (!businessPlan.pdfPath) {
       return NextResponse.json(
         {
           success: false,
@@ -65,7 +65,7 @@ export async function GET(
     await prisma.activity.create({
       data: {
         clientId: businessPlan.clientId,
-        type: 'DOCUMENT_DOWNLOAD',
+        type: 'BUSINESS_PLAN_DELIVERED',
         description: `Downloaded business plan v${businessPlan.version}`,
       },
     })
@@ -74,7 +74,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: {
-        downloadUrl: businessPlan.pdfUrl,
+        downloadUrl: businessPlan.pdfPath,
         filename: `business-plan-v${businessPlan.version}.pdf`,
         version: businessPlan.version,
       },

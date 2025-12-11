@@ -8,9 +8,11 @@ import { handleError } from '@/lib/utils/errors'
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
     const { clientId } = generateBusinessPlanSchema.parse(body)
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Enqueue job
     const jobId = await jobQueue.enqueue('GENERATE_BUSINESS_PLAN', {
       clientId,
-      userId: session.user.id,
+      userId,
     })
 
     return NextResponse.json({

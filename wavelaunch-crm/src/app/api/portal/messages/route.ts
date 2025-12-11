@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId: auth.portalUser.clientId,
-        type: 'MESSAGE_SENT',
+        type: 'CLIENT_UPDATED',
         description: `Client sent a message: ${subject}`,
       },
     })

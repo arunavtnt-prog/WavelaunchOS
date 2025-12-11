@@ -9,7 +9,7 @@ import { CapacityError, ConflictError, handleError } from '@/lib/utils/errors'
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -81,9 +81,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Check capacity
     const clientCount = await db.client.count({
@@ -123,7 +125,7 @@ export async function POST(request: NextRequest) {
         clientId: client.id,
         type: 'CLIENT_CREATED',
         description: `Created client: ${client.creatorName}`,
-        userId: session.user.id,
+        userId,
       },
     })
 

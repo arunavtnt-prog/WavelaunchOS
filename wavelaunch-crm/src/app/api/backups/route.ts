@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result.data,
-      message: result.message,
+      message: 'Backup created successfully',
     })
   } catch (error) {
     const err = handleError(error)

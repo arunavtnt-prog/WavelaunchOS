@@ -16,9 +16,11 @@ export async function POST(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Verify deliverable exists
     const deliverable = await db.deliverable.findUnique({
@@ -40,7 +42,7 @@ export async function POST(
     const jobId = await jobQueue.enqueue('GENERATE_PDF', {
       deliverableId: params.id,
       quality,
-      userId: session.user.id,
+      userId,
     })
 
     return NextResponse.json({

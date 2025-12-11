@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
       await tx.activity.create({
         data: {
           clientId: portalUser.clientId,
+          type: 'CLIENT_UPDATED',
           description: `Client completed onboarding questionnaire: ${portalUser.email}`,
         },
       })

@@ -6,9 +6,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
     const { clientIds, status } = body
@@ -62,7 +64,7 @@ export async function POST(request: NextRequest) {
             newStatus: status,
           }),
           clientId: client.id,
-          userId: session.user.id,
+          userId,
         },
       })
     }

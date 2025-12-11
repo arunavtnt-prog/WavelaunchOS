@@ -109,7 +109,7 @@ export default function PromptsPage() {
 
   const extractVariables = (content: string): string[] => {
     const regex = /\{(\w+)\}/g
-    const matches = content.matchAll(regex)
+    const matches = Array.from(content.matchAll(regex))
     const variables = new Set<string>()
     for (const match of matches) {
       variables.add(match[1])

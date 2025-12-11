@@ -19,9 +19,11 @@ export async function POST(
 ) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
     const { sectionNames } = regenerateSectionsSchema.parse(body)
@@ -100,7 +102,7 @@ Generate only this section, nothing else.`
         cacheTTLHours: 72,
         operation: `REGENERATE_SECTION_${sectionName.toUpperCase()}`,
         clientId: businessPlan.clientId,
-        userId: session.user.id,
+        userId,
         metadata: {
           businessPlanId: params.id,
           sectionName,
@@ -112,7 +114,7 @@ Generate only this section, nothing else.`
         where: { id: section.id },
         data: {
           content: sectionContent.replace(/^##\s+.+\n+/, ''), // Remove heading as we store it separately
-          generatedBy: session.user.id,
+          generatedBy: userId,
           version: section.version + 1,
           updatedAt: new Date(),
         },
@@ -142,7 +144,7 @@ Generate only this section, nothing else.`
         clientId: businessPlan.clientId,
         type: 'BUSINESS_PLAN_UPDATED',
         description: `Regenerated sections: ${regeneratedSections.join(', ')}`,
-        userId: session.user.id,
+        userId,
       },
     })
 

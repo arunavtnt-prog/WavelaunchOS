@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         {
           success: false,
@@ -87,14 +87,15 @@ export async function GET(request: NextRequest) {
       },
     ]
 
-    const milestones = monthsData.map((monthData) => {
-      const deliverable = deliverables.find((d) => d.month === monthData.month)
+    const milestones = monthsData.map((monthData, index) => {
+      const monthNumber = index + 1
+      const deliverable = deliverables.find((d) => d.month === monthNumber)
 
       return {
         month: monthData.month,
         title: deliverable?.title || monthData.title,
         description: monthData.description,
-        status: deliverable?.status || 'PENDING',
+        status: deliverable?.status || 'DRAFT',
         deliveredAt: deliverable?.deliveredAt || null,
         createdAt: deliverable?.createdAt || null,
       }
@@ -106,9 +107,9 @@ export async function GET(request: NextRequest) {
       completedCount: milestones.filter(
         (m) => m.status === 'DELIVERED' || m.status === 'APPROVED'
       ).length,
-      inProgressCount: milestones.filter((m) => m.status === 'IN_PROGRESS')
+      inProgressCount: milestones.filter((m) => m.status === 'PENDING_REVIEW')
         .length,
-      pendingCount: milestones.filter((m) => m.status === 'PENDING').length,
+      pendingCount: milestones.filter((m) => m.status === 'DRAFT').length,
       progressPercentage: Math.round(
         (milestones.filter(
           (m) => m.status === 'DELIVERED' || m.status === 'APPROVED'

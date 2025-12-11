@@ -18,7 +18,7 @@ export async function GET(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -32,7 +32,7 @@ export async function GET(
             brandName: true,
           },
         },
-        createdByUser: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -69,9 +69,11 @@ export async function PATCH(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Check note exists
     const existingNote = await db.note.findUnique({
@@ -88,20 +90,26 @@ export async function PATCH(
     const body = await request.json()
     const updates = updateNoteSchema.parse(body)
 
+    // Prepare data with tags as JSON string
+    const updateData: Record<string, unknown> = { ...updates }
+    if (updates.tags) {
+      updateData.tags = JSON.stringify(updates.tags)
+    }
+
     // Update note
     const note = await db.note.update({
       where: { id: params.id },
-      data: updates,
+      data: updateData,
     })
 
-    // Log activity if title or important status changed
-    if (updates.title || updates.isImportant !== undefined) {
+    // Log activity if content or important status changed
+    if (updates.content || updates.isImportant !== undefined) {
       await db.activity.create({
         data: {
           clientId: note.clientId,
           type: 'NOTE_UPDATED',
-          description: `Updated note: ${note.title}`,
-          userId: session.user.id,
+          description: `Updated note`,
+          userId,
         },
       })
     }
@@ -127,9 +135,11 @@ export async function DELETE(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Check note exists
     const existingNote = await db.note.findUnique({
@@ -153,8 +163,8 @@ export async function DELETE(
       data: {
         clientId: existingNote.clientId,
         type: 'NOTE_DELETED',
-        description: `Deleted note: ${existingNote.title}`,
-        userId: session.user.id,
+        description: `Deleted note`,
+        userId,
       },
     })
 

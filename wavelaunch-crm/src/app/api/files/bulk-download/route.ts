@@ -10,9 +10,11 @@ export async function POST(request: NextRequest) {
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
     const { fileIds } = body
@@ -64,13 +66,13 @@ export async function POST(request: NextRequest) {
     // Log activity
     await prisma.activity.create({
       data: {
-        type: 'FILES_DOWNLOADED',
+        type: 'FILE_UPLOADED',
         description: `Bulk downloaded ${files.length} file(s)`,
         metadata: JSON.stringify({
           fileCount: files.length,
           fileIds,
         }),
-        userId: session.user.id,
+        userId,
       },
     })
 

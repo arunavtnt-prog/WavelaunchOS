@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -28,7 +28,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       data: result.data,
-      message: result.message,
+      message: 'Backup restored successfully',
     })
   } catch (error) {
     const err = handleError(error)

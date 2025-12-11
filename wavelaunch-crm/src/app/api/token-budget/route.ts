@@ -62,10 +62,31 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Calculate start and end dates based on period
+    const now = new Date()
+    let startDate = new Date(now)
+    let endDate = new Date(now)
+
+    if (data.period === 'DAILY') {
+      startDate.setHours(0, 0, 0, 0)
+      endDate.setHours(23, 59, 59, 999)
+    } else if (data.period === 'WEEKLY') {
+      const dayOfWeek = now.getDay()
+      startDate.setDate(now.getDate() - dayOfWeek)
+      startDate.setHours(0, 0, 0, 0)
+      endDate.setDate(startDate.getDate() + 6)
+      endDate.setHours(23, 59, 59, 999)
+    } else if (data.period === 'MONTHLY') {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+    }
+
     // Create new budget
     const budget = await db.tokenBudget.create({
       data: {
         ...data,
+        startDate,
+        endDate,
         isActive: true,
         tokensUsed: 0,
         costUsed: 0,

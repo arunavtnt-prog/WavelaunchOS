@@ -10,9 +10,11 @@ export async function POST(
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const application = await prisma.application.findUnique({
       where: { id: params.id },
@@ -59,7 +61,7 @@ export async function POST(
         targetDemographicAge: application.targetDemographicAge,
         brandImage: application.idealBrandImage,
         brandPersonality: application.brandPersonality,
-        preferredFont: application.preferredFont,
+        preferredFont: application.preferredFont || 'Not specified',
         
         // Optional fields
         professionalMilestones: application.professionalMilestones,
@@ -99,7 +101,7 @@ export async function POST(
           clientId: client.id,
         }),
         clientId: client.id,
-        userId: session.user.id,
+        userId,
       },
     })
 

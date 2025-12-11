@@ -79,7 +79,7 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = user.role
+        token.role = (user as { role?: string }).role
       }
       return token
     },
@@ -92,8 +92,10 @@ export const authConfig: NextAuthConfig = {
           throw new Error('Session expired. Please log in again.')
         }
 
-        session.user.id = token.id as string
-        session.user.role = token.role as string
+        // Cast session.user to include custom fields
+        const user = session.user as { id?: string; role?: string }
+        user.id = token.id as string
+        user.role = token.role as string
       }
       return session
     },

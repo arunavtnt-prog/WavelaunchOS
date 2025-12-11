@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
@@ -145,14 +144,16 @@ ${client.socialHandles ? `### Social Presence\n${client.socialHandles}\n` : ''}
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
       )
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
 
@@ -215,7 +216,7 @@ export async function POST(request: NextRequest) {
         version: 1,
         status: 'DRAFT',
         contentMarkdown,
-        generatedBy: session.user.id,
+        generatedBy: userId,
         generatedAt: new Date(),
       },
     })
@@ -237,7 +238,8 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId,
-        userId: session.user.id,
+        userId,
+        type: 'BUSINESS_PLAN_GENERATED',
         description: `Generated AI business plan draft (v${businessPlan.version})`,
       },
     })

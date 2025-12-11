@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         {
           success: false,
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'updatedAt' // 'updatedAt' | 'createdAt' | 'version' | 'month'
     const sortOrder = searchParams.get('sortOrder') || 'desc' // 'asc' | 'desc'
 
-    let businessPlans = []
-    let deliverables = []
+    let businessPlans: Awaited<ReturnType<typeof prisma.businessPlan.findMany>> = []
+    let deliverables: Awaited<ReturnType<typeof prisma.deliverable.findMany>> = []
 
     // Fetch business plans
     if (!type || type === 'all' || type === 'business-plans') {
@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
         (d) => d.status === 'DELIVERED' || d.status === 'APPROVED'
       ).length,
       inProgressDeliverables: deliverables.filter(
-        (d) => d.status === 'IN_PROGRESS'
+        (d) => d.status === 'PENDING_REVIEW'
       ).length,
-      pendingDeliverables: deliverables.filter((d) => d.status === 'PENDING')
+      pendingDeliverables: deliverables.filter((d) => d.status === 'DRAFT')
         .length,
     }
 

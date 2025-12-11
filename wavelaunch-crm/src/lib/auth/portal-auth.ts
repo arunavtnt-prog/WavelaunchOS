@@ -10,15 +10,16 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { prisma } from '@/lib/db'
 
-// Ensure JWT_SECRET is configured - fail fast if missing
-if (!process.env.NEXTAUTH_SECRET) {
-  throw new Error(
-    'NEXTAUTH_SECRET environment variable is required for portal authentication. ' +
-    'Please set it in your .env file.'
-  )
+// Get JWT secret lazily to avoid build-time errors
+function getJWTSecret(): Uint8Array {
+  if (!process.env.NEXTAUTH_SECRET) {
+    throw new Error(
+      'NEXTAUTH_SECRET environment variable is required for portal authentication. ' +
+      'Please set it in your .env file.'
+    )
+  }
+  return new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
 }
-
-const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET)
 
 const PORTAL_TOKEN_NAME = 'portal-token'
 const TOKEN_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -60,7 +61,7 @@ export async function createPortalToken(payload: {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_SECRET)
+    .sign(getJWTSecret())
 
   return token
 }
@@ -72,7 +73,7 @@ export async function verifyPortalToken(
   token: string
 ): Promise<PortalSession | null> {
   try {
-    const verified = await jwtVerify(token, JWT_SECRET)
+    const verified = await jwtVerify(token, getJWTSecret())
     return verified.payload as unknown as PortalSession
   } catch (error) {
     return null
@@ -280,7 +281,7 @@ export async function createPasswordResetToken(email: string): Promise<string | 
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1h')
-    .sign(JWT_SECRET)
+    .sign(getJWTSecret())
 
   return token
 }
@@ -292,7 +293,7 @@ export async function verifyPasswordResetToken(
   token: string
 ): Promise<{ userId: string } | null> {
   try {
-    const verified = await jwtVerify(token, JWT_SECRET)
+    const verified = await jwtVerify(token, getJWTSecret())
     const payload = verified.payload as { userId: string; type: string }
 
     if (payload.type !== 'reset') return null

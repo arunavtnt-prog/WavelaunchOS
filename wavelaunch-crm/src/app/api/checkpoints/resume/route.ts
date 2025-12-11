@@ -16,9 +16,11 @@ const resumeSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const body = await request.json()
     const { jobId } = resumeSchema.parse(body)
@@ -41,9 +43,9 @@ export async function POST(request: NextRequest) {
 
     // Resume generation based on job type
     if (checkpoint.jobType === 'BUSINESS_PLAN') {
-      await resumeBusinessPlanGeneration(checkpoint, session.user.id)
+      await resumeBusinessPlanGeneration(checkpoint, userId)
     } else if (checkpoint.jobType === 'DELIVERABLE') {
-      await resumeDeliverableGeneration(checkpoint, session.user.id)
+      await resumeDeliverableGeneration(checkpoint, userId)
     } else {
       return NextResponse.json(
         { success: false, error: 'Unknown job type' },
@@ -122,7 +124,6 @@ Generate only this section, nothing else.`
         currentSection: i + 1,
         generatedContent: generatedSections,
         promptContext: checkpoint.promptContext,
-        metadata: checkpoint.metadata,
       })
     }
 
@@ -177,7 +178,8 @@ async function resumeDeliverableGeneration(checkpoint: any, userId: string) {
     // Similar logic for deliverables
     // Implementation would be similar to resumeBusinessPlanGeneration
     // but for deliverables structure
-    const month = checkpoint.metadata?.month || 1
+    // Month can be stored in promptContext
+    const month = checkpoint.promptContext?.month || 1
 
     // Mark as completed for now (would implement full logic)
     await completeCheckpoint(checkpoint.jobId)

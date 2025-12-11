@@ -17,7 +17,7 @@ export async function GET(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -69,9 +69,11 @@ export async function PATCH(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Get existing deliverable
     const existingDeliverable = await db.deliverable.findUnique({
@@ -116,7 +118,7 @@ export async function PATCH(
         clientId: existingDeliverable.clientId,
         type: 'DELIVERABLE_UPDATED',
         description: activityDescription,
-        userId: session.user.id,
+        userId,
       },
     })
 

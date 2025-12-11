@@ -103,7 +103,7 @@ export class ClientJourneyWorkflow {
 
     logInfo(`New client workflow started`, {
       clientId: client.id,
-      clientName: client.name,
+      clientName: client.creatorName,
     })
 
     // 1. Send welcome email (if email system is enabled and client wants it)
@@ -136,10 +136,10 @@ export class ClientJourneyWorkflow {
       data: {
         userId: event.userId,
         type: 'CLIENT_CREATED',
-        description: `Created new client: ${client.name}`,
+        description: `Created new client: ${client.creatorName}`,
         metadata: JSON.stringify({
           clientId: client.id,
-          company: client.company,
+          brandName: client.brandName,
         }),
       },
     })
@@ -298,7 +298,7 @@ export class ClientJourneyWorkflow {
                   clientId: client.id,
                   to: client.email,
                   context: {
-                    clientName: client.name,
+                    clientName: client.creatorName,
                     month: nextMonth,
                     deliverableTitle: `Month ${nextMonth} Deliverable`,
                   },
@@ -338,7 +338,7 @@ export class ClientJourneyWorkflow {
                 clientId: client.id,
                 to: client.email,
                 context: {
-                  clientName: client.name,
+                  clientName: client.creatorName,
                 },
               },
               { priority: JOB_PRIORITY.NORMAL }
@@ -352,7 +352,7 @@ export class ClientJourneyWorkflow {
       await db.activity.create({
         data: {
           userId: event.userId,
-          type: 'MILESTONE_REACHED',
+          type: 'CLIENT_UPDATED',
           description: `Client ${event.clientId} completed all 8 months of deliverables`,
           metadata: JSON.stringify({
             clientId: event.clientId,
@@ -400,9 +400,9 @@ export class ClientJourneyWorkflow {
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.name,
+                clientName: client.creatorName,
                 deliverableTitle: deliverable.title,
-                dueDate: deliverable.dueDate,
+                month: deliverable.month,
               },
             },
             { priority: JOB_PRIORITY.NORMAL }
@@ -416,12 +416,12 @@ export class ClientJourneyWorkflow {
     await db.activity.create({
       data: {
         userId: event.userId,
-        type: 'DELIVERABLE_OVERDUE',
+        type: 'DELIVERABLE_UPDATED',
         description: `Deliverable overdue: ${deliverable.title}`,
         metadata: JSON.stringify({
           clientId: event.clientId,
           deliverableId: deliverable.id,
-          dueDate: deliverable.dueDate,
+          month: deliverable.month,
         }),
       },
     })
@@ -481,7 +481,7 @@ export class ClientJourneyWorkflow {
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.name,
+                clientName: client.creatorName,
               },
             },
             { priority: JOB_PRIORITY.NORMAL }
@@ -519,7 +519,7 @@ export class ClientJourneyWorkflow {
     // Get the latest completed deliverable
     const latestDeliverable = client.deliverables[0]
 
-    if (latestDeliverable && latestDeliverable.status === 'COMPLETED') {
+    if (latestDeliverable && latestDeliverable.status === 'DELIVERED') {
       const nextMonth = latestDeliverable.month + 1
 
       if (nextMonth <= 8) {
@@ -563,7 +563,7 @@ export class ClientJourneyWorkflow {
     await db.activity.create({
       data: {
         userId: event.userId,
-        type: 'MILESTONE_REACHED',
+        type: 'CLIENT_UPDATED',
         description: `Client reached milestone: ${milestone}`,
         metadata: JSON.stringify({
           clientId: event.clientId,
@@ -586,11 +586,11 @@ export class ClientJourneyWorkflow {
           await jobQueue.enqueue(
             'SEND_EMAIL',
             {
-              type: 'MILESTONE_REACHED',
+              type: 'CLIENT_UPDATED',
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.name,
+                clientName: client.creatorName,
                 milestone,
               },
             },
@@ -618,9 +618,9 @@ export class ClientJourneyWorkflow {
 
     const overdueDeliverables = await db.deliverable.findMany({
       where: {
-        status: 'IN_PROGRESS',
-        dueDate: {
-          lt: now,
+        status: 'PENDING_REVIEW',
+        updatedAt: {
+          lt: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), // Older than 30 days
         },
       },
       include: {

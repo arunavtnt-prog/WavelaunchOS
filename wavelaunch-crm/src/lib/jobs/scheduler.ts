@@ -12,7 +12,7 @@
  * - Configurable schedules per environment
  */
 
-import { Queue, QueueScheduler } from 'bullmq'
+import { Queue } from 'bullmq'
 import { isRedisAvailable } from '@/lib/redis/client'
 import { jobQueue, JOB_PRIORITY } from './index'
 import { logInfo, logError, logDebug } from '@/lib/logging/logger'
@@ -334,14 +334,16 @@ class JobScheduler {
     logInfo('Shutting down job scheduler...')
 
     // Clear all intervals
-    for (const [name, interval] of this.intervals) {
+    const intervalEntries = Array.from(this.intervals.entries())
+    for (const [name, interval] of intervalEntries) {
       clearInterval(interval)
       logDebug(`Cleared interval for task: ${name}`)
     }
     this.intervals.clear()
 
     // Close all BullMQ schedulers
-    for (const [name, queue] of this.schedulers) {
+    const schedulerEntries = Array.from(this.schedulers.entries())
+    for (const [name, queue] of schedulerEntries) {
       await queue.close()
       logDebug(`Closed scheduler for task: ${name}`)
     }

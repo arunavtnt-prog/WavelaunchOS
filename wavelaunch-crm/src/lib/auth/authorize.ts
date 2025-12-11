@@ -5,8 +5,7 @@
  * Used across all API routes to prevent unauthorized access.
  */
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -22,7 +21,7 @@ export type AuthorizedUser = {
  * Returns null if not authenticated
  */
 export async function getCurrentUser(): Promise<AuthorizedUser | null> {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
   if (!session?.user?.email) {
     return null
@@ -78,7 +77,7 @@ export async function authorizeClientAccess(
 ): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { role: true },
+    select: { role: true, email: true },
   })
 
   if (!user) {
@@ -92,11 +91,11 @@ export async function authorizeClientAccess(
 
   // Portal users can only access their own client
   if (user.role === 'CLIENT') {
-    const portalUser = await prisma.portalUser.findFirst({
+    const portalUser = await prisma.clientPortalUser.findFirst({
       where: {
-        userId,
+        email: user.email,
         clientId,
-        status: 'ACTIVE',
+        isActive: true,
       },
     })
 
@@ -116,7 +115,7 @@ export async function authorizeResourceOwnership(
 ): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { role: true },
+    select: { role: true, email: true },
   })
 
   if (!user) {
@@ -130,8 +129,8 @@ export async function authorizeResourceOwnership(
 
   // For portal users, check if resource belongs to their client
   if (user.role === 'CLIENT') {
-    const portalUser = await prisma.portalUser.findFirst({
-      where: { userId, status: 'ACTIVE' },
+    const portalUser = await prisma.clientPortalUser.findFirst({
+      where: { email: user.email, isActive: true },
       select: { clientId: true },
     })
 
@@ -186,8 +185,18 @@ export async function authorizeResourceOwnership(
  * Returns null if user is not a portal user or not active
  */
 export async function getPortalUserClientId(userId: string): Promise<string | null> {
-  const portalUser = await prisma.portalUser.findFirst({
-    where: { userId, status: 'ACTIVE' },
+  // Get user's email first
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  })
+
+  if (!user) {
+    return null
+  }
+
+  const portalUser = await prisma.clientPortalUser.findFirst({
+    where: { email: user.email, isActive: true },
     select: { clientId: true },
   })
 

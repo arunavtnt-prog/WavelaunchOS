@@ -9,9 +9,11 @@ export async function POST(
   try {
     const session = await auth()
 
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     const clientId = params.id
 
@@ -54,7 +56,7 @@ export async function POST(
           brandName: restoredClient.brandName,
         }),
         clientId: restoredClient.id,
-        userId: session.user.id,
+        userId,
       },
     })
 

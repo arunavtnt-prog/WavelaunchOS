@@ -280,7 +280,7 @@ export default function ClientDetailPage() {
           clientId={client.id}
           clientName={client.creatorName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
-          hasCompletedOnboarding={client.portalUser?.completedOnboarding || false}
+          hasCompletedOnboarding={Boolean(client.visionStatement)}
         />
       )}
 

@@ -27,6 +27,15 @@ export async function generateBusinessPlan(
     // Render prompt
     const prompt = promptLoader.renderPrompt(template, context)
 
+    // Get current version before generation
+    const existingPlans = await db.businessPlan.findMany({
+      where: { clientId },
+      orderBy: { version: 'desc' },
+      take: 1,
+    })
+
+    const version = existingPlans.length > 0 ? existingPlans[0].version + 1 : 1
+
     // Generate with Claude (with caching and token tracking)
     const claudeClient = getClaudeClient()
     const content = await claudeClient.generate(prompt, {
@@ -38,18 +47,9 @@ export async function generateBusinessPlan(
       userId,
       metadata: {
         version,
-        templateId: template.id,
+        templateName: template.name,
       },
     })
-
-    // Get current version
-    const existingPlans = await db.businessPlan.findMany({
-      where: { clientId },
-      orderBy: { version: 'desc' },
-      take: 1,
-    })
-
-    const version = existingPlans.length > 0 ? existingPlans[0].version + 1 : 1
 
     // Save to database
     const businessPlan = await db.businessPlan.create({

@@ -29,9 +29,18 @@ import {
   Tag,
   X,
 } from 'lucide-react'
-import type { Note } from '@prisma/client'
-
-interface NoteWithRelations extends Note {
+interface NoteWithRelations {
+  id: string
+  clientId: string
+  content: string
+  title: string
+  isImportant: boolean
+  tags: string[]
+  category: string | null
+  authorId: string
+  createdAt: Date
+  updatedAt: Date
+  deletedAt: Date | null
   client: {
     id: string
     creatorName: string

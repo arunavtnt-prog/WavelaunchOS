@@ -3,7 +3,7 @@ import { generatePDF, type PDFQuality } from './generator'
 import { AppError } from '@/lib/utils/errors'
 import * as path from 'path'
 import { format } from 'date-fns'
-import type { JobResult } from '@/types'
+import type { JobResult } from '@/lib/jobs'
 
 export interface GenerateDeliverablePDFPayload {
   deliverableId: string
@@ -75,8 +75,8 @@ export async function generateDeliverablePDF(
         clientId: deliverable.clientId,
         filename,
         filepath: outputPath,
-        fileType: 'application/pdf',
-        fileSize: result.fileSize,
+        mimetype: 'application/pdf',
+        filesize: result.fileSize,
         category: 'DELIVERABLE',
         uploadedBy: userId,
       },
@@ -93,13 +93,19 @@ export async function generateDeliverablePDF(
     })
 
     return {
-      fileId: file.id,
-      filename,
-      fileSize: result.fileSize,
-      pdfPath: outputPath,
+      success: true,
+      data: {
+        fileId: file.id,
+        filename,
+        fileSize: result.fileSize,
+        pdfPath: outputPath,
+      },
     }
   } catch (error: any) {
     console.error('Error generating deliverable PDF:', error)
-    throw error
+    return {
+      success: false,
+      error: error.message || 'Failed to generate PDF',
+    }
   }
 }

@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
 
     // File storage
     const fileStorage = await db.file.aggregate({
-      _sum: { fileSize: true },
+      _sum: { filesize: true },
       _count: true,
     })
-    const totalFileStorageBytes = fileStorage._sum.fileSize || 0
+    const totalFileStorageBytes = fileStorage._sum.filesize || 0
     const totalFiles = fileStorage._count
 
     // Backup storage

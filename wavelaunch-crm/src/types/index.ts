@@ -51,13 +51,21 @@ export {
   BackupStatus,
 }
 
+// Activity with user relation (for client detail page)
+export type ActivityWithUser = Activity & {
+  user?: {
+    name: string | null
+    email: string
+  }
+}
+
 // Extended types with relations
 export type ClientWithRelations = Client & {
   businessPlans: BusinessPlan[]
   deliverables: Deliverable[]
   files: File[]
   notes: Note[]
-  activities: Activity[]
+  activities: ActivityWithUser[]
   _count?: {
     businessPlans: number
     deliverables: number

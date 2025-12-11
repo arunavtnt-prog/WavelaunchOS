@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import type { JobResult } from '@/types'
+import type { JobResult } from '@/lib/jobs'
 
 /**
  * Clean up temporary files older than 24 hours
@@ -16,8 +16,7 @@ export async function cleanupTempFiles(): Promise<JobResult> {
       // Directory doesn't exist, nothing to clean
       return {
         success: true,
-        filesDeleted: 0,
-        message: 'Temp directory does not exist',
+        data: { filesDeleted: 0 },
       }
     }
 
@@ -49,9 +48,10 @@ export async function cleanupTempFiles(): Promise<JobResult> {
 
     return {
       success: true,
-      filesDeleted,
-      errors,
-      message: `Cleaned up ${filesDeleted} temp file(s)`,
+      data: {
+        filesDeleted,
+        errors,
+      },
     }
   } catch (error: any) {
     console.error('Error cleaning up temp files:', error)

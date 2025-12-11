@@ -254,7 +254,7 @@ class EmailService {
         to: options.to,
         subject: options.subject,
         html: options.html,
-        text: options.text,
+        text: options.text || options.subject, // text is required by Resend
         replyTo: options.replyTo,
         cc: options.cc,
         bcc: options.bcc,

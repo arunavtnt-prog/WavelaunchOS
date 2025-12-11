@@ -9,7 +9,6 @@ export interface CheckpointData {
   currentSection: number
   generatedContent: any
   promptContext: any
-  metadata?: any
 }
 
 /**
@@ -29,17 +28,14 @@ export async function saveCheckpoint(data: CheckpointData): Promise<void> {
         currentSection: data.currentSection,
         generatedContent: JSON.stringify(data.generatedContent),
         promptContext: JSON.stringify(data.promptContext),
-        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         canResume: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       update: {
         completedSections: data.completedSections,
         currentSection: data.currentSection,
         generatedContent: JSON.stringify(data.generatedContent),
         status: 'IN_PROGRESS',
-        updatedAt: new Date(),
+        lastCheckpoint: new Date(),
       },
     })
   } catch (error) {
@@ -64,7 +60,6 @@ export async function getCheckpoint(jobId: string) {
       ...checkpoint,
       generatedContent: JSON.parse(checkpoint.generatedContent),
       promptContext: JSON.parse(checkpoint.promptContext),
-      metadata: checkpoint.metadata ? JSON.parse(checkpoint.metadata) : null,
     }
   } catch (error) {
     console.error('Get checkpoint error:', error)
@@ -82,8 +77,6 @@ export async function completeCheckpoint(jobId: string): Promise<void> {
       data: {
         status: 'COMPLETED',
         canResume: false,
-        completedAt: new Date(),
-        updatedAt: new Date(),
       },
     })
   } catch (error) {
@@ -105,7 +98,6 @@ export async function failCheckpoint(
         status: 'FAILED',
         canResume: true,
         errorMessage,
-        updatedAt: new Date(),
       },
     })
   } catch (error) {
@@ -145,24 +137,28 @@ export async function getResumableCheckpoints(clientId?: string) {
     const checkpoints = await db.generationCheckpoint.findMany({
       where,
       orderBy: {
-        updatedAt: 'desc',
-      },
-      include: {
-        client: {
-          select: {
-            id: true,
-            creatorName: true,
-            brandName: true,
-          },
-        },
+        lastCheckpoint: 'desc',
       },
     })
+
+    // Fetch client info separately since there's no relation in the schema
+    const clientIds = Array.from(new Set(checkpoints.map((c) => c.clientId)))
+    const clients = await db.client.findMany({
+      where: { id: { in: clientIds } },
+      select: {
+        id: true,
+        creatorName: true,
+        brandName: true,
+      },
+    })
+
+    const clientMap = new Map(clients.map((c) => [c.id, c]))
 
     return checkpoints.map((checkpoint) => ({
       ...checkpoint,
       generatedContent: JSON.parse(checkpoint.generatedContent),
       promptContext: JSON.parse(checkpoint.promptContext),
-      metadata: checkpoint.metadata ? JSON.parse(checkpoint.metadata) : null,
+      client: clientMap.get(checkpoint.clientId) || null,
     }))
   } catch (error) {
     console.error('Get resumable checkpoints error:', error)
@@ -181,7 +177,7 @@ export async function cleanupOldCheckpoints(): Promise<number> {
     const result = await db.generationCheckpoint.deleteMany({
       where: {
         status: 'COMPLETED',
-        completedAt: {
+        lastCheckpoint: {
           lt: sevenDaysAgo,
         },
       },

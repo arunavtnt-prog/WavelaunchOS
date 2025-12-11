@@ -11,9 +11,11 @@ export async function DELETE(
 ) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const userId = session.user.id
 
     // Get file record
     const file = await db.file.findUnique({
@@ -46,7 +48,7 @@ export async function DELETE(
         clientId: file.clientId,
         type: 'FILE_DELETED',
         description: `Deleted file: ${file.filename}`,
-        userId: session.user.id,
+        userId,
       },
     })
 

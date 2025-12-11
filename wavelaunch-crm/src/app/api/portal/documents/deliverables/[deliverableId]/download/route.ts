@@ -11,7 +11,7 @@ export async function GET(
     // Check authentication and verify session
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.portalUser) {
       return NextResponse.json(
         {
           success: false,
@@ -51,7 +51,7 @@ export async function GET(
     }
 
     // Check if PDF exists
-    if (!deliverable.pdfUrl) {
+    if (!deliverable.pdfPath) {
       return NextResponse.json(
         {
           success: false,
@@ -65,7 +65,7 @@ export async function GET(
     await prisma.activity.create({
       data: {
         clientId: deliverable.clientId,
-        type: 'DOCUMENT_DOWNLOAD',
+        type: 'DELIVERABLE_DELIVERED',
         description: `Downloaded ${deliverable.month} deliverable: ${deliverable.title}`,
       },
     })
@@ -74,7 +74,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: {
-        downloadUrl: deliverable.pdfUrl,
+        downloadUrl: deliverable.pdfPath,
         filename: `${deliverable.month}-${deliverable.title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
         month: deliverable.month,
         title: deliverable.title,

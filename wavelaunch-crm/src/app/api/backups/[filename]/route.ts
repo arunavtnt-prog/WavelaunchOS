@@ -27,7 +27,7 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: result.message,
+      message: 'Backup deleted successfully',
     })
   } catch (error) {
     const err = handleError(error)

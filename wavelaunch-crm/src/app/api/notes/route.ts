@@ -23,7 +23,7 @@ const createNoteSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
             brandName: true,
           },
         },
-        createdByUser: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -99,12 +99,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const userId = session.user.id
+
     const body = await request.json()
-    const { clientId, title, content, tags, isImportant } = createNoteSchema.parse(body)
+    const { clientId, content, tags, isImportant } = createNoteSchema.parse(body)
 
     // Verify client exists
     const client = await db.client.findUnique({
@@ -122,11 +124,10 @@ export async function POST(request: NextRequest) {
     const note = await db.note.create({
       data: {
         clientId,
-        title,
         content,
-        tags,
+        tags: tags ? JSON.stringify(tags) : null,
         isImportant,
-        createdBy: session.user.id,
+        authorId: userId,
       },
     })
 
@@ -135,8 +136,8 @@ export async function POST(request: NextRequest) {
       data: {
         clientId,
         type: 'NOTE_CREATED',
-        description: `Created note: ${title}`,
-        userId: session.user.id,
+        description: `Created note`,
+        userId,
       },
     })
 

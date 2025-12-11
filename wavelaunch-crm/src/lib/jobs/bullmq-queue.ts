@@ -410,7 +410,8 @@ class BullMQJobQueue {
   async getQueueMetrics() {
     const metrics: Record<string, any> = {}
 
-    for (const [name, queue] of this.queues) {
+    const entries = Array.from(this.queues.entries())
+    for (const [name, queue] of entries) {
       const counts = await queue.getJobCounts()
       metrics[name] = {
         waiting: counts.waiting,
@@ -582,19 +583,22 @@ class BullMQJobQueue {
     logInfo('Shutting down BullMQ job queue system...')
 
     // Close all workers first (stop processing new jobs)
-    for (const [name, worker] of this.workers) {
+    const workerEntries = Array.from(this.workers.entries())
+    for (const [name, worker] of workerEntries) {
       await worker.close()
       logDebug(`Closed worker: ${name}`)
     }
 
     // Close all queue event listeners
-    for (const [name, queueEvents] of this.queueEvents) {
+    const queueEventEntries = Array.from(this.queueEvents.entries())
+    for (const [name, queueEvents] of queueEventEntries) {
       await queueEvents.close()
       logDebug(`Closed queue events: ${name}`)
     }
 
     // Close all queues
-    for (const [name, queue] of this.queues) {
+    const queueEntries = Array.from(this.queues.entries())
+    for (const [name, queue] of queueEntries) {
       await queue.close()
       logDebug(`Closed queue: ${name}`)
     }

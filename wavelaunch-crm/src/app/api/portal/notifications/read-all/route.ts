@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await getVerifiedPortalSession()
 
-    if (!auth) {
+    if (!auth?.session) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }

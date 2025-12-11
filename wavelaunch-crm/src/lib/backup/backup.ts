@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import type { JobResult } from '@/types'
+import type { JobResult } from '@/lib/jobs'
 
 export interface BackupInfo {
   filename: string
@@ -69,7 +69,6 @@ export async function createBackup(label?: string): Promise<JobResult> {
         filepath: backupPath,
         sizeBytes: stats.size,
       },
-      message: 'Backup created successfully',
     }
   } catch (error: any) {
     console.error('Error creating backup:', error)
@@ -193,7 +192,6 @@ export async function restoreBackup(backupFilename: string): Promise<JobResult> 
         backupFilename,
         safetyBackup: safetyResult.data.filename,
       },
-      message: 'Backup restored successfully',
     }
   } catch (error: any) {
     console.error('Error restoring backup:', error)
@@ -228,7 +226,7 @@ export async function deleteBackup(backupFilename: string): Promise<JobResult> {
 
     return {
       success: true,
-      message: 'Backup deleted successfully',
+      data: { deleted: true },
     }
   } catch (error: any) {
     console.error('Error deleting backup:', error)
@@ -269,7 +267,6 @@ export async function cleanupOldBackups(): Promise<JobResult> {
         errors,
         retentionDays: RETENTION_DAYS,
       },
-      message: `Cleaned up ${deletedCount} old backup(s)`,
     }
   } catch (error: any) {
     console.error('Error cleaning up old backups:', error)

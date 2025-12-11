@@ -38,7 +38,6 @@ export async function logTokenUsage(data: TokenUsageData): Promise<void> {
         cacheKey: data.cacheKey,
         clientId: data.clientId,
         userId: data.userId,
-        promptContext: data.metadata ? JSON.stringify(data.metadata) : null,
       },
     })
 
@@ -123,11 +122,11 @@ async function sendBudgetAlert(
   costUsed: number
 ): Promise<void> {
   try {
-    // Log alert to activity
+    // Log alert to activity using SETTINGS_UPDATED as a system-level activity type
     await db.activity.create({
       data: {
-        type: 'TOKEN_BUDGET_ALERT',
-        description: `${period} token budget ${threshold}% threshold reached. Used ${tokensUsed.toLocaleString()} tokens ($${costUsed.toFixed(2)})`,
+        type: 'SETTINGS_UPDATED',
+        description: `Token budget alert: ${period} budget ${threshold}% threshold reached. Used ${tokensUsed.toLocaleString()} tokens ($${costUsed.toFixed(2)})`,
       },
     })
 

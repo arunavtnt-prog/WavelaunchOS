@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
       await tx.activity.create({
         data: {
           clientId: portalUser.clientId,
+          type: 'CLIENT_UPDATED',
           description: `Client activated portal account: ${portalUser.email}`,
         },
       })
