@@ -1,6 +1,16 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+
+// Initialize Resend lazily or check for key
+const getResend = () => {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    console.warn('RESEND_API_KEY is not defined. Email sending will be skipped.')
+    return null
+  }
+  return new Resend(apiKey)
+}
+
 
 export interface ApplicationEmailData {
   fullName: string
@@ -14,6 +24,9 @@ export interface ApplicationEmailData {
 
 export async function sendApplicationConfirmation(data: ApplicationEmailData) {
   try {
+    const resend = getResend()
+    if (!resend) return { success: false, error: 'Missing RESEND_API_KEY' }
+
     await resend.emails.send({
       from: 'Wavelaunch Studio <noreply@wavelaunch.studio>',
       to: data.email,
@@ -69,6 +82,9 @@ export async function sendAdminNotification(data: ApplicationEmailData) {
   const adminEmail = process.env.ADMIN_EMAIL || 'arunav@wavelaunch.org'
 
   try {
+    const resend = getResend()
+    if (!resend) return { success: false, error: 'Missing RESEND_API_KEY' }
+
     await resend.emails.send({
       from: 'Wavelaunch Studio <noreply@wavelaunch.studio>',
       to: adminEmail,
