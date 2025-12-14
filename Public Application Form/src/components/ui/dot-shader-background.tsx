@@ -101,22 +101,10 @@ const DotMaterial = shaderMaterial(
 
 extend({ DotMaterial })
 
-type DotMaterialType = JSX.IntrinsicElements['shaderMaterial'] & {
-    time?: number
-    resolution?: THREE.Vector2
-    dotColor?: THREE.Color
-    bgColor?: THREE.Color
-    mouseTrail?: THREE.Texture | null
-    render?: number
-    rotation?: number
-    gridSize?: number
-    dotOpacity?: number
-}
-
 declare global {
     namespace JSX {
         interface IntrinsicElements {
-            dotMaterial: DotMaterialType
+            dotMaterial: any
         }
     }
 }
