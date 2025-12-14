@@ -5,18 +5,20 @@
  * Falls back gracefully if Redis is not available.
  */
 
-import Redis from 'ioredis'
-
-let redis: Redis | null = null
+// Only import Redis if REDIS_URL is configured (avoid Edge runtime issues)
+let Redis: typeof import('ioredis').default | null = null
+let redis: InstanceType<typeof import('ioredis').default> | null = null
 let redisAvailable = false
+let initAttempted = false
 
 /**
  * Initialize Redis connection
  */
-export function initRedis(): Redis | null {
-  if (redis) {
+export async function initRedis(): Promise<typeof redis> {
+  if (initAttempted) {
     return redis
   }
+  initAttempted = true
 
   const redisUrl = process.env.REDIS_URL
 
@@ -26,6 +28,10 @@ export function initRedis(): Redis | null {
   }
 
   try {
+    // Dynamic import to avoid Edge runtime issues
+    const ioredis = await import('ioredis')
+    Redis = ioredis.default
+
     redis = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
       retryStrategy: (times) => {
@@ -67,8 +73,11 @@ export function initRedis(): Redis | null {
 /**
  * Get Redis client instance
  */
-export function getRedis(): Redis | null {
-  return redis || initRedis()
+export async function getRedis(): Promise<typeof redis> {
+  if (!redis && !initAttempted) {
+    await initRedis()
+  }
+  return redis
 }
 
 /**
@@ -97,7 +106,7 @@ export async function cacheSet(
   value: string,
   ttlSeconds: number
 ): Promise<void> {
-  const client = getRedis()
+  const client = await getRedis()
   if (client && redisAvailable) {
     await client.setex(key, ttlSeconds, value)
   }
@@ -107,7 +116,7 @@ export async function cacheSet(
  * Redis cache get helper
  */
 export async function cacheGet(key: string): Promise<string | null> {
-  const client = getRedis()
+  const client = await getRedis()
   if (client && redisAvailable) {
     return await client.get(key)
   }
@@ -118,7 +127,7 @@ export async function cacheGet(key: string): Promise<string | null> {
  * Redis cache delete helper
  */
 export async function cacheDelete(key: string): Promise<void> {
-  const client = getRedis()
+  const client = await getRedis()
   if (client && redisAvailable) {
     await client.del(key)
   }
@@ -131,7 +140,7 @@ export async function incrementWithExpiry(
   key: string,
   ttlSeconds: number
 ): Promise<number> {
-  const client = getRedis()
+  const client = await getRedis()
   if (!client || !redisAvailable) {
     throw new Error('Redis not available')
   }
@@ -152,7 +161,7 @@ export async function incrementWithExpiry(
  * Get current count for rate limiting
  */
 export async function getCount(key: string): Promise<number> {
-  const client = getRedis()
+  const client = await getRedis()
   if (!client || !redisAvailable) {
     return 0
   }
@@ -165,7 +174,7 @@ export async function getCount(key: string): Promise<number> {
  * Get TTL for a key
  */
 export async function getTTL(key: string): Promise<number> {
-  const client = getRedis()
+  const client = await getRedis()
   if (!client || !redisAvailable) {
     return -1
   }
@@ -173,8 +182,7 @@ export async function getTTL(key: string): Promise<number> {
   return await client.ttl(key)
 }
 
-// Initialize Redis on module load
-initRedis()
+// Note: initRedis is now called lazily via getRedis() to avoid Edge runtime issues
 
 // Export redis instance for backward compatibility
 export { redis }

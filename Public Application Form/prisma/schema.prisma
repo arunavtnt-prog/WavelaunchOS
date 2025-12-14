@@ -2,7 +2,7 @@
 // Connects to existing CRM database
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

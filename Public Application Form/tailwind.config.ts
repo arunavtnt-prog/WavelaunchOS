@@ -58,6 +58,13 @@ const config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"],
+      },
+      backgroundImage: {
+        'editorial-gradient': 'linear-gradient(to bottom right, rgba(20,20,22,1), rgba(10,10,12,1))',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

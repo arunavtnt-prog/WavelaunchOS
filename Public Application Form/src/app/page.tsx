@@ -1,190 +1,91 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
-export default function WelcomePage() {
-  const router = useRouter()
+export default function D26IntroPage() {
+    const router = useRouter()
 
-  const features = [
-    'Product development & manufacturing',
-    'Branding & website creation',
-    'Marketing, SEO & analytics',
-    'Logistics & customer support',
-    'Up to $50,000 investment from Wavelaunch VC',
-    'You keep 100% ownership',
-  ]
+    return (
+        <div className="flex flex-col lg:flex-row min-h-screen bg-[#FDFBF7] font-sans">
+            {/* Left Column: Intro Panel (Replicating Reference Design Style) */}
+            <div className="w-full lg:w-[50%] p-12 lg:p-20 flex flex-col justify-center relative">
+                <div className="max-w-md mx-auto w-full">
+                    {/* Header / Logo Area */}
+                    <div className="mb-16">
+                        <span className="font-sans text-sm font-bold tracking-[0.2em] uppercase text-gray-900">Wavelaunch Studio.</span>
+                    </div>
 
-  const requirements = [
-    '5-10% onboarding fee',
-    '6-12 months commitment',
-    'Active participation in brand planning',
-    'Alignment with long-term vision',
-  ]
+                    <div>
+                        {/* Headline */}
+                        <h1 className="font-serif text-5xl md:text-[72px] text-gray-900 mb-4 tracking-tight leading-none">
+                            Start your D26<br />Application?
+                        </h1>
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 bg-secondary px-6 py-3 rounded-full mb-8">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold">Wavelaunch Studio</span>
-          </div>
+                        {/* Sub-headline */}
+                        <p className="text-gray-400 text-sm mb-12 tracking-wide font-medium">
+                            Each application is reviewed individually and deliberately.
+                        </p>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Welcome to the Wavelaunch Studio Application
-          </h1>
+                        {/* Form Replacement Content */}
+                        <div className="space-y-8">
+                            {/* Editorial Copy */}
+                            <div className="prose prose-stone">
+                                <p className="text-gray-600 text-base leading-relaxed font-light">
+                                    Most accelerators want a deck and a dream. We want to understand who you are, what you've built, and whether we're the right partners to scale it.
+                                </p>
+                            </div>
 
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
-            A brand-building accelerator for creators and influencers. We help you launch
-            your own profitable D2C businesses with complete end-to-end support.
-          </p>
-        </motion.div>
+                            {/* CTA */}
+                            <div className="pt-4">
+                                <Button
+                                    onClick={() => router.push('/apply')}
+                                    className="w-full bg-[#1A1A1A] text-white hover:bg-black text-sm font-medium tracking-widest uppercase py-6 h-auto rounded-none transition-all active:scale-[0.98]"
+                                >
+                                    Start Application
+                                </Button>
+                            </div>
 
-        {/* Main Content */}
-        <div className="space-y-6">
-          {/* What We Offer */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>What We Offer</CardTitle>
-                <CardDescription>
-                  Complete end-to-end support for building your brand
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {features.map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
-                    </motion.div>
-                  ))}
+                            {/* "Google Sign In" Style Alternative Action */}
+                            <Button
+                                variant="outline"
+                                onClick={() => window.location.href = 'https://studio.wavelaunch.org'}
+                                className="w-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-black text-sm font-medium tracking-widest uppercase py-6 h-auto rounded-none flex items-center justify-center gap-3"
+                            >
+                                Return to Studio
+                            </Button>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="mt-16 text-center">
+                            <p className="text-xs text-gray-400 tracking-wide">
+                                Already have an account? <span className="text-gray-900 font-medium cursor-pointer hover:underline">Log in</span>
+                            </p>
+                        </div>
+
+                    </div>
                 </div>
-                <p className="mt-6 text-sm text-muted-foreground leading-relaxed">
-                  Our team manages everything end-to-end while you collaborate on creative
-                  direction and strategy. You maintain full ownership of your brand while we
-                  invest in its growth.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+            </div>
 
-          {/* Your Commitment */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Commitment</CardTitle>
-                <CardDescription>
-                  What we need from you to ensure success
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {requirements.map((req, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                      </div>
-                      <span className="text-sm">{req}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Right Column: Visual (Replicating Reference Style) */}
+            <div className="hidden lg:block w-full lg:w-[50%] relative bg-black overflow-hidden h-screen">
+                <Image
+                    src="/d26_right_bg.png"
+                    alt="D26 Aesthetic"
+                    fill
+                    className="object-cover opacity-90"
+                    priority
+                />
 
-          {/* Why This Form Exists */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Why This Form Exists</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Your answers help us evaluate fit, understand your audience, identify brand
-                  opportunities, and create a custom business roadmap. This roadmap will be
-                  shared with you and evaluated internally by Wavelaunch VC to ensure we can
-                  deliver the best possible outcome for your brand.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                {/* Overlays - Removed as they are baked into the image */}
+                {/* Mirror effect overlay to ensure it blends nicely if needed, otherwise clean image */}
+                <div className="absolute inset-0 z-10 pointer-events-none"></div>
 
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="text-center pt-8"
-          >
-            <Button
-              size="lg"
-              onClick={() => router.push('/apply')}
-              className="px-12"
-            >
-              Start Application
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <p className="mt-4 text-sm text-muted-foreground">
-              The application takes approximately 15-20 minutes to complete
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="text-center mt-16 text-sm text-muted-foreground"
-        >
-          <p>
-            Learn more about Wavelaunch VC at{' '}
-            <a
-              href={process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium"
-            >
-              wavelaunch.vc
-            </a>
-          </p>
-        </motion.div>
-      </div>
-    </div>
-  )
+                {/* Glitch Overlay Effect - Kept for atmosphere, but reduced intensity */}
+                <div className="absolute top-[20%] left-[-10%] w-[120%] h-[20%] bg-white/5 blur-3xl mix-blend-overlay rotate-12 pointer-events-none opacity-50"></div>
+            </div>
+        </div >
+    )
 }

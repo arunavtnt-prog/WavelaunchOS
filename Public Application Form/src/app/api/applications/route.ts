@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       country: application.country,
     })
 
+
     // Create activity log entry (optional, for tracking)
     await prisma.activity.create({
       data: {
@@ -99,6 +100,9 @@ export async function POST(request: NextRequest) {
         }),
       },
     })
+
+    // Sync to Google Sheets (Non-blocking)
+    syncToGoogleSheets(application).catch(console.error)
 
     return NextResponse.json({
       success: true,
@@ -116,6 +120,22 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     )
+  }
+}
+
+async function syncToGoogleSheets(data: any) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL
+  if (!webhookUrl) return
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  } catch (error) {
+    console.error('Failed to sync to Google Sheets:', error)
+    // Do not throw, so we don't fail the submission
   }
 }
 

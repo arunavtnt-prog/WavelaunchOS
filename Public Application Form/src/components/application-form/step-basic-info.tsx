@@ -51,14 +51,14 @@ export function StepBasicInfo({ form }: StepProps) {
         <div className="space-y-2">
           <Label htmlFor="instagramHandle">Instagram Handle</Label>
           <div className="flex items-center">
-            <span className="px-3 py-2 bg-slate-100 border border-r-0 rounded-l-md text-slate-600">
+            <span className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-slate-200 dark:border-zinc-700 rounded-l-xl text-slate-500 dark:text-zinc-400">
               @
             </span>
             <Input
               id="instagramHandle"
               {...register('instagramHandle')}
               placeholder="username"
-              className="rounded-l-none"
+              className="rounded-l-none border-l-0"
             />
           </div>
           {errors.instagramHandle && (
@@ -69,14 +69,14 @@ export function StepBasicInfo({ form }: StepProps) {
         <div className="space-y-2">
           <Label htmlFor="tiktokHandle">TikTok Handle</Label>
           <div className="flex items-center">
-            <span className="px-3 py-2 bg-slate-100 border border-r-0 rounded-l-md text-slate-600">
+            <span className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-slate-200 dark:border-zinc-700 rounded-l-xl text-slate-500 dark:text-zinc-400">
               @
             </span>
             <Input
               id="tiktokHandle"
               {...register('tiktokHandle')}
               placeholder="username"
-              className="rounded-l-none"
+              className="rounded-l-none border-l-0"
             />
           </div>
           {errors.tiktokHandle && (

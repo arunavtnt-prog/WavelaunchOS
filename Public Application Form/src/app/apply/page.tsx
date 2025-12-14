@@ -5,13 +5,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Check, FileText } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 
 import { ApplicationFormData, applicationSchema } from '@/schemas/application'
 import { FORM_STEPS } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { useToast } from '@/components/ui/use-toast'
 import { saveFormData, loadFormData, hasSavedData } from '@/lib/autosave'
 
@@ -24,6 +22,9 @@ import { StepBrandIdentity } from '@/components/application-form/step-brand-iden
 import { StepProductDirection } from '@/components/application-form/step-product'
 import { StepBusinessGoals } from '@/components/application-form/step-business-goals'
 import { StepLogistics } from '@/components/application-form/step-logistics'
+
+import { ModeToggle } from '@/components/mode-toggle'
+import { DotScreenShader } from '@/components/ui/dot-shader-background'
 
 export default function ApplicationPage() {
   const router = useRouter()
@@ -65,8 +66,6 @@ export default function ApplicationPage() {
     return () => subscription.unsubscribe()
   }, [watch])
 
-  const progressPercentage = ((currentStep + 1) / FORM_STEPS.length) * 100
-
   const handleNext = async () => {
     const step = FORM_STEPS[currentStep]
     const isValid = await trigger(step.fields as any)
@@ -76,7 +75,6 @@ export default function ApplicationPage() {
         setCurrentStep(currentStep + 1)
         window.scrollTo({ top: 0, behavior: 'smooth' })
       } else {
-        // Go to review page
         router.push('/apply/review')
       }
     } else {
@@ -97,154 +95,111 @@ export default function ApplicationPage() {
 
   const renderStep = () => {
     switch (currentStep) {
-      case 0:
-        return <StepBasicInfo form={form} />
-      case 1:
-        return <StepCareerBackground form={form} />
-      case 2:
-        return <StepAudienceDemographics form={form} />
-      case 3:
-        return <StepPainPoints form={form} />
-      case 4:
-        return <StepCompetition form={form} />
-      case 5:
-        return <StepBrandIdentity form={form} />
-      case 6:
-        return <StepProductDirection form={form} />
-      case 7:
-        return <StepBusinessGoals form={form} />
-      case 8:
-        return <StepLogistics form={form} zipFile={zipFile} setZipFile={setZipFile} />
-      default:
-        return null
+      case 0: return <StepBasicInfo form={form} />
+      case 1: return <StepCareerBackground form={form} />
+      case 2: return <StepAudienceDemographics form={form} />
+      case 3: return <StepPainPoints form={form} />
+      case 4: return <StepCompetition form={form} />
+      case 5: return <StepBrandIdentity form={form} />
+      case 6: return <StepProductDirection form={form} />
+      case 7: return <StepBusinessGoals form={form} />
+      case 8: return <StepLogistics form={form} zipFile={zipFile} setZipFile={setZipFile} />
+      default: return null
     }
   }
 
   const currentStepData = FORM_STEPS[currentStep]
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-            Wavelaunch Studio Application
-          </h1>
-          <p className="text-slate-600">
-            Step {currentStep + 1} of {FORM_STEPS.length}
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden isolate">
+      {/* Dot Shader Background */}
+      <DotScreenShader />
 
-        {/* Progress Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mb-8"
-        >
-          <Progress value={progressPercentage} className="h-2" />
-          <div className="flex justify-between mt-2 text-xs text-slate-500">
-            <span>Progress</span>
-            <span>{Math.round(progressPercentage)}%</span>
+      {/* Editorial Progress Rail */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-80 hover:opacity-100 transition-opacity"
+      >
+        <h1 className="font-serif text-[48px] text-foreground tracking-tight leading-none">
+          Wavelaunch Studio
+        </h1>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground hidden sm:flex">
+            <span className="tracking-widest uppercase opacity-40">0{currentStep + 1} / 0{FORM_STEPS.length}</span>
+            <div className="flex gap-1.5">
+              {FORM_STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1 h-1 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-foreground/80' : 'bg-foreground/10'}`}
+                />
+              ))}
+            </div>
           </div>
-        </motion.div>
-
-        {/* Steps Navigation */}
-        <div className="mb-6 overflow-x-auto pb-2">
-          <div className="flex gap-2 min-w-max">
-            {FORM_STEPS.map((step, index) => (
-              <button
-                key={step.id}
-                onClick={() => {
-                  if (index < currentStep) {
-                    setCurrentStep(index)
-                  }
-                }}
-                className={`
-                  px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all
-                  ${
-                    index === currentStep
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : index < currentStep
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-slate-200 text-slate-400'
-                  }
-                  ${index < currentStep ? 'cursor-pointer' : 'cursor-default'}
-                `}
-              >
-                {index < currentStep && <Check className="inline w-3 h-3 mr-1" />}
-                {step.title}
-              </button>
-            ))}
-          </div>
+          <ModeToggle />
         </div>
+      </motion.div>
 
-        {/* Main Form Card */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className=" border-2">
-              <CardHeader>
-                <CardTitle className="text-2xl">{currentStepData.title}</CardTitle>
-                <CardDescription>{currentStepData.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-6">
-                  {renderStep()}
+      {/* Sleek Divider */}
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={{ scaleX: 1, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
+        className="w-full max-w-2xl h-px bg-black/50 dark:bg-zinc-800/50 mb-16"
+      />
 
-                  {/* Navigation Buttons */}
-                  <div className="flex justify-between pt-6 border-t">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleBack}
-                      disabled={currentStep === 0}
-                    >
-                      <ChevronLeft className="w-4 h-4 mr-2" />
-                      Back
-                    </Button>
-
-                    <Button
-                      type="button"
-                      onClick={handleNext}
-                      className="bg-primary text-primary-foreground"
-                    >
-                      {currentStep === FORM_STEPS.length - 1 ? (
-                        <>
-                          Review Application
-                          <FileText className="w-4 h-4 ml-2" />
-                        </>
-                      ) : (
-                        <>
-                          Next
-                          <ChevronRight className="w-4 h-4 ml-2" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Auto-save indicator */}
+      {/* Main Form Panel */}
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center mt-4 text-sm text-slate-500"
+          key={currentStep}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-2xl"
         >
-          Your progress is automatically saved
+          <div className="mb-16">
+            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4 leading-tight">{currentStepData.title}</h2>
+            {currentStepData.description && (
+              <p className="text-muted-foreground text-lg leading-relaxed max-w-lg font-light">{currentStepData.description}</p>
+            )}
+          </div>
+
+          <div className="relative">
+            <form className="space-y-12">
+              {renderStep()}
+
+              <div className="flex justify-between items-center pt-16 mt-8">
+                <Button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={currentStep === 0}
+                  className={`bg-white dark:bg-neutral-900 text-foreground border border-input z-10 hover:bg-accent hover:text-accent-foreground px-6 py-6 text-sm font-medium rounded transition-all shadow-sm ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-sm font-medium tracking-wide rounded transition-all shadow-none hover:shadow-lg active:scale-[0.98]"
+                >
+                  {currentStep === FORM_STEPS.length - 1 ? "Complete Application" : "Continue"}
+                </Button>
+              </div>
+            </form>
+          </div>
         </motion.div>
-      </div>
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mt-24 text-center text-[10px] text-muted-foreground/60 font-medium tracking-[0.2em] uppercase"
+      >
+        Confidential Admissions Portal
+      </motion.div>
     </div>
   )
 }

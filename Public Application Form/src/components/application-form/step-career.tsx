@@ -16,13 +16,13 @@ export function StepCareerBackground({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="professionalMilestones">
-          Significant milestones in your professional career <span className="text-red-500">*</span>
+          Professional milestones <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="professionalMilestones"
           {...register('professionalMilestones')}
-          placeholder="Share key achievements, career highlights, and professional accomplishments..."
-          rows={4}
+          placeholder="Key career achievements..."
+          rows={3}
           className="resize-none"
         />
         {errors.professionalMilestones && (
@@ -32,13 +32,13 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="personalTurningPoints">
-          Main turning points in your personal career <span className="text-red-500">*</span>
+          Personal turning points <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="personalTurningPoints"
           {...register('personalTurningPoints')}
-          placeholder="Describe pivotal moments that shaped your journey..."
-          rows={4}
+          placeholder="Pivotal moments..."
+          rows={3}
           className="resize-none"
         />
         {errors.personalTurningPoints && (
@@ -48,13 +48,13 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="visionForVenture">
-          Your vision for this new venture <span className="text-red-500">*</span>
+          Vision for this venture <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="visionForVenture"
           {...register('visionForVenture')}
-          placeholder="What do you envision for this brand? What impact do you want to make?"
-          rows={4}
+          placeholder="Desired impact..."
+          rows={3}
           className="resize-none"
         />
         {errors.visionForVenture && (
@@ -64,13 +64,13 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="hopeToAchieve">
-          What you hope to achieve <span className="text-red-500">*</span>
+          Definition of success <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="hopeToAchieve"
           {...register('hopeToAchieve')}
-          placeholder="Share your goals, aspirations, and what success looks like to you..."
-          rows={4}
+          placeholder="Your aspirations..."
+          rows={3}
           className="resize-none"
         />
         {errors.hopeToAchieve && (

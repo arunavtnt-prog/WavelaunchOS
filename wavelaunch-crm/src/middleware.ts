@@ -310,5 +310,6 @@ export default auth(async (req) => {
 })
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  // Exclude static files, images, favicon, and public apply routes from middleware
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|apply).*)'],
 }

@@ -7,7 +7,6 @@
 
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'crypto'
 
 const CSRF_COOKIE_NAME = 'csrf-token'
 const CSRF_HEADER_NAME = 'x-csrf-token'
@@ -16,8 +15,10 @@ const CSRF_TOKEN_LENGTH = 32
 /**
  * Generate a cryptographically secure CSRF token
  */
-export function generateCsrfToken(): string {
-  return crypto.randomBytes(CSRF_TOKEN_LENGTH).toString('hex')
+export async function generateCsrfToken(): Promise<string> {
+  const array = new Uint8Array(CSRF_TOKEN_LENGTH)
+  crypto.getRandomValues(array)
+  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
 /**
@@ -29,7 +30,7 @@ export async function setCsrfToken(): Promise<string> {
   let token = cookieStore.get(CSRF_COOKIE_NAME)?.value
 
   if (!token) {
-    token = generateCsrfToken()
+    token = await generateCsrfToken()
     cookieStore.set(CSRF_COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -73,10 +74,16 @@ export async function verifyCsrfToken(req: NextRequest): Promise<boolean> {
   }
 
   // Use constant-time comparison to prevent timing attacks
-  return crypto.timingSafeEqual(
-    Buffer.from(cookieToken),
-    Buffer.from(headerToken)
-  )
+  if (cookieToken.length !== headerToken.length) {
+    return false
+  }
+  
+  // Simple constant-time comparison
+  let result = 0
+  for (let i = 0; i < cookieToken.length; i++) {
+    result |= cookieToken.charCodeAt(i) ^ headerToken.charCodeAt(i)
+  }
+  return result === 0
 }
 
 /**

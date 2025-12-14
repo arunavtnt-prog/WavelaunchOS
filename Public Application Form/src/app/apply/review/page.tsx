@@ -168,17 +168,17 @@ export default function ReviewPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4 transition-colors duration-300">
       <div className="container mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
             Review Your Application
           </h1>
-          <p className="text-slate-600">
+          <p className="text-muted-foreground">
             Please review all your answers before submitting
           </p>
         </motion.div>
@@ -191,13 +191,14 @@ export default function ReviewPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="">
+              <Card className="bg-card border-border text-card-foreground">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-xl">{section.title}</CardTitle>
+                  <CardTitle className="text-xl text-foreground">{section.title}</CardTitle>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(section.stepIndex)}
+                    className="border-border bg-background hover:bg-muted text-muted-foreground"
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
@@ -206,11 +207,11 @@ export default function ReviewPage() {
                 <CardContent>
                   <div className="space-y-4">
                     {section.fields.map((field, fieldIndex) => (
-                      <div key={fieldIndex} className="border-b border-slate-200 last:border-0 pb-3 last:pb-0">
-                        <p className="text-sm font-medium text-slate-700 mb-1">
+                      <div key={fieldIndex} className="border-b border-border last:border-0 pb-3 last:pb-0">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
                           {field.label}
                         </p>
-                        <p className="text-slate-600 whitespace-pre-wrap">
+                        <p className="text-foreground whitespace-pre-wrap">
                           {field.value || 'Not provided'}
                         </p>
                       </div>
