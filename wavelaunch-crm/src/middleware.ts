@@ -1,8 +1,9 @@
+import { auth } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
-export default async function middleware(req: Request) {
-  const { pathname } = new URL(req.url)
+export default auth(async function middleware(req: any) {
+  const { pathname } = req.nextUrl
   const startTime = Date.now()
   const requestId = Math.random().toString(36).substring(2, 15)
 
@@ -17,6 +18,7 @@ export default async function middleware(req: Request) {
 
   const isApiRoute = pathname.startsWith('/api/')
   const isPortalRoute = pathname.startsWith('/portal/')
+  const isAdminLoggedIn = !!req.auth
 
   // Basic rate limiting
   if (isApiRoute) {
@@ -102,22 +104,17 @@ export default async function middleware(req: Request) {
     }
   }
 
-  // Admin routes - simple session check
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/clients') || 
-      pathname.startsWith('/messages') || pathname.startsWith('/portal-users') ||
-      pathname.startsWith('/settings') || pathname.startsWith('/reports') ||
-      pathname.startsWith('/deliverables') || pathname.startsWith('/business-plans') ||
-      pathname.startsWith('/files') || pathname.startsWith('/prompts') ||
-      pathname.startsWith('/tickets') || pathname.startsWith('/webhooks') ||
-      pathname.startsWith('/submissions')) {
-    
-    const cookieStore = await cookies()
-    const sessionToken = cookieStore.get('next-auth.session-token')?.value ||
-                        cookieStore.get('__Secure-next-auth.session-token')?.value
+  // Admin routes - use NextAuth auth check
+  const isPublicRoute = pathname === '/login' || pathname.startsWith('/api/auth')
 
-    if (!sessionToken && pathname !== '/login') {
-      return NextResponse.redirect(new URL('/login', req.url))
-    }
+  // Redirect logged-in users away from login page
+  if (isAdminLoggedIn && pathname === '/login') {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
+  // Redirect non-logged-in users to login page
+  if (!isAdminLoggedIn && !isPublicRoute && !pathname.startsWith('/portal/')) {
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
   const response = NextResponse.next()
@@ -129,7 +126,7 @@ export default async function middleware(req: Request) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
 
   return response
-}
+})
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|apply).*)'],
