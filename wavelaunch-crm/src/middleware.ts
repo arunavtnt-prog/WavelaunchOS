@@ -4,7 +4,6 @@ import { cookies } from 'next/headers'
 
 export default auth(async function middleware(req: any) {
   const { pathname } = req.nextUrl
-  const startTime = Date.now()
   const requestId = Math.random().toString(36).substring(2, 15)
 
   // Handle OPTIONS preflight requests
@@ -12,7 +11,6 @@ export default auth(async function middleware(req: any) {
     const response = new NextResponse(null, { status: 204 })
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, X-Request-ID')
-    response.headers.set('Access-Control-Max-Age', '86400')
     return response
   }
 
@@ -22,9 +20,7 @@ export default auth(async function middleware(req: any) {
 
   // Basic rate limiting
   if (isApiRoute) {
-    const clientId = req.headers.get('x-forwarded-for')?.split(',')[0] || 
-                     req.headers.get('x-real-ip') || 
-                     'unknown'
+    const clientId = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
     const key = `${clientId}:${pathname}`
     const limit = 100
     const now = Date.now()
@@ -81,7 +77,7 @@ export default auth(async function middleware(req: any) {
     }
   }
 
-  // Portal routes - simple token check
+  // Portal routes authentication
   if (isPortalRoute) {
     const isPublicPortalRoute = pathname === '/portal/login' ||
                                pathname.startsWith('/portal/invite/') ||
@@ -104,15 +100,13 @@ export default auth(async function middleware(req: any) {
     }
   }
 
-  // Admin routes - use NextAuth auth check
+  // Admin routes authentication
   const isPublicRoute = pathname === '/login' || pathname.startsWith('/api/auth')
 
-  // Redirect logged-in users away from login page
   if (isAdminLoggedIn && pathname === '/login') {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  // Redirect non-logged-in users to login page
   if (!isAdminLoggedIn && !isPublicRoute && !pathname.startsWith('/portal/')) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
