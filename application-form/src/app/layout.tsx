@@ -12,8 +12,9 @@ const instrumentSerif = Instrument_Serif({
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
-  // Inter automatically supports optical sizing for 'Display' look
-  axes: ["opsz"]
+  display: "swap",
+  axes: ["opsz"],
+  style: "normal"
 });
 
 export const metadata: Metadata = {
