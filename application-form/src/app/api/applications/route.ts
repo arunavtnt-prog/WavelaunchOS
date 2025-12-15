@@ -104,6 +104,9 @@ export async function POST(request: NextRequest) {
     // Sync to Google Sheets (Non-blocking)
     syncToGoogleSheets(application).catch(console.error)
 
+    // Sync to CRM backend (Non-blocking)
+    syncToCRM(application).catch(console.error)
+
     return NextResponse.json({
       success: true,
       data: {
@@ -135,6 +138,39 @@ async function syncToGoogleSheets(data: any) {
     })
   } catch (error) {
     console.error('Failed to sync to Google Sheets:', error)
+    // Do not throw, so we don't fail the submission
+  }
+}
+
+async function syncToCRM(data: any) {
+  const crmApiUrl = process.env.CRM_API_URL
+  const crmApiToken = process.env.CRM_API_TOKEN
+  
+  if (!crmApiUrl || !crmApiToken) {
+    console.warn('CRM API configuration missing')
+    return
+  }
+
+  try {
+    const response = await fetch(crmApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${crmApiToken}`,
+      },
+      body: JSON.stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('CRM sync failed:', response.status, errorData)
+      return
+    }
+
+    const result = await response.json()
+    console.log('CRM sync successful:', result)
+  } catch (error) {
+    console.error('Failed to sync to CRM:', error)
     // Do not throw, so we don't fail the submission
   }
 }
