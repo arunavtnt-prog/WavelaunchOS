@@ -9,8 +9,12 @@ export default async function middleware(req: any) {
   
   if (!isPublicRoute && !pathname.startsWith('/portal/')) {
     const cookieStore = await cookies()
-    const sessionToken = cookieStore.get('next-auth.session-token')?.value ||
-                        cookieStore.get('__Secure-next-auth.session-token')?.value
+    // NextAuth v5 uses 'authjs.' prefix instead of 'next-auth.'
+    const sessionToken = cookieStore.get('authjs.session-token') ||
+                         cookieStore.get('__Secure-authjs.session-token') ||
+                         // Fallback for v4 compatibility
+                         cookieStore.get('next-auth.session-token') ||
+                         cookieStore.get('__Secure-next-auth.session-token')
 
     if (!sessionToken && pathname !== '/login') {
       return NextResponse.redirect(new URL('/login', req.url))
