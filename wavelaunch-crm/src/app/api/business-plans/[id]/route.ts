@@ -110,7 +110,7 @@ export async function PATCH(
         clientId: existingPlan.clientId,
         type: 'BUSINESS_PLAN_UPDATED',
         description: activityDescription,
-        userId: session.user.id,
+        userId: session.user?.id || '',
       },
     })
 

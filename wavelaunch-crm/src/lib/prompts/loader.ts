@@ -33,6 +33,9 @@ export class PromptLoader {
     }
 
     // Load YAML file
+    if (!template.yamlPath) {
+      throw new Error(`Template yamlPath is null for type: ${type}`)
+    }
     const yamlPath = path.join(process.cwd(), template.yamlPath)
 
     try {

@@ -19,13 +19,13 @@ export async function GET(request: NextRequest) {
 
     // Get client deliverables
     const deliverables = await prisma.deliverable.findMany({
-      where: { clientId: auth.portalUser.clientId },
+      where: { clientId: auth.portalUser?.clientId },
       orderBy: { month: 'asc' },
     })
 
     // Get client data
     const client = await prisma.client.findUnique({
-      where: { id: auth.portalUser.clientId },
+      where: { id: auth.portalUser?.clientId },
     })
 
     if (!client) {
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     ]
 
     const milestones = monthsData.map((monthData) => {
-      const deliverable = deliverables.find((d) => d.month === monthData.month)
+      const deliverable = deliverables.find((d) => d.month === parseInt(monthData.month.replace('M', '')))
 
       return {
         month: monthData.month,

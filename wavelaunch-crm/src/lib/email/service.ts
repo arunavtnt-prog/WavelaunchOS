@@ -254,7 +254,7 @@ class EmailService {
         to: options.to,
         subject: options.subject,
         html: options.html,
-        text: options.text,
+        text: options.text || '', // Provide empty string fallback for required text field
         replyTo: options.replyTo,
         cc: options.cc,
         bcc: options.bcc,

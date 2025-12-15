@@ -59,7 +59,7 @@ export async function POST(
         targetDemographicAge: application.targetDemographicAge,
         brandImage: application.idealBrandImage,
         brandPersonality: application.brandPersonality,
-        preferredFont: application.preferredFont,
+        preferredFont: application.preferredFont || '',
         
         // Optional fields
         professionalMilestones: application.professionalMilestones,

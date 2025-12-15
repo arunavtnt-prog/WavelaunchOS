@@ -58,7 +58,6 @@ export default function ClientNotesPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingNote, setEditingNote] = useState<NoteWithRelations | null>(null)
   const [formData, setFormData] = useState({
-    title: '',
     content: '',
     tags: [] as string[],
     isImportant: false,
@@ -100,7 +99,6 @@ export default function ClientNotesPage() {
   const openCreateDialog = () => {
     setEditingNote(null)
     setFormData({
-      title: '',
       content: '',
       tags: [],
       isImportant: false,
@@ -111,19 +109,18 @@ export default function ClientNotesPage() {
   const openEditDialog = (note: NoteWithRelations) => {
     setEditingNote(note)
     setFormData({
-      title: note.title,
       content: note.content,
-      tags: note.tags,
+      tags: note.tags ? JSON.parse(note.tags) : [],
       isImportant: note.isImportant,
     })
     setDialogOpen(true)
   }
 
   const handleSaveNote = async () => {
-    if (!formData.title.trim()) {
+    if (!formData.content.trim()) {
       toast({
         title: 'Validation Error',
-        description: 'Please enter a title',
+        description: 'Please enter note content',
         variant: 'destructive',
       })
       return
@@ -268,17 +265,17 @@ export default function ClientNotesPage() {
 
   // Get all unique tags from notes
   const allTags = Array.from(
-    new Set(notes.flatMap((note) => note.tags))
+    new Set(notes.flatMap((note) => note.tags ? JSON.parse(note.tags) : []))
   ).sort()
 
   // Filter notes by search query
   const filteredNotes = notes.filter((note) => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
+    const tags = note.tags ? JSON.parse(note.tags) : []
     return (
-      note.title.toLowerCase().includes(query) ||
       note.content.toLowerCase().includes(query) ||
-      note.tags.some((tag) => tag.toLowerCase().includes(query))
+      tags.some((tag: string) => tag.toLowerCase().includes(query))
     )
   })
 
@@ -376,7 +373,7 @@ export default function ClientNotesPage() {
               {/* Header */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold truncate">{note.title}</h3>
+                  <h3 className="font-semibold truncate">{note.content.substring(0, 50)}...</h3>
                   <p className="text-xs text-muted-foreground">
                     {new Date(note.updatedAt).toLocaleDateString()}
                   </p>
@@ -404,9 +401,9 @@ export default function ClientNotesPage() {
               />
 
               {/* Tags */}
-              {note.tags.length > 0 && (
+              {note.tags && JSON.parse(note.tags).length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {note.tags.map((tag) => (
+                  {JSON.parse(note.tags).map((tag: string) => (
                     <Badge key={tag} variant="secondary" className="text-xs">
                       {tag}
                     </Badge>
@@ -456,20 +453,6 @@ export default function ClientNotesPage() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Title */}
-            <div>
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-                placeholder="Enter note title..."
-                className="mt-1"
-              />
-            </div>
-
             {/* Important */}
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -552,7 +535,7 @@ export default function ClientNotesPage() {
           <DialogHeader>
             <DialogTitle>Delete Note</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{noteToDelete?.title}"? This
+              Are you sure you want to delete this note? This
               action cannot be undone.
             </DialogDescription>
           </DialogHeader>

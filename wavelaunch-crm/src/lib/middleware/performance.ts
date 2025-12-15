@@ -63,7 +63,7 @@ class PerformanceTracker {
 
   getAllStats(): Map<string, ReturnType<typeof this.getStats>> {
     const allStats = new Map()
-    for (const endpoint of this.metrics.keys()) {
+    for (const endpoint of Array.from(this.metrics.keys())) {
       allStats.set(endpoint, this.getStats(endpoint))
     }
     return allStats
@@ -76,7 +76,7 @@ class PerformanceTracker {
   }> {
     const endpoints: Array<{ endpoint: string; avgTime: number; count: number }> = []
 
-    for (const [endpoint, timings] of this.metrics.entries()) {
+    for (const [endpoint, timings] of Array.from(this.metrics.entries())) {
       if (timings.length === 0) continue
       const avg = timings.reduce((a, b) => a + b, 0) / timings.length
       endpoints.push({ endpoint, avgTime: avg, count: timings.length })
@@ -184,7 +184,7 @@ export class RequestTimer {
    */
   getCheckpoints(): Record<string, number> {
     const result: Record<string, number> = {}
-    for (const [name, time] of this.checkpoints.entries()) {
+    for (const [name, time] of Array.from(this.checkpoints.entries())) {
       result[name] = time
     }
     return result

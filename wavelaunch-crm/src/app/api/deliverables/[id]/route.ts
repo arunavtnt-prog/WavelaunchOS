@@ -116,7 +116,7 @@ export async function PATCH(
         clientId: existingDeliverable.clientId,
         type: 'DELIVERABLE_UPDATED',
         description: activityDescription,
-        userId: session.user.id,
+        userId: session.user?.id || '',
       },
     })
 

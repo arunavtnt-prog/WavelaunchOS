@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 
 // Get all messages (admin view) - supports filtering by clientId and threadId
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session) {
       return NextResponse.json(
@@ -115,7 +114,7 @@ export async function GET(request: NextRequest) {
 // Send message as admin
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session) {
       return NextResponse.json(
@@ -152,7 +151,8 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId,
-        userId: session.user.id,
+        userId: session.user?.id || '',
+        type: 'CLIENT_UPDATED',
         description: `Sent message: ${subject || 'Message from Admin'}`,
       },
     })

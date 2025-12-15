@@ -111,7 +111,7 @@ export default function PromptsPage() {
     const regex = /\{(\w+)\}/g
     const matches = content.matchAll(regex)
     const variables = new Set<string>()
-    for (const match of matches) {
+    for (const match of Array.from(matches)) {
       variables.add(match[1])
     }
     return Array.from(variables)

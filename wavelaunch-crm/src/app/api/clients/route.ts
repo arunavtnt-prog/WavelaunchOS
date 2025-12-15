@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         clientId: client.id,
         type: 'CLIENT_CREATED',
         description: `Created client: ${client.creatorName}`,
-        userId: session.user.id,
+        userId: session.user?.id || '',
       },
     })
 

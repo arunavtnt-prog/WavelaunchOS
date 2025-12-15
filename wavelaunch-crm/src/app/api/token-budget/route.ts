@@ -41,6 +41,20 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/token-budget - Create a new token budget
+// Helper function to get period duration in days
+function getPeriodDuration(period: string): number {
+  switch (period) {
+    case 'DAILY':
+      return 1
+    case 'WEEKLY':
+      return 7
+    case 'MONTHLY':
+      return 30
+    default:
+      return 30
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
@@ -70,6 +84,8 @@ export async function POST(request: NextRequest) {
         tokensUsed: 0,
         costUsed: 0,
         isPaused: false,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + getPeriodDuration(data.period) * 24 * 60 * 60 * 1000),
       },
     })
 

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const unreadCount = await prisma.portalMessage.count({
       where: {
-        clientId: auth.portalUser.clientId,
+        clientId: auth.portalUser?.clientId,
         isFromAdmin: true,
         isRead: false,
       },

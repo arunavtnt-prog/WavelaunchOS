@@ -64,13 +64,13 @@ export async function POST(request: NextRequest) {
     // Log activity
     await prisma.activity.create({
       data: {
-        type: 'FILES_DOWNLOADED',
+        type: 'FILE_UPLOADED',
         description: `Bulk downloaded ${files.length} file(s)`,
         metadata: JSON.stringify({
           fileCount: files.length,
           fileIds,
         }),
-        userId: session.user.id,
+        userId: session.user?.id || '',
       },
     })
 

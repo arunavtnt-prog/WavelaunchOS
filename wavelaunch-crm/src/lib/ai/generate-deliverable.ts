@@ -61,7 +61,8 @@ export async function generateDeliverable(
       userId,
       metadata: {
         month,
-        templateId: template.id,
+        templateName: template.name,
+        templateVersion: template.version,
         monthTitle: context.month_title,
       },
     })

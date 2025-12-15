@@ -21,7 +21,7 @@ export async function POST(
     await prisma.portalMessage.updateMany({
       where: {
         threadId: params.threadId,
-        clientId: auth.portalUser.clientId,
+        clientId: auth.portalUser?.clientId,
         isFromAdmin: true,
         isRead: false,
       },

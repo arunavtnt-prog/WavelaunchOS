@@ -57,13 +57,13 @@ export async function POST(request: NextRequest) {
     // Check total storage before processing file
     const totalStorage = await db.file.aggregate({
       _sum: {
-        fileSize: true,
+        filesize: true,
       },
     })
 
-    const currentStorage = totalStorage._sum.fileSize || 0
+    const currentStorage = totalStorage._sum.filesize || 0
     if (currentStorage + file.size > STORAGE_LIMIT_BYTES) {
-      throw new StorageError('Storage limit exceeded', STORAGE_LIMIT_BYTES)
+      throw new StorageError('Storage limit exceeded')
     }
 
     // Write file to temporary location for validation
@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
         clientId: validatedClientId,
         filename: validation.sanitizedFilename,
         filepath: finalPath,
-        fileType: file.type || 'application/octet-stream',
-        fileSize: file.size,
+        mimetype: file.type || 'application/octet-stream',
+        filesize: file.size,
         category: validatedCategory,
         uploadedBy: user.id,
       },

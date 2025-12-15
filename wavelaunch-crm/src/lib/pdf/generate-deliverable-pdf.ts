@@ -75,8 +75,8 @@ export async function generateDeliverablePDF(
         clientId: deliverable.clientId,
         filename,
         filepath: outputPath,
-        fileType: 'application/pdf',
-        fileSize: result.fileSize,
+        mimetype: 'application/pdf',
+        filesize: result.fileSize,
         category: 'DELIVERABLE',
         uploadedBy: userId,
       },
@@ -93,10 +93,14 @@ export async function generateDeliverablePDF(
     })
 
     return {
-      fileId: file.id,
-      filename,
-      fileSize: result.fileSize,
-      pdfPath: outputPath,
+      success: true,
+      data: {
+        fileId: file.id,
+        filename,
+        fileSize: result.fileSize,
+        pdfPath: outputPath,
+      },
+      message: 'Deliverable PDF generated successfully',
     }
   } catch (error: any) {
     console.error('Error generating deliverable PDF:', error)

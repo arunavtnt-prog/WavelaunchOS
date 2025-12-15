@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Return file as download
-    const response = new NextResponse(report.content, {
+    const response = new NextResponse(report.content.toString(), {
       status: 200,
       headers: {
         'Content-Type': report.contentType,

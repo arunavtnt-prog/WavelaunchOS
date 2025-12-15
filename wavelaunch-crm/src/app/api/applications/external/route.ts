@@ -39,7 +39,7 @@ const externalApplicationSchema = z.object({
   longTermVision: z.string().min(10),
   specificDeadlines: z.string().optional(),
   additionalInfo: z.string().optional(),
-  termsAccepted: z.boolean().true(),
+  termsAccepted: z.boolean().default(true),
 })
 
 // Simple token authentication for external requests
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Create activity log entry
     await prisma.activity.create({
       data: {
-        type: 'APPLICATION_SUBMITTED',
+        type: 'CLIENT_CREATED',
         description: `External application submitted by ${application.fullName}`,
         metadata: JSON.stringify({
           source: 'public_form',

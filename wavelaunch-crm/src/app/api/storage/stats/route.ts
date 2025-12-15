@@ -15,12 +15,12 @@ export async function GET(request: NextRequest) {
     // Get total storage used
     const totalStorage = await db.file.aggregate({
       _sum: {
-        fileSize: true,
+        filesize: true,
       },
       _count: true,
     })
 
-    const usedBytes = totalStorage._sum.fileSize || 0
+    const usedBytes = totalStorage._sum.filesize || 0
     const usedPercentage = (usedBytes / STORAGE_LIMIT_BYTES) * 100
     const limitBytes = STORAGE_LIMIT_BYTES
     const warningThresholdBytes = STORAGE_LIMIT_BYTES * STORAGE_WARNING_THRESHOLD
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const storageByCategory = await db.file.groupBy({
       by: ['category'],
       _sum: {
-        fileSize: true,
+        filesize: true,
       },
       _count: true,
     })
@@ -38,19 +38,19 @@ export async function GET(request: NextRequest) {
     const storageByClient = await db.file.groupBy({
       by: ['clientId'],
       _sum: {
-        fileSize: true,
+        filesize: true,
       },
       _count: true,
       orderBy: {
         _sum: {
-          fileSize: 'desc',
+          filesize: 'desc',
         },
       },
       take: 10,
     })
 
     // Enrich client data
-    const clientIds = storageByClient.map((s) => s.clientId)
+    const clientIds = storageByClient.map((s) => s.clientId).filter((id): id is string => id !== null)
     const clients = await db.client.findMany({
       where: { id: { in: clientIds } },
       select: {
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
         clientId: storage.clientId,
         clientName: client?.brandName || client?.creatorName || 'Unknown',
         fileCount: storage._count,
-        storageBytes: storage._sum.fileSize || 0,
+        storageBytes: storage._sum.filesize || 0,
       }
     })
 
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         byCategory: storageByCategory.map((cat) => ({
           category: cat.category,
           fileCount: cat._count,
-          storageBytes: cat._sum.fileSize || 0,
+          storageBytes: cat._sum.filesize || 0,
         })),
         byClient: enrichedStorageByClient,
       },

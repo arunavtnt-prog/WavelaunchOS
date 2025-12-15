@@ -41,9 +41,9 @@ export async function POST(request: NextRequest) {
 
     // Resume generation based on job type
     if (checkpoint.jobType === 'BUSINESS_PLAN') {
-      await resumeBusinessPlanGeneration(checkpoint, session.user.id)
+      await resumeBusinessPlanGeneration(checkpoint, session.user?.id || '')
     } else if (checkpoint.jobType === 'DELIVERABLE') {
-      await resumeDeliverableGeneration(checkpoint, session.user.id)
+      await resumeDeliverableGeneration(checkpoint, session.user?.id || '')
     } else {
       return NextResponse.json(
         { success: false, error: 'Unknown job type' },

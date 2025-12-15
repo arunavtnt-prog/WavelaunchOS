@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { randomBytes, createHash } from 'crypto'
 import { checkRateLimit } from '@/lib/rate-limiter'
@@ -16,7 +15,7 @@ function hashToken(token: string): string {
 // Generate invite token for portal user
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session) {
       return NextResponse.json(
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Rate limiting: 20 invites per hour per admin user
     const rateLimitResult = checkRateLimit({
-      identifier: session.user.id,
+      identifier: session.user?.id || '',
       endpoint: 'generate-invite',
       maxRequests: 20,
       windowSeconds: 60 * 60, // 1 hour
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
       data: {
         inviteToken: inviteTokenHash,
         inviteTokenExpiry,
-        invitedBy: session.user.id,
+        invitedBy: session.user?.id || '',
       },
     })
 
@@ -96,7 +95,8 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId: portalUser.clientId,
-        userId: session.user.id,
+        userId: session.user?.id || '',
+        type: 'CLIENT_UPDATED',
         description: `Generated portal invite for ${portalUser.email}`,
       },
     })
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
 // Regenerate invite token (if expired or resend needed)
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
 
     if (!session) {
       return NextResponse.json(
@@ -172,7 +172,7 @@ export async function PATCH(request: NextRequest) {
       data: {
         inviteToken: inviteTokenHash,
         inviteTokenExpiry,
-        invitedBy: session.user.id,
+        invitedBy: session.user?.id || '',
       },
     })
 
@@ -180,7 +180,8 @@ export async function PATCH(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId: portalUser.clientId,
-        userId: session.user.id,
+        userId: session.user?.id || '',
+        type: 'CLIENT_UPDATED',
         description: `Regenerated portal invite for ${portalUser.email}`,
       },
     })

@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     // Portal user and client are already verified by getVerifiedPortalSession
     const portalUser = auth.portalUser
 
-    if (!portalUser.client) {
+    if (!portalUser?.client) {
       return NextResponse.json(
         { success: false, error: 'Client not found' },
         { status: 404 }
@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
       await tx.activity.create({
         data: {
           clientId: portalUser.clientId,
+          type: 'CLIENT_UPDATED',
           description: `Client completed onboarding questionnaire: ${portalUser.email}`,
         },
       })

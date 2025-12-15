@@ -46,7 +46,7 @@ export async function DELETE(
         clientId: file.clientId,
         type: 'FILE_DELETED',
         description: `Deleted file: ${file.filename}`,
-        userId: session.user.id,
+        userId: session.user?.id || '',
       },
     })
 

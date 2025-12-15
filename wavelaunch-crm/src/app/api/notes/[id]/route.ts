@@ -5,7 +5,6 @@ import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
 const updateNoteSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
   content: z.string().optional(),
   tags: z.array(z.string()).optional(),
   isImportant: z.boolean().optional(),
@@ -32,7 +31,7 @@ export async function GET(
             brandName: true,
           },
         },
-        createdByUser: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -88,20 +87,26 @@ export async function PATCH(
     const body = await request.json()
     const updates = updateNoteSchema.parse(body)
 
+    // Convert tags array to JSON string if present
+    const noteUpdates = {
+      ...updates,
+      tags: updates.tags ? JSON.stringify(updates.tags) : undefined,
+    }
+
     // Update note
     const note = await db.note.update({
       where: { id: params.id },
-      data: updates,
+      data: noteUpdates,
     })
 
-    // Log activity if title or important status changed
-    if (updates.title || updates.isImportant !== undefined) {
+    // Log activity if important status changed
+    if (updates.isImportant !== undefined) {
       await db.activity.create({
         data: {
           clientId: note.clientId,
           type: 'NOTE_UPDATED',
-          description: `Updated note: ${note.title}`,
-          userId: session.user.id,
+          description: `Updated note`,
+          userId: session.user?.id || '',
         },
       })
     }
@@ -153,8 +158,8 @@ export async function DELETE(
       data: {
         clientId: existingNote.clientId,
         type: 'NOTE_DELETED',
-        description: `Deleted note: ${existingNote.title}`,
-        userId: session.user.id,
+        description: `Deleted note`,
+        userId: session.user?.id || '',
       },
     })
 

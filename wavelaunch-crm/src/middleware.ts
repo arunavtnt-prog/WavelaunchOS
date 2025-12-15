@@ -208,7 +208,11 @@ export default auth(async (req) => {
     const existingToken = cookieStore.get('csrf-token')?.value
 
     if (!existingToken) {
-      const token = generateCsrfToken()
+      // Generate token synchronously for middleware
+      const array = new Uint8Array(32)
+      crypto.getRandomValues(array)
+      const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
+      
       // Token will be set in response cookies
       response = NextResponse.next()
       response.cookies.set('csrf-token', token, {

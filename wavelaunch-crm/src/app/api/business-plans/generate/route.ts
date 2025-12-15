@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     // Enqueue job
     const jobId = await jobQueue.enqueue('GENERATE_BUSINESS_PLAN', {
       clientId,
-      userId: session.user.id,
+      userId: session.user?.id || '',
     })
 
     return NextResponse.json({

@@ -14,7 +14,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log(`Restore requested by ${session.user.email} for backup: ${params.filename}`)
+    console.log(`Restore requested by ${session.user?.email || 'unknown'} for backup: ${params.filename}`)
 
     const result = await restoreBackup(params.filename)
 

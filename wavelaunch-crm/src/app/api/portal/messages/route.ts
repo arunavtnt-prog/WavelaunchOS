@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       const messages = await prisma.portalMessage.findMany({
         where: {
           threadId,
-          clientId: auth.portalUser.clientId,
+          clientId: auth.portalUser?.clientId,
         },
         orderBy: { createdAt: 'asc' },
       })
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       await prisma.portalMessage.updateMany({
         where: {
           threadId,
-          clientId: auth.portalUser.clientId,
+          clientId: auth.portalUser?.clientId,
           isFromAdmin: true,
           isRead: false,
         },
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Otherwise, get all threads (grouped by threadId)
     const messages = await prisma.portalMessage.findMany({
-      where: { clientId: auth.portalUser.clientId },
+      where: { clientId: auth.portalUser?.clientId },
       orderBy: { createdAt: 'desc' },
     })
 
@@ -132,6 +132,14 @@ export async function POST(request: NextRequest) {
     // Generate threadId if creating new thread
     const finalThreadId = threadId || `thread_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
+    // Ensure portal user exists
+    if (!auth.portalUser?.clientId) {
+      return NextResponse.json(
+        { success: false, error: 'Portal user not found' },
+        { status: 401 }
+      )
+    }
+
     // Create message
     const message = await prisma.portalMessage.create({
       data: {
@@ -153,7 +161,7 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         clientId: auth.portalUser.clientId,
-        type: 'MESSAGE_SENT',
+        type: 'CLIENT_UPDATED',
         description: `Client sent a message: ${subject}`,
       },
     })

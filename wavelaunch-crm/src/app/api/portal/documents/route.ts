@@ -23,12 +23,12 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'updatedAt' // 'updatedAt' | 'createdAt' | 'version' | 'month'
     const sortOrder = searchParams.get('sortOrder') || 'desc' // 'asc' | 'desc'
 
-    let businessPlans = []
-    let deliverables = []
+    let businessPlans: any[] = []
+    let deliverables: any[] = []
 
     // Fetch business plans
     if (!type || type === 'all' || type === 'business-plans') {
-      const planWhere: any = { clientId: auth.portalUser.clientId }
+      const planWhere: any = { clientId: auth.portalUser?.clientId }
       if (status) {
         planWhere.status = status
       }
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch deliverables
     if (!type || type === 'all' || type === 'deliverables') {
-      const deliverableWhere: any = { clientId: auth.portalUser.clientId }
+      const deliverableWhere: any = { clientId: auth.portalUser?.clientId }
       if (status) {
         deliverableWhere.status = status
       }

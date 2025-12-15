@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Get files
     const files = await db.file.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { uploadedAt: 'desc' },
       include: {
         client: {
           select: {
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     // Calculate total storage used
     const totalStorage = await db.file.aggregate({
       _sum: {
-        fileSize: true,
+        filesize: true,
       },
     })
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       data: files,
       metadata: {
         totalFiles: files.length,
-        totalStorageBytes: totalStorage._sum.fileSize || 0,
+        totalStorageBytes: totalStorage._sum.filesize || 0,
       },
     })
   } catch (error) {

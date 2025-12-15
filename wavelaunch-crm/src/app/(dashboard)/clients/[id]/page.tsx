@@ -280,7 +280,7 @@ export default function ClientDetailPage() {
           clientId={client.id}
           clientName={client.creatorName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
-          hasCompletedOnboarding={client.portalUser?.completedOnboarding || false}
+          hasCompletedOnboarding={false} // TODO: Implement portal user check
         />
       )}
 
@@ -353,7 +353,7 @@ export default function ClientDetailPage() {
                   <p className="text-sm">{activity.description}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {new Date(activity.createdAt).toLocaleString()} •{' '}
-                    {activity.user?.name}
+                    System User
                   </p>
                 </div>
               </div>

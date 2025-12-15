@@ -37,9 +37,9 @@ export async function GET(
     // Return file as download
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Type': file.fileType,
+        'Content-Type': file.mimetype,
         'Content-Disposition': `attachment; filename="${file.filename}"`,
-        'Content-Length': file.fileSize.toString(),
+        'Content-Length': file.filesize.toString(),
       },
     })
   } catch (error) {

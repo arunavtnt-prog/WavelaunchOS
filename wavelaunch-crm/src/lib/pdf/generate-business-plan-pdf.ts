@@ -75,8 +75,8 @@ export async function generateBusinessPlanPDF(
         clientId: businessPlan.clientId,
         filename,
         filepath: outputPath,
-        fileType: 'application/pdf',
-        fileSize: result.fileSize,
+        mimetype: 'application/pdf',
+        filesize: result.fileSize,
         category: 'BUSINESS_PLAN',
         uploadedBy: userId,
       },
@@ -93,10 +93,14 @@ export async function generateBusinessPlanPDF(
     })
 
     return {
-      fileId: file.id,
-      filename,
-      fileSize: result.fileSize,
-      pdfPath: outputPath,
+      success: true,
+      data: {
+        fileId: file.id,
+        filename,
+        fileSize: result.fileSize,
+        pdfPath: outputPath,
+      },
+      message: 'Business plan PDF generated successfully',
     }
   } catch (error: any) {
     console.error('Error generating business plan PDF:', error)

@@ -40,7 +40,7 @@ export async function POST(
     const jobId = await jobQueue.enqueue('GENERATE_PDF', {
       deliverableId: params.id,
       quality,
-      userId: session.user.id,
+      userId: session.user?.id || '',
     })
 
     return NextResponse.json({

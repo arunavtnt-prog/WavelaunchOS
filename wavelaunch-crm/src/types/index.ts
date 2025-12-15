@@ -51,6 +51,14 @@ export {
   BackupStatus,
 }
 
+// Custom types
+export interface JobResult<T = any> {
+  success: boolean
+  message?: string
+  data?: T
+  error?: string
+}
+
 // Extended types with relations
 export type ClientWithRelations = Client & {
   businessPlans: BusinessPlan[]

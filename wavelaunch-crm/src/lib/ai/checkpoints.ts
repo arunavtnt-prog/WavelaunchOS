@@ -4,9 +4,11 @@ export interface CheckpointData {
   jobId: string
   jobType: 'BUSINESS_PLAN' | 'DELIVERABLE'
   clientId: string
+  status?: string
   totalSections: number
   completedSections: number
   currentSection: number
+  documentId?: string
   generatedContent: any
   promptContext: any
   metadata?: any
@@ -23,23 +25,20 @@ export async function saveCheckpoint(data: CheckpointData): Promise<void> {
         jobId: data.jobId,
         jobType: data.jobType,
         clientId: data.clientId,
-        status: 'IN_PROGRESS',
+        status: data.status || 'IN_PROGRESS',
         totalSections: data.totalSections,
         completedSections: data.completedSections,
         currentSection: data.currentSection,
+        documentId: data.documentId,
         generatedContent: JSON.stringify(data.generatedContent),
         promptContext: JSON.stringify(data.promptContext),
-        metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         canResume: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
       update: {
         completedSections: data.completedSections,
         currentSection: data.currentSection,
         generatedContent: JSON.stringify(data.generatedContent),
         status: 'IN_PROGRESS',
-        updatedAt: new Date(),
       },
     })
   } catch (error) {
@@ -64,7 +63,6 @@ export async function getCheckpoint(jobId: string) {
       ...checkpoint,
       generatedContent: JSON.parse(checkpoint.generatedContent),
       promptContext: JSON.parse(checkpoint.promptContext),
-      metadata: checkpoint.metadata ? JSON.parse(checkpoint.metadata) : null,
     }
   } catch (error) {
     console.error('Get checkpoint error:', error)
@@ -82,8 +80,6 @@ export async function completeCheckpoint(jobId: string): Promise<void> {
       data: {
         status: 'COMPLETED',
         canResume: false,
-        completedAt: new Date(),
-        updatedAt: new Date(),
       },
     })
   } catch (error) {
@@ -105,7 +101,6 @@ export async function failCheckpoint(
         status: 'FAILED',
         canResume: true,
         errorMessage,
-        updatedAt: new Date(),
       },
     })
   } catch (error) {
@@ -145,16 +140,7 @@ export async function getResumableCheckpoints(clientId?: string) {
     const checkpoints = await db.generationCheckpoint.findMany({
       where,
       orderBy: {
-        updatedAt: 'desc',
-      },
-      include: {
-        client: {
-          select: {
-            id: true,
-            creatorName: true,
-            brandName: true,
-          },
-        },
+        createdAt: 'desc',
       },
     })
 
@@ -162,7 +148,6 @@ export async function getResumableCheckpoints(clientId?: string) {
       ...checkpoint,
       generatedContent: JSON.parse(checkpoint.generatedContent),
       promptContext: JSON.parse(checkpoint.promptContext),
-      metadata: checkpoint.metadata ? JSON.parse(checkpoint.metadata) : null,
     }))
   } catch (error) {
     console.error('Get resumable checkpoints error:', error)
@@ -181,7 +166,7 @@ export async function cleanupOldCheckpoints(): Promise<number> {
     const result = await db.generationCheckpoint.deleteMany({
       where: {
         status: 'COMPLETED',
-        completedAt: {
+        createdAt: {
           lt: sevenDaysAgo,
         },
       },

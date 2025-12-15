@@ -16,7 +16,7 @@ export async function cleanupTempFiles(): Promise<JobResult> {
       // Directory doesn't exist, nothing to clean
       return {
         success: true,
-        filesDeleted: 0,
+        data: { filesDeleted: 0 },
         message: 'Temp directory does not exist',
       }
     }
@@ -49,8 +49,7 @@ export async function cleanupTempFiles(): Promise<JobResult> {
 
     return {
       success: true,
-      filesDeleted,
-      errors,
+      data: { filesDeleted, errors },
       message: `Cleaned up ${filesDeleted} temp file(s)`,
     }
   } catch (error: any) {

@@ -13,7 +13,6 @@ const listNotesSchema = z.object({
 
 const createNoteSchema = z.object({
   clientId: z.string().cuid(),
-  title: z.string().min(1).max(200),
   content: z.string(),
   tags: z.array(z.string()).default([]),
   isImportant: z.boolean().default(false),
@@ -72,7 +71,7 @@ export async function GET(request: NextRequest) {
             brandName: true,
           },
         },
-        createdByUser: {
+        author: {
           select: {
             id: true,
             name: true,
@@ -104,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { clientId, title, content, tags, isImportant } = createNoteSchema.parse(body)
+    const { clientId, content, tags, isImportant } = createNoteSchema.parse(body)
 
     // Verify client exists
     const client = await db.client.findUnique({
@@ -122,11 +121,10 @@ export async function POST(request: NextRequest) {
     const note = await db.note.create({
       data: {
         clientId,
-        title,
         content,
-        tags,
+        tags: JSON.stringify(tags),
         isImportant,
-        createdBy: session.user.id,
+        authorId: session.user?.id || '',
       },
     })
 
@@ -135,8 +133,8 @@ export async function POST(request: NextRequest) {
       data: {
         clientId,
         type: 'NOTE_CREATED',
-        description: `Created note: ${title}`,
-        userId: session.user.id,
+        description: `Created new note`,
+        userId: session.user?.id || '',
       },
     })
 

@@ -205,7 +205,7 @@ export function CheckpointManager() {
                     <CardTitle className="text-lg">
                       {checkpoint.jobType === 'BUSINESS_PLAN'
                         ? 'Business Plan'
-                        : `Month ${checkpoint.metadata?.month || '?'} Deliverable`}
+                        : `Deliverable`}
                     </CardTitle>
                     <CardDescription>
                       <Link

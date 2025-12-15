@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     const jobId = await jobQueue.enqueue('GENERATE_DELIVERABLE', {
       clientId,
       month,
-      userId: session.user.id,
+      userId: session.user?.id || '',
     })
 
     return NextResponse.json({
