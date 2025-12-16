@@ -108,8 +108,37 @@ export async function POST(
 
   } catch (error) {
     console.error('Error converting application to client:', error)
+    console.error('Error details:', error.message)
+    console.error('Error stack:', error.stack)
+    
+    // Check for specific database errors
+    if (error.code === 'P2002') {
+      console.error('Unique constraint violation:', error.meta)
+      return NextResponse.json(
+        { error: 'A client with this email already exists' },
+        { status: 400 }
+      )
+    }
+    
+    if (error.code === 'P2025') {
+      console.error('Record not found:', error.meta)
+      return NextResponse.json(
+        { error: 'Application not found or already converted' },
+        { status: 404 }
+      )
+    }
+    
+    // Check for Prisma validation errors
+    if (error.name === 'PrismaClientValidationError') {
+      console.error('Prisma validation error:', error.message)
+      return NextResponse.json(
+        { error: 'Database schema mismatch. Please check field mappings.', details: error.message },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to convert application to client' },
+      { error: 'Failed to convert application to client', details: error.message },
       { status: 500 }
     )
   }
