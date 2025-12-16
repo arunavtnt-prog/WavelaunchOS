@@ -7,7 +7,8 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('Convert to client request for application ID:', params.id)
+    console.log('// Convert to Client API endpoint')
+    console.log('// Updated: Dec 17 2025 - Fixed production database schema issues for application ID:', params.id)
     
     // Get the application
     const application = await db.application.findUnique({
