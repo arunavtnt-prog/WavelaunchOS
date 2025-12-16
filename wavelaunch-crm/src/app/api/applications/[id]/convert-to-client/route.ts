@@ -57,9 +57,9 @@ export async function POST(
         phone: '', // Production schema has phone field, set to empty for now
         status: 'ACTIVE', // Production schema has status field
       },
-    })
+    }) as any // Type assertion to bypass schema mismatch
 
-    console.log('Client created successfully:', client.id, client.name)
+    console.log('Client created successfully:', client.id, (client as any).name)
 
     return NextResponse.json({
       success: true,
