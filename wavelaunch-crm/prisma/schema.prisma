@@ -30,7 +30,8 @@ model User {
   ticketAttachments      TicketAttachment[]
   ticketComments         TicketComment[]
   assignedTickets        Ticket[]           @relation("AssignedTickets")
-
+  assignedClients        Client[]           @relation("ClientAssignments")
+  
   @@map("users")
 }
 
@@ -52,58 +53,28 @@ model LoginAttempt {
 }
 
 model Client {
-  id                         String                   @id @default(cuid())
-  fullName                   String
-  email                      String                   @unique
-  instagramHandle            String?
-  tiktokHandle               String?
-  country                    String
-  industryNiche              String
-  age                        Int
-  professionalMilestones     String
-  personalTurningPoints      String
-  visionForVenture           String
-  hopeToAchieve              String
-  targetAudience             String
-  demographicProfile         String
-  targetDemographicAge       String
-  audienceGenderSplit        String
-  audienceMaritalStatus      String
-  currentChannels            String
-  keyPainPoints              String
-  brandValues                String
-  differentiation            String
-  uniqueValueProps           String
-  emergingCompetitors        String
-  idealBrandImage            String
-  inspirationBrands          String
-  brandingAesthetics         String
-  emotionsBrandEvokes        String
-  brandPersonality           String
-  preferredFont              String
-  productCategories          String[] // JSON array as string
-  otherProductIdeas          String?
-  scalingGoals               String
-  growthStrategies           String
-  longTermVision             String
-  specificDeadlines          String?
-  additionalInfo             String?
-  status                     ClientStatus             @default(ACTIVE)
-  onboardedAt                DateTime                 @default(now())
-  createdAt                  DateTime                 @default(now())
-  updatedAt                  DateTime                 @updatedAt
-  deletedAt                  DateTime?
-  activities                 Activity[]
-  applications               Application[]
-  businessPlans              BusinessPlan[]
-  portalUser                 ClientPortalUser?
-  deliverables               Deliverable[]
-  files                      File[]
-  notes                      Note[]
-  notificationPreferences    NotificationPreferences?
-  portalMessages             PortalMessage[]
-  tickets                    Ticket[]
-
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String?
+  status        String    @default("ACTIVE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  assignedUserId String?
+  
+  // Relations
+  assignedUser  User?     @relation("ClientAssignments", fields: [assignedUserId], references: [id])
+  tickets       Ticket[]
+  businessPlans BusinessPlan[]
+  deliverables  Deliverable[]
+  files         File[]
+  notes         Note[]
+  activities    Activity[]
+  portalUsers   ClientPortalUser[]
+  notifications NotificationPreferences[]
+  portalMessages PortalMessage[]
+  applications  Application[]
+  
   @@map("clients")
 }
 
