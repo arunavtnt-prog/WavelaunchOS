@@ -4,6 +4,43 @@ import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
+// Google Sheets integration (async, non-blocking)
+async function pushToGoogleSheets(application: any) {
+  try {
+    // TODO: Implement Google Sheets API integration
+    // This requires:
+    // 1. Google Service Account credentials
+    // 2. Google Sheets API enabled
+    // 3. Sheet ID and authentication
+    
+    console.log('Google Sheets integration placeholder - application ID:', application.id)
+    
+    // Example implementation (when ready):
+    // const { GoogleSpreadsheet } = require('google-spreadsheet')
+    // const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID)
+    // await doc.useServiceAccountAuth({
+    //   client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    //   private_key: process.env.GOOGLE_PRIVATE_KEY,
+    // })
+    // await doc.loadInfo()
+    // const sheet = doc.sheetsByIndex[0]
+    // await sheet.addRow({
+    //   'Application ID': application.id,
+    //   'Full Name': application.fullName,
+    //   'Email': application.email,
+    //   'Industry Niche': application.industryNiche,
+    //   'Country': application.country,
+    //   'Status': application.status,
+    //   'Submitted At': new Date().toISOString(),
+    //   ...other fields
+    // })
+    
+  } catch (error) {
+    console.error('Google Sheets sync error:', error)
+    // Don't throw - this is async and non-blocking
+  }
+}
+
 // Validation schema for application submission
 const applicationSchema = z.object({
   // Basic Information
@@ -78,8 +115,53 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Normalize payload - map old field names to new schema names
+    const normalizeApplicationPayload = (input: Record<string, string>) => {
+      return {
+        // Required fields with fallbacks
+        fullName: input.fullName ?? input.creatorName ?? "",
+        email: input.email ?? "",
+        instagramHandle: input.instagramHandle ?? "",
+        tiktokHandle: input.tiktokHandle ?? "",
+        country: input.country ?? "",
+        industryNiche: input.industryNiche ?? input.niche ?? "",
+        age: input.age ? parseInt(input.age) : 18,
+        professionalMilestones: input.professionalMilestones ?? "",
+        personalTurningPoints: input.personalTurningPoints ?? "",
+        visionForVenture: input.visionForVenture ?? input.visionStatement ?? "",
+        hopeToAchieve: input.hopeToAchieve ?? "",
+        targetAudience: input.targetAudience ?? "",
+        demographicProfile: input.demographicProfile ?? input.demographics ?? "",
+        targetDemographicAge: input.targetDemographicAge ?? "",
+        audienceGenderSplit: input.audienceGenderSplit ?? "",
+        audienceMaritalStatus: input.audienceMaritalStatus ?? "",
+        currentChannels: input.currentChannels ?? "",
+        keyPainPoints: input.keyPainPoints ?? input.painPoints ?? "",
+        brandValues: input.brandValues ?? "",
+        differentiation: input.differentiation ?? input.competitiveDifferentiation ?? "",
+        uniqueValueProps: input.uniqueValueProps ?? "",
+        emergingCompetitors: input.emergingCompetitors ?? "",
+        idealBrandImage: input.idealBrandImage ?? input.brandImage ?? "",
+        inspirationBrands: input.inspirationBrands ?? "",
+        brandingAesthetics: input.brandingAesthetics ?? "",
+        emotionsBrandEvokes: input.emotionsBrandEvokes ?? "",
+        brandPersonality: input.brandPersonality ?? "",
+        preferredFont: input.preferredFont ?? "",
+        productCategories: input.productCategories ? JSON.parse(input.productCategories) : [],
+        otherProductIdeas: input.otherProductIdeas ?? "",
+        scalingGoals: input.scalingGoals ?? "",
+        growthStrategies: input.growthStrategies ?? "",
+        longTermVision: input.longTermVision ?? "",
+        specificDeadlines: input.specificDeadlines ?? "",
+        additionalInfo: input.additionalInfo ?? "",
+        termsAccepted: input.termsAccepted === "true",
+      }
+    }
+
+    const normalizedData = normalizeApplicationPayload(data)
+
     // Validate the data
-    const validationResult = applicationSchema.safeParse(data)
+    const validationResult = applicationSchema.safeParse(normalizedData)
     if (!validationResult.success) {
       const errorMessages = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
       return NextResponse.json(
@@ -186,6 +268,13 @@ export async function POST(request: NextRequest) {
         termsAccepted: true,
         status: 'PENDING',
       },
+    })
+
+    // Async: Push to Google Sheets (non-blocking)
+    queueMicrotask(() => {
+      pushToGoogleSheets(application).catch(error => {
+        console.error('Google Sheets sync failed:', error)
+      })
     })
 
     // Send notification email to admin

@@ -36,8 +36,7 @@ export async function GET(request: NextRequest) {
       where.industryNiche = { contains: filters.niche, mode: 'insensitive' }
     }
 
-    where.deletedAt = null // Only active clients
-
+    
     const [clients, total] = await Promise.all([
       db.client.findMany({
         where,
@@ -86,9 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check capacity
-    const clientCount = await db.client.count({
-      where: { deletedAt: null },
-    })
+    const clientCount = await db.client.count()
 
     if (clientCount >= MAX_CLIENTS) {
       throw new CapacityError('Client', MAX_CLIENTS)

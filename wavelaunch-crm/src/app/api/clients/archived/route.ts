@@ -13,21 +13,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search') || ''
 
-    const where: any = {
-      deletedAt: { not: null }, // Only archived clients
-    }
+    const where: any = {}
 
     if (search) {
       where.OR = [
-        { creatorName: { contains: search, mode: 'insensitive' } },
-        { brandName: { contains: search, mode: 'insensitive' } },
+        { fullName: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
       ]
     }
 
     const clients = await prisma.client.findMany({
       where,
-      orderBy: { deletedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
       include: {
         _count: {
           select: {

@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
     const clients = await prisma.client.findMany({
       where: {
         id: { in: clientIds },
-        deletedAt: null, // Can't update archived clients
       },
     })
 
