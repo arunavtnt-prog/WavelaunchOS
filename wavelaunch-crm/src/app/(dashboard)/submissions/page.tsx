@@ -120,11 +120,11 @@ export default function SubmissionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800'
-      case 'REVIEWED': return 'bg-blue-100 text-blue-800'
-      case 'APPROVED': return 'bg-green-100 text-green-800'
-      case 'REJECTED': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'PENDING': return 'bg-gray-100 text-gray-600'
+      case 'REVIEWED': return 'bg-blue-50 text-blue-600'
+      case 'APPROVED': return 'bg-green-50 text-green-600'
+      case 'REJECTED': return 'bg-red-50 text-red-600'
+      default: return 'bg-gray-50 text-gray-600'
     }
   }
 
@@ -142,8 +142,8 @@ export default function SubmissionsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">D26 Submissions</h1>
-          <p className="text-muted-foreground">Loading submissions...</p>
+          <h1 className="text-3xl font-bold">D26 Application Review</h1>
+          <p className="text-muted-foreground">Loading applications...</p>
         </div>
       </div>
     )
@@ -152,9 +152,9 @@ export default function SubmissionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">D26 Submissions</h1>
+        <h1 className="text-3xl font-bold">D26 Application Review</h1>
         <p className="text-muted-foreground">
-          Wavelaunch Studio Intake Application submissions
+          Cohort intake and evaluation
         </p>
       </div>
 
@@ -177,24 +177,25 @@ export default function SubmissionsPage() {
                   {applications.map((application) => (
                     <div
                       key={application.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-accent ${
-                        selectedApplication?.id === application.id ? 'bg-accent' : ''
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-accent/50 ${
+                        selectedApplication?.id === application.id ? 'bg-accent border-primary/20' : ''
                       }`}
                       onClick={() => setSelectedApplication(application)}
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">{application.fullName}</div>
-                          <div className="text-sm text-muted-foreground truncate">{application.email}</div>
+                          <div className="font-medium text-base mb-1">{application.fullName}</div>
+                          <div className="text-sm text-muted-foreground mb-1">{application.email}</div>
                           <div className="text-xs text-muted-foreground">{application.industryNiche}</div>
                         </div>
-                        <Badge className={getStatusColor(application.status)}>
-                          {getStatusIcon(application.status)}
-                          <span className="ml-1">{application.status}</span>
-                        </Badge>
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {new Date(application.createdAt).toLocaleDateString()}
+                        <div className="flex flex-col items-end gap-1">
+                          <div className={`text-xs px-2 py-1 rounded-full ${getStatusColor(application.status)}`}>
+                            {application.status}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(application.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -214,94 +215,88 @@ export default function SubmissionsPage() {
           {selectedApplication ? (
             <Card>
               <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      {selectedApplication.fullName}
-                    </CardTitle>
-                    <CardDescription>{selectedApplication.email}</CardDescription>
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Users className="h-5 w-5" />
+                    {selectedApplication.fullName}
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    {selectedApplication.email}
+                  </CardDescription>
+                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <span>Applied: {new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedApplication.status)}`}>
+                      {selectedApplication.status}
+                    </span>
                   </div>
-                  <Badge className={getStatusColor(selectedApplication.status)}>
-                    {getStatusIcon(selectedApplication.status)}
-                    <span className="ml-1">{selectedApplication.status}</span>
-                  </Badge>
                 </div>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="basic" className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-6">
-                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                    <TabsTrigger value="career">Career</TabsTrigger>
-                    <TabsTrigger value="audience">Audience</TabsTrigger>
-                    <TabsTrigger value="market">Market</TabsTrigger>
-                    <TabsTrigger value="brand">Brand</TabsTrigger>
-                    <TabsTrigger value="products">Products</TabsTrigger>
+                <Tabs defaultValue="basic" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-6 bg-muted/30 p-1">
+                    <TabsTrigger value="basic" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Basic Info</TabsTrigger>
+                    <TabsTrigger value="career" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Career</TabsTrigger>
+                    <TabsTrigger value="audience" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Audience</TabsTrigger>
+                    <TabsTrigger value="market" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Market</TabsTrigger>
+                    <TabsTrigger value="brand" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Brand</TabsTrigger>
+                    <TabsTrigger value="products" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Products</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="basic" className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4" />
-                          <span className="font-medium">Country:</span>
-                          <span>{selectedApplication.country}</span>
+                  <TabsContent value="basic" className="space-y-6">
+                    <div className="grid gap-6 md:grid-cols-2">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <Globe className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Country</span>
+                          <span className="text-muted-foreground">{selectedApplication.country}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4" />
-                          <span className="font-medium">Industry:</span>
-                          <span>{selectedApplication.industryNiche}</span>
+                        <div className="flex items-center gap-3">
+                          <Target className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Industry</span>
+                          <span className="text-muted-foreground">{selectedApplication.industryNiche}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          <span className="font-medium">Age:</span>
-                          <span>{selectedApplication.age}</span>
+                        <div className="flex items-center gap-3">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Age</span>
+                          <span className="text-muted-foreground">{selectedApplication.age}</span>
                         </div>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {selectedApplication.instagramHandle && (
-                          <div className="flex items-center gap-2">
-                            <Instagram className="h-4 w-4" />
-                            <span className="font-medium">Instagram:</span>
-                            <span>{selectedApplication.instagramHandle}</span>
+                          <div className="flex items-center gap-3">
+                            <Instagram className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Instagram</span>
+                            <span className="text-muted-foreground">{selectedApplication.instagramHandle}</span>
                           </div>
                         )}
                         {selectedApplication.tiktokHandle && (
-                          <div className="flex items-center gap-2">
-                            <Music className="h-4 w-4" />
-                            <span className="font-medium">TikTok:</span>
-                            <span>{selectedApplication.tiktokHandle}</span>
+                          <div className="flex items-center gap-3">
+                            <Music className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">TikTok</span>
+                            <span className="text-muted-foreground">{selectedApplication.tiktokHandle}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          <span className="font-medium">Applied:</span>
-                          <span>{new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
-                        </div>
                       </div>
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="career" className="space-y-4">
-                    <div className="space-y-4">
+                  <TabsContent value="career" className="space-y-6">
+                    <div className="space-y-6">
                       <div>
-                        <h4 className="font-medium mb-2">Professional Milestones</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.professionalMilestones}</p>
+                        <h4 className="font-semibold text-base mb-3">Professional Milestones</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.professionalMilestones}</p>
                       </div>
-                      <hr />
-                      <div>
-                        <h4 className="font-medium mb-2">Personal Turning Points</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.personalTurningPoints}</p>
+                      <div className="border-l-2 border-border pl-6">
+                        <h4 className="font-semibold text-base mb-3">Personal Turning Points</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.personalTurningPoints}</p>
                       </div>
-                      <hr />
                       <div>
-                        <h4 className="font-medium mb-2">Vision for Venture</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.visionForVenture}</p>
+                        <h4 className="font-semibold text-base mb-3">Vision for Venture</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.visionForVenture}</p>
                       </div>
-                      <hr />
-                      <div>
-                        <h4 className="font-medium mb-2">Hope to Achieve</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.hopeToAchieve}</p>
+                      <div className="border-l-2 border-border pl-6">
+                        <h4 className="font-semibold text-base mb-3">Hope to Achieve</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.hopeToAchieve}</p>
                       </div>
                     </div>
                   </TabsContent>
@@ -400,54 +395,45 @@ export default function SubmissionsPage() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="products" className="space-y-4">
-                    <div className="space-y-4">
+                  <TabsContent value="products" className="space-y-6">
+                    <div className="space-y-6">
                       <div>
-                        <h4 className="font-medium mb-2">Product Categories</h4>
+                        <h4 className="font-semibold text-base mb-3">Product Categories</h4>
                         <div className="flex flex-wrap gap-2">
                           {selectedApplication.productCategories.split(',').map((category, index) => (
-                            <Badge key={index} variant="secondary">{category.trim()}</Badge>
+                            <Badge key={index} variant="secondary" className="px-3 py-1">{category.trim()}</Badge>
                           ))}
                         </div>
                       </div>
-                      <hr />
                       <div>
-                        <h4 className="font-medium mb-2">Other Product Ideas</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.otherProductIdeas}</p>
+                        <h4 className="font-semibold text-base mb-3">Other Product Ideas</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.otherProductIdeas}</p>
                       </div>
-                      <hr />
-                      <div>
-                        <h4 className="font-medium mb-2">Scaling Goals</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.scalingGoals}</p>
+                      <div className="border-l-2 border-border pl-6">
+                        <h4 className="font-semibold text-base mb-3">Scaling Goals</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.scalingGoals}</p>
                       </div>
-                      <hr />
                       <div>
-                        <h4 className="font-medium mb-2">Growth Strategies</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.growthStrategies}</p>
+                        <h4 className="font-semibold text-base mb-3">Growth Strategies</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.growthStrategies}</p>
                       </div>
-                      <hr />
-                      <div>
-                        <h4 className="font-medium mb-2">Long-term Vision</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.longTermVision}</p>
+                      <div className="border-l-2 border-border pl-6">
+                        <h4 className="font-semibold text-base mb-3">Long-term Vision</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.longTermVision}</p>
                       </div>
-                      <hr />
                       <div>
-                        <h4 className="font-medium mb-2">Specific Deadlines</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.specificDeadlines}</p>
+                        <h4 className="font-semibold text-base mb-3">Specific Deadlines</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.specificDeadlines}</p>
                       </div>
-                      <hr />
-                      <div>
-                        <h4 className="font-medium mb-2">Additional Information</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.additionalInfo}</p>
+                      <div className="border-l-2 border-border pl-6">
+                        <h4 className="font-semibold text-base mb-3">Additional Information</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.additionalInfo}</p>
                       </div>
                       {selectedApplication.zipFile && (
-                        <>
-                          <hr />
-                          <div>
-                            <h4 className="font-medium mb-2">Submitted File</h4>
-                            <p className="text-sm text-muted-foreground">{selectedApplication.zipFile}</p>
-                          </div>
-                        </>
+                        <div>
+                          <h4 className="font-semibold text-base mb-3">Submitted File</h4>
+                          <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.zipFile}</p>
+                        </div>
                       )}
                     </div>
                   </TabsContent>
