@@ -39,8 +39,8 @@ export async function buildClientContext(clientId: string): Promise<ClientContex
   }
 
   return {
-    client_name: client.fullName,
-    brand_name: client.fullName,
+    client_name: client.name,
+    brand_name: client.name,
     email: client.email,
     niche: client.industryNiche,
     vision_statement: client.visionForVenture,

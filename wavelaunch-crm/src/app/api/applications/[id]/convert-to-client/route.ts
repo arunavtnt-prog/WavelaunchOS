@@ -52,7 +52,7 @@ export async function POST(
     // Create client from application data using production schema
     const client = await db.client.create({
       data: {
-        name: application.fullName, // Production schema uses 'name' field
+        name: application.fullName, // Production schema uses 'name' field, application uses 'fullName'
         email: application.email,
         phone: '', // Production schema has phone field, set to empty for now
         status: 'ACTIVE', // Production schema has status field

@@ -26,7 +26,7 @@ async function pushToGoogleSheets(application: any) {
     // const sheet = doc.sheetsByIndex[0]
     // await sheet.addRow({
     //   'Application ID': application.id,
-    //   'Full Name': application.fullName,
+    //   'Full Name': application.name,
     //   'Email': application.email,
     //   'Industry Niche': application.industryNiche,
     //   'Country': application.country,
@@ -44,7 +44,7 @@ async function pushToGoogleSheets(application: any) {
 // Validation schema for application submission
 const applicationSchema = z.object({
   // Basic Information
-  fullName: z.string().min(1, 'Full name is required'),
+  name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email format'),
   instagramHandle: z.string().optional().default(''),
   tiktokHandle: z.string().optional().default(''),
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     const normalizeApplicationPayload = (input: Record<string, string>) => {
       return {
         // Required fields with fallbacks
-        fullName: input.fullName ?? input.creatorName ?? "",
+        name: input.name ?? input.creatorName ?? "",
         email: input.email ?? "",
         instagramHandle: input.instagramHandle ?? "",
         tiktokHandle: input.tiktokHandle ?? "",
@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
     // Create the application in the database
     const application = await prisma.application.create({
       data: {
-        fullName: validatedData.fullName,
+        name: validatedData.name,
         email: validatedData.email,
         instagramHandle: validatedData.instagramHandle || null,
         tiktokHandle: validatedData.tiktokHandle || null,
@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
       data: {
         id: application.id,
         email: application.email,
-        fullName: application.fullName,
+        name: application.name,
       },
       message: 'Application submitted successfully',
     })
@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
 // Send notification email to admin
 async function sendAdminNotification(application: {
   id: string
-  fullName: string
+  name: string
   email: string
   country: string
   industryNiche: string
@@ -330,7 +330,7 @@ async function sendAdminNotification(application: {
     console.log('No email provider configured. Admin notification skipped.')
     console.log('New application:', {
       id: application.id,
-      name: application.fullName,
+      name: application.name,
       email: application.email,
       country: application.country,
       niche: application.industryNiche,
@@ -367,7 +367,7 @@ async function sendAdminNotification(application: {
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Name</td>
-                <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; text-align: right;">${application.fullName}</td>
+                <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; text-align: right;">${application.name}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Email</td>
@@ -406,7 +406,7 @@ async function sendAdminNotification(application: {
     await resend.emails.send({
       from: process.env.SMTP_FROM || 'Wavelaunch <noreply@wavelaunch.studio>',
       to: adminEmail,
-      subject: `New Application: ${application.fullName} (${application.industryNiche})`,
+      subject: `New Application: ${application.name} (${application.industryNiche})`,
       html: emailHtml,
     })
   } else if (hasSmtp) {
@@ -423,7 +423,7 @@ async function sendAdminNotification(application: {
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'Wavelaunch <noreply@wavelaunch.studio>',
       to: adminEmail,
-      subject: `New Application: ${application.fullName} (${application.industryNiche})`,
+      subject: `New Application: ${application.name} (${application.industryNiche})`,
       html: emailHtml,
     })
   }
@@ -431,7 +431,7 @@ async function sendAdminNotification(application: {
 
 // Send confirmation email to applicant
 async function sendApplicantConfirmation(application: {
-  fullName: string
+  name: string
   email: string
 }) {
   // Check if we have email configuration
@@ -465,7 +465,7 @@ async function sendApplicantConfirmation(application: {
           </h1>
 
           <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">
-            Hi ${application.fullName},
+            Hi ${application.name},
           </p>
 
           <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">

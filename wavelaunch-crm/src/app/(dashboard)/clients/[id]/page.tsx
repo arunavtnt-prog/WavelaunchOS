@@ -263,7 +263,7 @@ export default function ClientDetailPage() {
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
-          creatorName={client.fullName}
+          creatorName={client.name}
         />
       )}
 
@@ -271,7 +271,7 @@ export default function ClientDetailPage() {
       {!client.deletedAt && (
         <BusinessPlanGenerator
           clientId={client.id}
-          clientName={client.fullName}
+          clientName={client.name}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
           hasCompletedOnboarding={false} // TODO: Implement portal user check
         />
@@ -286,7 +286,7 @@ export default function ClientDetailPage() {
       {!client.deletedAt && (
         <ClientMessaging
           clientId={client.id}
-          creatorName={client.fullName}
+          creatorName={client.name}
         />
       )}
 
@@ -363,7 +363,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Archive Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will archive {client.fullName}. You can restore them later from the archived clients page.
+              This will archive {client.name}. You can restore them later from the archived clients page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -381,7 +381,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore {client.fullName} and mark them as active again.
+              This will restore {client.name} and mark them as active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

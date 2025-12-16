@@ -110,7 +110,7 @@ export async function PATCH(
       data: {
         clientId: updated.id,
         type: 'CLIENT_UPDATED',
-        description: `Updated client: ${updated.fullName}`,
+        description: `Updated client: ${updated.name}`,
         userId: user.id,
       },
     })
@@ -161,7 +161,7 @@ export async function DELETE(
       data: {
         clientId: client.id,
         type: 'CLIENT_DELETED',
-        description: `Deleted client: ${client.fullName}`,
+        description: `Deleted client: ${client.name}`,
         userId: user.id,
       },
     })

@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 // Schema for external application submission
 const externalApplicationSchema = z.object({
-  fullName: z.string().min(2),
+  name: z.string().min(2),
   email: z.string().email(),
   instagramHandle: z.string().optional(),
   tiktokHandle: z.string().optional(),
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     // Create application in CRM database
     const application = await prisma.application.create({
       data: {
-        fullName: data.fullName,
+        name: data.name,
         email: data.email,
         instagramHandle: data.instagramHandle,
         tiktokHandle: data.tiktokHandle,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         type: 'CLIENT_CREATED',
-        description: `External application submitted by ${application.fullName}`,
+        description: `External application submitted by ${application.name}`,
         metadata: JSON.stringify({
           source: 'public_form',
           applicationId: application.id,

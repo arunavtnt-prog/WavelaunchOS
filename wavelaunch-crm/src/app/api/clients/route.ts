@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     if (filters.search) {
       where.OR = [
-        { fullName: { contains: filters.search, mode: 'insensitive' } },
+        { name: { contains: filters.search, mode: 'insensitive' } },
         { email: { contains: filters.search, mode: 'insensitive' } },
         { industryNiche: { contains: filters.search, mode: 'insensitive' } },
       ]
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       data: {
         clientId: client.id,
         type: 'CLIENT_CREATED',
-        description: `Created client: ${client.fullName}`,
+        description: `Created client: ${client.name}`,
         userId: session.user.id,
       },
     })

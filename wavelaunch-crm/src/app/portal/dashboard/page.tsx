@@ -82,7 +82,7 @@ export default async function PortalDashboardPage() {
       {/* Welcome Section */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          Welcome back, {client.fullName}!
+          Welcome back, {client.name}!
           {portalUser.completedOnboarding && <Sparkles className="h-6 w-6 text-yellow-500" />}
         </h1>
         <p className="text-muted-foreground">
@@ -113,7 +113,7 @@ export default async function PortalDashboardPage() {
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div className="flex-1 space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Based on the comprehensive information you provided during onboarding, our team is crafting a personalized business plan tailored specifically to {client.fullName || 'your brand'}.
+                  Based on the comprehensive information you provided during onboarding, our team is crafting a personalized business plan tailored specifically to {client.name || 'your brand'}.
                 </p>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -310,7 +310,7 @@ export default async function PortalDashboardPage() {
             <div>
               <p className="text-sm font-medium text-muted-foreground">Brand Name</p>
               <p className="text-lg font-semibold">
-                {client.fullName || 'Not set'}
+                {client.name || 'Not set'}
               </p>
             </div>
             <div>
@@ -329,8 +329,8 @@ export default async function PortalDashboardPage() {
 
   return (
     <DashboardClientWrapper
-      clientName={client.fullName}
-      brandName={client.fullName}
+      clientName={client.name}
+      brandName={client.name}
       showWelcome={showWelcome}
     >
       {dashboardContent}

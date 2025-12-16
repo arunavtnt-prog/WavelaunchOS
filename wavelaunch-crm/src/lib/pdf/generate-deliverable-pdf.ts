@@ -51,8 +51,8 @@ export async function generateDeliverablePDF(
     const result = await generatePDF({
       content: deliverable.contentMarkdown,
       metadata: {
-        clientName: deliverable.client.fullName,
-        brandName: deliverable.client.fullName || undefined,
+        clientName: deliverable.client.name,
+        brandName: deliverable.client.name || undefined,
         industry: deliverable.client.industryNiche,
         version: 1, // Deliverables don't have versions
         date: format(deliverable.createdAt, 'MMMM dd, yyyy'),

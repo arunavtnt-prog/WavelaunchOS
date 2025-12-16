@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const createClientSchema = z.object({
   // Required fields
-  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
+  name: z.string().min(2, 'Full name must be at least 2 characters').max(100),
   email: z.string().email('Invalid email address'),
   visionForVenture: z.string().min(10, 'Vision for venture must be at least 10 characters'),
   targetAudience: z.string().min(10, 'Target audience description is required'),

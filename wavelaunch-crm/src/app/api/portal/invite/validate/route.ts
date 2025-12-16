@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         client: {
           select: {
             id: true,
-            fullName: true,
+            name: true,
             email: true,
           },
         },
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       valid: true,
       data: {
         email: portalUser.email,
-        clientName: portalUser.client.fullName,
+        clientName: portalUser.client.name,
         expiresAt: portalUser.inviteTokenExpiry,
       },
     })

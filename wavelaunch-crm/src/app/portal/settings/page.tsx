@@ -56,12 +56,12 @@ export default async function PortalSettingsPage() {
             </div>
             <div>
               <Label className="text-muted-foreground">Creator Name</Label>
-              <p className="text-lg font-medium">{portalUser.client.fullName}</p>
+              <p className="text-lg font-medium">{portalUser.client.name}</p>
             </div>
             <div>
               <Label className="text-muted-foreground">Brand Name</Label>
               <p className="text-lg font-medium">
-                {portalUser.client.fullName || 'Not set'}
+                {portalUser.client.name || 'Not set'}
               </p>
             </div>
             <div>

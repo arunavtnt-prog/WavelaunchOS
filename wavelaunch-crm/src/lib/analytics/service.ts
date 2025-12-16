@@ -451,7 +451,7 @@ export class AnalyticsService {
 
         return {
           clientId: client.id,
-          clientName: client.fullName,
+          clientName: client.name,
           onboardedAt: client.onboardedAt,
           status: client.status,
           metrics: {

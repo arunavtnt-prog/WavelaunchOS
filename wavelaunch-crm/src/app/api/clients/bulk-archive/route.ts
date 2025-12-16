@@ -48,10 +48,10 @@ export async function POST(request: NextRequest) {
       await prisma.activity.create({
         data: {
           type: 'CLIENT_ARCHIVED',
-          description: `Bulk archived client: ${client.fullName}`,
+          description: `Bulk archived client: ${client.name}`,
           metadata: JSON.stringify({
             clientId: client.id,
-            fullName: client.fullName,
+            name: client.name,
           }),
           clientId: client.id,
           userId: session.user.id,

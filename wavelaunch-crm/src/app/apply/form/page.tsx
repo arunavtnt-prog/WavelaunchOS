@@ -49,7 +49,7 @@ const COUNTRIES = [
 // Initial form state
 const initialFormData = {
   // Basic Information
-  fullName: '',
+  name: '',
   email: '',
   instagramHandle: '',
   tiktokHandle: '',
@@ -152,7 +152,7 @@ export default function ApplicationFormPage() {
 
     switch (step) {
       case 1:
-        if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required'
+        if (!formData.name.trim()) newErrors.name = 'Full name is required'
         if (!formData.email.trim()) newErrors.email = 'Email is required'
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format'
         if (!formData.country) newErrors.country = 'Country is required'
@@ -284,11 +284,11 @@ export default function ApplicationFormPage() {
                   <Label htmlFor="fullName">Full Name *</Label>
                   <Input
                     id="fullName"
-                    value={formData.fullName}
+                    value={formData.name}
                     onChange={(e) => updateField('fullName', e.target.value)}
                     placeholder="Your full name"
                   />
-                  {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
+                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email *</Label>
@@ -712,7 +712,7 @@ export default function ApplicationFormPage() {
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-slate-500">Name:</span>
-                    <p className="font-medium">{formData.fullName}</p>
+                    <p className="font-medium">{formData.name}</p>
                   </div>
                   <div>
                     <span className="text-slate-500">Email:</span>

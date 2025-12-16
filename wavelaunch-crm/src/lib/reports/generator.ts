@@ -159,8 +159,8 @@ export class ReportGenerator {
 
     return clients.map((c) => ({
       id: c.id,
-      fullName: c.fullName,
-      brandName: c.fullName,
+      name: c.name,
+      brandName: c.name,
       email: c.email,
       status: c.status,
       niche: c.industryNiche,
@@ -204,7 +204,7 @@ export class ReportGenerator {
         client: {
           select: {
             id: true,
-            fullName: true,
+            name: true,
             email: true,
           },
         },
@@ -225,7 +225,7 @@ export class ReportGenerator {
       title: d.title,
       month: d.month,
       status: d.status,
-      clientName: d.client.fullName,
+      clientName: d.client.name,
       clientEmail: d.client.email,
       generatedBy: d.generatedByUser.name,
       generatedAt: d.generatedAt,
@@ -265,7 +265,7 @@ export class ReportGenerator {
         client: {
           select: {
             id: true,
-            fullName: true,
+            name: true,
             email: true,
           },
         },
@@ -285,7 +285,7 @@ export class ReportGenerator {
       id: p.id,
       version: p.version,
       status: p.status,
-      clientName: p.client.fullName,
+      clientName: p.client.name,
       clientEmail: p.client.email,
       generatedBy: p.generatedByUser.name,
       generatedAt: p.generatedAt,
@@ -329,7 +329,7 @@ export class ReportGenerator {
         client: {
           select: {
             id: true,
-            fullName: true,
+            name: true,
           },
         },
         user: {
@@ -347,7 +347,7 @@ export class ReportGenerator {
       id: a.id,
       type: a.type,
       description: a.description,
-      clientName: a.client?.fullName || null,
+      clientName: a.client?.name || null,
       userName: a.user?.name || null,
       createdAt: a.createdAt,
     }))
@@ -427,7 +427,7 @@ export class ReportGenerator {
         client: {
           select: {
             id: true,
-            fullName: true,
+            name: true,
             email: true,
           },
         },
@@ -451,7 +451,7 @@ export class ReportGenerator {
       status: t.status,
       priority: t.priority,
       category: t.category,
-      clientName: t.client.fullName,
+      clientName: t.client.name,
       assignedTo: t.assignedUser?.name || 'Unassigned',
       commentsCount: t._count.comments,
       createdAt: t.createdAt,
