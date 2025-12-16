@@ -23,6 +23,7 @@ import {
 
 interface Application {
   id: string
+  // Basic Information
   fullName: string
   email: string
   instagramHandle?: string
@@ -30,25 +31,43 @@ interface Application {
   country: string
   industryNiche: string
   age: number
+  // Career Background
   professionalMilestones: string
   personalTurningPoints: string
   visionForVenture: string
   hopeToAchieve: string
+  // Audience & Demographics
   targetAudience: string
   demographicProfile: string
   targetDemographicAge: string
   audienceGenderSplit?: string
+  audienceMaritalStatus?: string
   currentChannels: string
+  // Pain Points & Values
   keyPainPoints: string
   brandValues: string
+  // Competition & Market
   differentiation: string
   uniqueValueProps: string
+  emergingCompetitors: string
+  // Brand Identity
   idealBrandImage: string
+  inspirationBrands: string
   brandingAesthetics: string
+  emotionsBrandEvokes: string
   brandPersonality: string
+  preferredFont: string
+  // Products & Goals
   productCategories: string
+  otherProductIdeas: string
   scalingGoals: string
+  growthStrategies: string
   longTermVision: string
+  specificDeadlines: string
+  additionalInfo: string
+  // File upload
+  zipFile?: string
+  // Status
   status: string
   createdAt: string
   reviewedAt?: string
@@ -211,11 +230,13 @@ export default function SubmissionsPage() {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="basic" className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="basic">Basic Info</TabsTrigger>
                     <TabsTrigger value="career">Career</TabsTrigger>
                     <TabsTrigger value="audience">Audience</TabsTrigger>
-                    <TabsTrigger value="business">Business</TabsTrigger>
+                    <TabsTrigger value="market">Market</TabsTrigger>
+                    <TabsTrigger value="brand">Brand</TabsTrigger>
+                    <TabsTrigger value="products">Products</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="basic" className="space-y-4">
@@ -272,6 +293,16 @@ export default function SubmissionsPage() {
                         <h4 className="font-medium mb-2">Personal Turning Points</h4>
                         <p className="text-sm text-muted-foreground">{selectedApplication.personalTurningPoints}</p>
                       </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Vision for Venture</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.visionForVenture}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Hope to Achieve</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.hopeToAchieve}</p>
+                      </div>
                     </div>
                   </TabsContent>
 
@@ -286,26 +317,138 @@ export default function SubmissionsPage() {
                         <p className="text-sm text-muted-foreground">{selectedApplication.demographicProfile}</p>
                       </div>
                       <div>
+                        <h4 className="font-medium mb-2">Target Demographic Age</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.targetDemographicAge}</p>
+                      </div>
+                      {selectedApplication.audienceGenderSplit && (
+                        <div>
+                          <h4 className="font-medium mb-2">Audience Gender Split</h4>
+                          <p className="text-sm text-muted-foreground">{selectedApplication.audienceGenderSplit}</p>
+                        </div>
+                      )}
+                      {selectedApplication.audienceMaritalStatus && (
+                        <div>
+                          <h4 className="font-medium mb-2">Audience Marital Status</h4>
+                          <p className="text-sm text-muted-foreground">{selectedApplication.audienceMaritalStatus}</p>
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-medium mb-2">Current Channels</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.currentChannels}</p>
+                      </div>
+                      <div>
                         <h4 className="font-medium mb-2">Key Pain Points</h4>
                         <p className="text-sm text-muted-foreground">{selectedApplication.keyPainPoints}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-2">Brand Values</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.brandValues}</p>
                       </div>
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="business" className="space-y-4">
+                  <TabsContent value="market" className="space-y-4">
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-medium mb-2">Vision for Venture</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.visionForVenture}</p>
+                        <h4 className="font-medium mb-2">Differentiation</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.differentiation}</p>
                       </div>
+                      <hr />
                       <div>
-                        <h4 className="font-medium mb-2">Hope to Achieve</h4>
-                        <p className="text-sm text-muted-foreground">{selectedApplication.hopeToAchieve}</p>
+                        <h4 className="font-medium mb-2">Unique Value Propositions</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.uniqueValueProps}</p>
                       </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Emerging Competitors</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.emergingCompetitors}</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="brand" className="space-y-4">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Ideal Brand Image</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.idealBrandImage}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Inspiration Brands</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.inspirationBrands}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Branding Aesthetics</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.brandingAesthetics}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Emotions Brand Evokes</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.emotionsBrandEvokes}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Brand Personality</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.brandPersonality}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Preferred Font</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.preferredFont}</p>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="products" className="space-y-4">
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-2">Product Categories</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedApplication.productCategories.split(',').map((category, index) => (
+                            <Badge key={index} variant="secondary">{category.trim()}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Other Product Ideas</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.otherProductIdeas}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Scaling Goals</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.scalingGoals}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Growth Strategies</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.growthStrategies}</p>
+                      </div>
+                      <hr />
                       <div>
                         <h4 className="font-medium mb-2">Long-term Vision</h4>
                         <p className="text-sm text-muted-foreground">{selectedApplication.longTermVision}</p>
                       </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Specific Deadlines</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.specificDeadlines}</p>
+                      </div>
+                      <hr />
+                      <div>
+                        <h4 className="font-medium mb-2">Additional Information</h4>
+                        <p className="text-sm text-muted-foreground">{selectedApplication.additionalInfo}</p>
+                      </div>
+                      {selectedApplication.zipFile && (
+                        <>
+                          <hr />
+                          <div>
+                            <h4 className="font-medium mb-2">Submitted File</h4>
+                            <p className="text-sm text-muted-foreground">{selectedApplication.zipFile}</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>
