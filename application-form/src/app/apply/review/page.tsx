@@ -41,19 +41,41 @@ export default function ReviewPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/applications', {
+      // Check if this is admin mode (from URL parameter or session)
+      const urlParams = new URLSearchParams(window.location.search)
+      const isAdminMode = urlParams.get('mode') === 'admin' || 
+                        window.location.pathname.startsWith('/admin')
+
+      // Submit to working CRM for both public and admin
+      const response = await fetch(process.env.NEXT_PUBLIC_CRM_API_URL || 'https://penguin-wavelaunch-os.vercel.app/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': process.env.CRM_API_TOKEN ? `Bearer ${process.env.CRM_API_TOKEN}` : '',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          source: isAdminMode ? 'admin' : 'public',
+          submittedAt: new Date().toISOString(),
+        }),
       })
 
       const result = await response.json()
 
       if (result.success) {
         clearFormData()
-        router.push('/success')
+        if (isAdminMode) {
+          toast({
+            title: 'Client Added Successfully',
+            description: 'Application has been submitted and is ready for review.',
+          })
+          // Redirect back to admin dashboard or clients page
+          setTimeout(() => {
+            window.location.href = '/admin/clients'
+          }, 2000)
+        } else {
+          router.push('/success')
+        }
       } else {
         toast({
           title: 'Submission Failed',
