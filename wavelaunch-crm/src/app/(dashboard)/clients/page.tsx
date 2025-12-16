@@ -302,7 +302,7 @@ export default function ClientsPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold group-hover:text-primary">
-                          {client.fullName}
+                          {client.name}
                         </h3>
                       </div>
                       <span

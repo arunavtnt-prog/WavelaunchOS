@@ -142,7 +142,7 @@ export default function ClientDetailPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{client.fullName}</h1>
+          <h1 className="text-3xl font-bold">{client.name}</h1>
         </div>
         {client.deletedAt ? (
           <Button
