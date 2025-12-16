@@ -35,7 +35,7 @@ const navigation = [
   { name: 'Files', href: '/files', icon: Folders },
   { name: 'Prompts', href: '/prompts', icon: FileCode },
   { name: 'Jobs', href: '/jobs', icon: FileText },
-  { name: 'Applications', href: '/applications', icon: Inbox },
+  { name: 'Submissions', href: '/submissions', icon: Inbox },
   { name: 'Tickets', href: '/tickets', icon: Ticket },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Reports', href: '/reports', icon: FileBarChart },

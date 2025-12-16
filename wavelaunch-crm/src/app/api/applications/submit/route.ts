@@ -385,7 +385,7 @@ async function sendAdminNotification(application: {
           </div>
 
           <div style="text-align: center;">
-            <a href="${appUrl}/dashboard/applications/${application.id}"
+            <a href="${appUrl}/dashboard/submissions/${application.id}"
                style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px;">
               Review Application
             </a>

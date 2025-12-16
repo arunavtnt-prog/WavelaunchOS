@@ -24,7 +24,7 @@ import { useState } from 'react'
 
 const mainNavigation = [
   { name: 'Quick Create', href: '/clients/new', icon: PlusCircle },
-  { name: 'View Applications', href: '/applications', icon: Inbox },
+  { name: 'View Submissions', href: '/submissions', icon: Inbox },
   { name: 'Dashboards', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Campaign Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Deliverables Hub', href: '/deliverables', icon: Calendar },
