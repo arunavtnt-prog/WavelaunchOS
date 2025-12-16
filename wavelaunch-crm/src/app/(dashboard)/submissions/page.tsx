@@ -161,68 +161,61 @@ export default function SubmissionsPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Applications List */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                All Submissions ({applications.length})
-              </CardTitle>
-              <CardDescription>
-                Click to view application details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[600px] overflow-y-auto">
-                <div className="space-y-2">
-                  {applications.map((application) => (
-                    <div
-                      key={application.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-accent/50 ${
-                        selectedApplication?.id === application.id ? 'bg-accent border-primary/20' : ''
-                      }`}
-                      onClick={() => setSelectedApplication(application)}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-base mb-1">{application.fullName}</div>
-                          <div className="text-sm text-muted-foreground mb-1">{application.email}</div>
-                          <div className="text-xs text-muted-foreground">{application.industryNiche}</div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <div className={`text-xs px-2 py-1 rounded-full ${getStatusColor(application.status)}`}>
-                            {application.status}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(application.createdAt).toLocaleDateString()}
-                          </div>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              <h2 className="text-lg font-semibold">Applications ({applications.length})</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">Click to review details</p>
+            <div className="h-[600px] overflow-y-auto border rounded-lg bg-background">
+              <div className="divide-y">
+                {applications.map((application) => (
+                  <div
+                    key={application.id}
+                    className={`px-3 py-2 cursor-pointer transition-colors hover:bg-accent/30 ${
+                      selectedApplication?.id === application.id ? 'bg-accent/50 border-l-2 border-l-primary' : ''
+                    }`}
+                    onClick={() => setSelectedApplication(application)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0 pr-3">
+                        <div className="font-medium text-sm mb-1 truncate">{application.fullName}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {application.email} • {application.industryNiche}
                         </div>
                       </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span className={`px-1.5 py-0.5 rounded text-xs ${getStatusColor(application.status)}`}>
+                          {application.status}
+                        </span>
+                        <span>{new Date(application.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                  ))}
-                  {applications.length === 0 && (
-                    <div className="text-center text-muted-foreground py-8">
-                      No submissions found. Submit a test application to see it here.
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ))}
+                {applications.length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    No applications found. Submit a test application to see it here.
+                  </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Application Details */}
         <div className="lg:col-span-2">
           {selectedApplication ? (
-            <Card>
-              <CardHeader>
+            <div className="bg-background border rounded-lg shadow-sm">
+              <div className="border-b bg-muted/30 px-6 py-4">
                 <div>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Users className="h-5 w-5" />
+                  <div className="flex items-center gap-3 text-xl font-semibold">
+                    <Users className="h-6 w-6" />
                     {selectedApplication.fullName}
-                  </CardTitle>
-                  <CardDescription className="mt-1">
+                  </div>
+                  <div className="mt-1 text-muted-foreground">
                     {selectedApplication.email}
-                  </CardDescription>
+                  </div>
                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                     <span>Applied: {new Date(selectedApplication.createdAt).toLocaleDateString()}</span>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedApplication.status)}`}>
@@ -230,8 +223,8 @@ export default function SubmissionsPage() {
                     </span>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
+              </div>
+              <div className="p-6">
                 <Tabs defaultValue="basic" className="space-y-6">
                   <TabsList className="grid w-full grid-cols-6 bg-muted/30 p-1">
                     <TabsTrigger value="basic" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">Basic Info</TabsTrigger>
@@ -485,18 +478,18 @@ export default function SubmissionsPage() {
                     </>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ) : (
-            <Card>
-              <CardContent className="flex items-center justify-center h-[600px]">
+            <div className="bg-background border rounded-lg shadow-sm">
+              <div className="flex items-center justify-center h-[600px]">
                 <div className="text-center text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-medium mb-2">No Submission Selected</h3>
-                  <p className="text-sm">Select a submission from the list to view details</p>
+                  <h3 className="font-medium mb-2">No Application Selected</h3>
+                  <p className="text-sm">Select an application from the list to review details</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
       </div>
