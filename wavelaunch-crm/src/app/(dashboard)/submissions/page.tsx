@@ -120,6 +120,7 @@ export default function SubmissionsPage() {
 
   const convertToClient = async (application: Application) => {
     try {
+      console.log('Converting application to client:', application.id)
       const response = await fetch(`/api/applications/${application.id}/convert-to-client`, {
         method: 'POST',
         headers: {
@@ -127,17 +128,28 @@ export default function SubmissionsPage() {
         },
       })
       
+      console.log('Response status:', response.status)
+      const data = await response.json()
+      console.log('Response data:', data)
+      
       if (response.ok) {
-        const data = await response.json()
         if (data.success) {
           // Update application status to show it's been converted
           await updateApplicationStatus(application.id, 'CONVERTED')
           // Show success message or redirect to clients page
           console.log('Application converted to client successfully')
+          alert('Application successfully converted to client!')
+        } else {
+          console.error('Conversion failed:', data.error)
+          alert(`Error: ${data.error}`)
         }
+      } else {
+        console.error('HTTP error:', response.status, data.error)
+        alert(`Error: ${data.error}`)
       }
     } catch (error) {
       console.error('Failed to convert application to client:', error)
+      alert('Failed to convert application to client. Check console for details.')
     }
   }
 

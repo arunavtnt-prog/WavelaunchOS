@@ -7,12 +7,17 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('Convert to client request for application ID:', params.id)
+    
     // Get the application
     const application = await db.application.findUnique({
       where: { id: params.id },
     })
 
+    console.log('Found application:', application?.id, 'Status:', application?.status)
+
     if (!application) {
+      console.log('Application not found')
       return NextResponse.json(
         { error: 'Application not found' },
         { status: 404 }
@@ -20,6 +25,7 @@ export async function POST(
     }
 
     if (application.status !== 'APPROVED') {
+      console.log('Application not approved, status:', application.status)
       return NextResponse.json(
         { error: 'Only approved applications can be converted to clients' },
         { status: 400 }
@@ -31,13 +37,17 @@ export async function POST(
       where: { email: application.email },
     })
 
+    console.log('Existing client check:', existingClient?.email)
+
     if (existingClient) {
+      console.log('Client already exists with this email')
       return NextResponse.json(
         { error: 'A client with this email already exists' },
         { status: 400 }
       )
     }
 
+    console.log('Creating client from application data...')
     // Create client from application data
     const client = await db.client.create({
       data: {
@@ -87,6 +97,8 @@ export async function POST(
         additionalInfo: application.additionalInfo || '',
       },
     })
+
+    console.log('Client created successfully:', client.id, client.fullName)
 
     return NextResponse.json({
       success: true,
