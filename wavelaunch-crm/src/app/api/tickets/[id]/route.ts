@@ -26,9 +26,8 @@ export async function GET(
         client: {
           select: {
             id: true,
-            creatorName: true,
+            fullName: true,
             email: true,
-            brandName: true,
           },
         },
         assignedUser: {
@@ -121,7 +120,7 @@ export async function PATCH(
         client: {
           select: {
             id: true,
-            creatorName: true,
+            fullName: true,
             email: true,
           },
         },

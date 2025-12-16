@@ -39,7 +39,7 @@ interface PortalNavProps {
   user?: {
     email: string
     client?: {
-      creatorName: string
+      fullName: string
       brandName?: string | null
     }
   }
@@ -90,7 +90,7 @@ export function PortalNav({ user }: PortalNavProps) {
     }
   }
 
-  const displayName = user?.client?.creatorName || user?.email || 'User'
+  const displayName = user?.client?.fullName || user?.email || 'User'
   const initials = displayName
     .split(' ')
     .map((n) => n[0])

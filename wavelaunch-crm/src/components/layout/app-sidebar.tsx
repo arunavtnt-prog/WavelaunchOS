@@ -33,8 +33,10 @@ const mainNavigation = [
 
 const documentsNavigation = [
   { name: 'Business Plans', href: '/business-plans', icon: FileText },
-  { name: 'Monthly Deliverables', href: '/clients', icon: Calendar },
   { name: 'Client Files', href: '/files', icon: Folders },
+  { name: 'Deliverables Hub', href: '/deliverables', icon: Calendar },
+  { name: 'Prompt Templates', href: '/prompts', icon: FileCode },
+  { name: 'Campaign Analytics', href: '/analytics', icon: BarChart3 },
 ]
 
 const systemNavigation = [
@@ -160,8 +162,8 @@ export function AppSidebar() {
 
       {/* User Section */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-between gap-3 rounded-md px-3 py-2 hover:bg-sidebar-accent/50">
-          <div className="flex items-center gap-3">
+        <Link href="/profile">
+          <div className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-sidebar-accent/50 cursor-pointer">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground">
               {session?.user?.name?.charAt(0) || 'A'}
             </div>
@@ -174,12 +176,12 @@ export function AppSidebar() {
               </span>
             </div>
           </div>
+        </Link>
+        <div className="mt-2">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8"
+            className="w-full justify-start gap-2 h-9 px-3 text-sm"
             onClick={() => signOut({ callbackUrl: '/login' })}
-            title="Sign out"
           >
             <svg
               width="16"
@@ -187,6 +189,7 @@ export function AppSidebar() {
               viewBox="0 0 16 16"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
             >
               <path
                 d="M6 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H6"
@@ -210,6 +213,7 @@ export function AppSidebar() {
                 strokeLinejoin="round"
               />
             </svg>
+            Sign Out
           </Button>
         </div>
       </div>

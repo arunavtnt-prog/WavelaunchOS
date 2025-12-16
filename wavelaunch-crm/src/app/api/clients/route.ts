@@ -110,6 +110,16 @@ export async function POST(request: NextRequest) {
       data: {
         ...data,
         status: 'ACTIVE',
+        // Set required fields that might be missing from form data
+        audienceGenderSplit: data.audienceGenderSplit || '',
+        audienceMaritalStatus: data.audienceMaritalStatus || '',
+        differentiation: data.uniqueValueProps || '', // Use uniqueValueProps as differentiation
+        emergingCompetitors: data.emergingCompetitors || '',
+        inspirationBrands: data.inspirationBrands || '',
+        emotionsBrandEvokes: data.emotionsBrandEvokes || '',
+        growthStrategies: data.growthStrategies || '',
+        specificDeadlines: data.specificDeadlines || null,
+        additionalInfo: data.additionalInfo || null,
       },
     })
 

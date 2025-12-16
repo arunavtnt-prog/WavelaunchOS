@@ -302,13 +302,8 @@ export default function ClientsPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-semibold group-hover:text-primary">
-                          {client.creatorName}
+                          {client.fullName}
                         </h3>
-                        {client.brandName && (
-                          <p className="text-sm text-muted-foreground">
-                            {client.brandName}
-                          </p>
-                        )}
                       </div>
                       <span
                         className={`rounded-full px-2 py-1 text-xs ${
@@ -323,7 +318,7 @@ export default function ClientsPage() {
 
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        {client.niche || client.targetIndustry}
+                        {client.industryNiche}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Onboarded {new Date(client.onboardedAt).toLocaleDateString()}

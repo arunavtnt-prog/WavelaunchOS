@@ -31,9 +31,8 @@ export function OnboardingDetails({ client }: OnboardingDetailsProps) {
   }
 
   const hasData = Boolean(
-    client.niche ||
-    client.visionStatement ||
-    client.targetIndustry ||
+    client.industryNiche ||
+    client.visionForVenture ||
     client.targetAudience
   )
 
@@ -94,19 +93,17 @@ export function OnboardingDetails({ client }: OnboardingDetailsProps) {
           {/* Tab 1: Business Basics */}
           <TabsContent value="basics" className="space-y-4 mt-4">
             <div className="space-y-3">
-              <DetailField label="Business Niche" value={client.niche} />
-              <DetailField label="Vision Statement" value={client.visionStatement} />
-              <DetailField label="Business Goals" value={client.goals} />
+              <DetailField label="Business Niche" value={client.industryNiche} />
+              <DetailField label="Vision Statement" value={client.visionForVenture} />
             </div>
           </TabsContent>
 
           {/* Tab 2: Target Audience */}
           <TabsContent value="audience" className="space-y-4 mt-4">
             <div className="space-y-3">
-              <DetailField label="Target Industry" value={client.targetIndustry} />
               <DetailField label="Target Audience" value={client.targetAudience} />
               <DetailField label="Target Demographic Age" value={client.targetDemographicAge} />
-              <DetailField label="Demographics" value={client.demographics} />
+              <DetailField label="Demographics" value={client.demographicProfile} />
               <DetailField label="Audience Gender Split" value={client.audienceGenderSplit} />
               <DetailField label="Audience Marital Status" value={client.audienceMaritalStatus} />
             </div>
@@ -115,9 +112,9 @@ export function OnboardingDetails({ client }: OnboardingDetailsProps) {
           {/* Tab 3: Value Proposition */}
           <TabsContent value="value" className="space-y-4 mt-4">
             <div className="space-y-3">
-              <DetailField label="Pain Points" value={client.painPoints} />
+              <DetailField label="Pain Points" value={client.keyPainPoints} />
               <DetailField label="Unique Value Propositions" value={client.uniqueValueProps} />
-              <DetailField label="Competitive Differentiation" value={client.competitiveDifferentiation} />
+              <DetailField label="Competitive Differentiation" value={client.differentiation} />
               <DetailField label="Emerging Competitors" value={client.emergingCompetitors} />
             </div>
           </TabsContent>
@@ -125,7 +122,7 @@ export function OnboardingDetails({ client }: OnboardingDetailsProps) {
           {/* Tab 4: Brand Identity */}
           <TabsContent value="brand" className="space-y-4 mt-4">
             <div className="space-y-3">
-              <DetailField label="Brand Image" value={client.brandImage} />
+              <DetailField label="Brand Image" value={client.idealBrandImage} />
               <DetailField label="Brand Personality" value={client.brandPersonality} />
               <DetailField label="Preferred Font" value={client.preferredFont} />
               <DetailField label="Brand Values" value={client.brandValues} />
@@ -151,7 +148,6 @@ export function OnboardingDetails({ client }: OnboardingDetailsProps) {
             <div className="space-y-3">
               <DetailField label="Professional Milestones" value={client.professionalMilestones} />
               <DetailField label="Personal Turning Points" value={client.personalTurningPoints} />
-              <DetailField label="Social Handles" value={client.socialHandles} />
               <DetailField label="Additional Information" value={client.additionalInfo} />
             </div>
           </TabsContent>

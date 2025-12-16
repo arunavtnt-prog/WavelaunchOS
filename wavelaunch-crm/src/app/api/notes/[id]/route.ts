@@ -27,8 +27,7 @@ export async function GET(
         client: {
           select: {
             id: true,
-            creatorName: true,
-            brandName: true,
+            fullName: true,
           },
         },
         author: {

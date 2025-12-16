@@ -367,27 +367,12 @@ export default function NewClientPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="differentiation">Differentiation Strategy *</Label>
-              <textarea
-                id="differentiation"
-                {...register('differentiation')}
-                className="min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="How will you differentiate from competitors?"
-              />
-              {errors.differentiation && (
-                <p className="text-sm text-destructive">
-                  {errors.differentiation.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="uniqueValueProps">Unique Value Propositions *</Label>
               <textarea
                 id="uniqueValueProps"
                 {...register('uniqueValueProps')}
                 className="min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="What makes your brand unique?"
+                placeholder="What makes your offering unique in the market?"
               />
               {errors.uniqueValueProps && (
                 <p className="text-sm text-destructive">
@@ -401,12 +386,27 @@ export default function NewClientPage() {
               <textarea
                 id="emergingCompetitors"
                 {...register('emergingCompetitors')}
-                className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="List competitors you monitor..."
+                className="min-h-[100px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                placeholder="Who are your main competitors and what makes them successful?"
               />
               {errors.emergingCompetitors && (
                 <p className="text-sm text-destructive">
                   {errors.emergingCompetitors.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="inspirationBrands">Inspiration Brands *</Label>
+              <textarea
+                id="inspirationBrands"
+                {...register('inspirationBrands')}
+                className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                placeholder="Which brands inspire you and why?"
+              />
+              {errors.inspirationBrands && (
+                <p className="text-sm text-destructive">
+                  {errors.inspirationBrands.message}
                 </p>
               )}
             </div>
@@ -516,35 +516,33 @@ export default function NewClientPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="productCategories">Product Categories *</Label>
-              <div className="grid gap-2 md:grid-cols-3">
-                {['Skincare', 'Makeup', 'Haircare', 'Fragrance', 'Wellness', 'Fashion'].map((category) => (
-                  <label key={category} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      value={category}
-                      {...register('productCategories')}
-                      className="rounded"
-                    />
-                    <span className="text-sm">{category}</span>
-                  </label>
-                ))}
-              </div>
-              {errors.productCategories && (
+              <Label htmlFor="otherProductIdeas">Other Product Ideas *</Label>
+              <textarea
+                id="otherProductIdeas"
+                {...register('otherProductIdeas')}
+                className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                placeholder="What other products or services are you considering?"
+              />
+              {errors.otherProductIdeas && (
                 <p className="text-sm text-destructive">
-                  {errors.productCategories.message}
+                  {errors.otherProductIdeas.message}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="otherProductIdeas">Other Product Ideas</Label>
+              <Label htmlFor="growthStrategies">Growth Strategies *</Label>
               <textarea
-                id="otherProductIdeas"
-                {...register('otherProductIdeas')}
+                id="growthStrategies"
+                {...register('growthStrategies')}
                 className="min-h-[80px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
-                placeholder="Any additional product ideas?"
+                placeholder="How do you plan to grow your business?"
               />
+              {errors.growthStrategies && (
+                <p className="text-sm text-destructive">
+                  {errors.growthStrategies.message}
+                </p>
+              )}
             </div>
           </div>
         </div>

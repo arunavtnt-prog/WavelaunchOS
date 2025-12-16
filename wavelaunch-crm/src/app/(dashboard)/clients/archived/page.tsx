@@ -161,10 +161,7 @@ export default function ArchivedClientsPage() {
             <div key={client.id} className="rounded-lg border bg-card p-6">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="font-semibold">{client.creatorName}</h3>
-                  {client.brandName && (
-                    <p className="text-sm text-muted-foreground">{client.brandName}</p>
-                  )}
+                  <h3 className="font-semibold">{client.fullName}</h3>
                 </div>
                 <span className="rounded-full px-2 py-1 text-xs bg-gray-100 text-gray-800">
                   ARCHIVED
@@ -173,7 +170,7 @@ export default function ArchivedClientsPage() {
 
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  {client.niche || client.targetIndustry}
+                  {client.industryNiche}
                 </p>
                 {client.deletedAt && (
                   <p className="text-xs text-muted-foreground">
@@ -209,7 +206,7 @@ export default function ArchivedClientsPage() {
             <AlertDialogDescription>
               {selectedClient && (
                 <>
-                  This will restore <strong>{selectedClient.creatorName}</strong> and mark them as
+                  This will restore <strong>{selectedClient.fullName}</strong> and mark them as
                   active again.
                 </>
               )}

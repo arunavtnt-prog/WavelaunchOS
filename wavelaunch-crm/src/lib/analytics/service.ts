@@ -188,7 +188,7 @@ export class AnalyticsService {
       byStatus[client.status] = (byStatus[client.status] || 0) + 1
 
       // Count by niche
-      const niche = client.niche || 'Unknown'
+      const niche = client.industryNiche || 'Unknown'
       byNiche[niche] = (byNiche[niche] || 0) + 1
 
       // Total deliverables
@@ -451,7 +451,7 @@ export class AnalyticsService {
 
         return {
           clientId: client.id,
-          clientName: client.creatorName,
+          clientName: client.fullName,
           onboardedAt: client.onboardedAt,
           status: client.status,
           metrics: {

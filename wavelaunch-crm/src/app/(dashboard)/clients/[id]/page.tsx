@@ -142,10 +142,7 @@ export default function ClientDetailPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{client.creatorName}</h1>
-          {client.brandName && (
-            <p className="text-muted-foreground">{client.brandName}</p>
-          )}
+          <h1 className="text-3xl font-bold">{client.fullName}</h1>
         </div>
         {client.deletedAt ? (
           <Button
@@ -243,18 +240,14 @@ export default function ClientDetailPage() {
 
           <div>
             <p className="text-sm font-medium text-muted-foreground">Industry</p>
-            <p className="mt-1">{client.targetIndustry}</p>
+            <p className="mt-1">{client.industryNiche}</p>
           </div>
 
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Niche</p>
-            <p className="mt-1">{client.niche || 'Not specified'}</p>
-          </div>
-        </div>
+                  </div>
 
         <div>
           <p className="text-sm font-medium text-muted-foreground">Vision</p>
-          <p className="mt-1 text-sm">{client.visionStatement}</p>
+          <p className="mt-1 text-sm">{client.visionForVenture}</p>
         </div>
 
         <div>
@@ -270,7 +263,7 @@ export default function ClientDetailPage() {
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
-          creatorName={client.creatorName}
+          creatorName={client.fullName}
         />
       )}
 
@@ -278,7 +271,7 @@ export default function ClientDetailPage() {
       {!client.deletedAt && (
         <BusinessPlanGenerator
           clientId={client.id}
-          clientName={client.creatorName}
+          clientName={client.fullName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
           hasCompletedOnboarding={false} // TODO: Implement portal user check
         />
@@ -293,7 +286,7 @@ export default function ClientDetailPage() {
       {!client.deletedAt && (
         <ClientMessaging
           clientId={client.id}
-          creatorName={client.creatorName}
+          creatorName={client.fullName}
         />
       )}
 
@@ -370,7 +363,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Archive Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will archive {client.creatorName}. You can restore them later from the archived clients page.
+              This will archive {client.fullName}. You can restore them later from the archived clients page.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -388,7 +381,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore {client.creatorName} and mark them as active again.
+              This will restore {client.fullName} and mark them as active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

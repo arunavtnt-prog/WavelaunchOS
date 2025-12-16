@@ -103,7 +103,7 @@ export class ClientJourneyWorkflow {
 
     logInfo(`New client workflow started`, {
       clientId: client.id,
-      clientName: client.brandName || client.creatorName,
+      clientName: client.fullName || client.fullName,
     })
 
     // 1. Send welcome email (if email system is enabled and client wants it)
@@ -119,7 +119,7 @@ export class ClientJourneyWorkflow {
             clientId: client.id,
             to: client.email,
             context: {
-              clientName: client.creatorName,
+              clientName: client.fullName,
               portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client-portal`,
             },
           },
@@ -136,10 +136,10 @@ export class ClientJourneyWorkflow {
       data: {
         userId: event.userId,
         type: 'CLIENT_CREATED',
-        description: `Created new client: ${client.brandName || client.creatorName}`,
+        description: `Created new client: ${client.fullName || client.fullName}`,
         metadata: JSON.stringify({
           clientId: client.id,
-          company: client.brandName,
+          company: client.fullName,
         }),
       },
     })
@@ -173,7 +173,7 @@ export class ClientJourneyWorkflow {
             clientId: client.id,
             to: client.email,
             context: {
-              clientName: client.creatorName,
+              clientName: client.fullName,
               portalUrl: `${process.env.NEXT_PUBLIC_APP_URL}/client-portal`,
             },
           },
@@ -298,7 +298,7 @@ export class ClientJourneyWorkflow {
                   clientId: client.id,
                   to: client.email,
                   context: {
-                    clientName: client.brandName || client.creatorName,
+                    clientName: client.fullName || client.fullName,
                     month: nextMonth,
                     deliverableTitle: `Month ${nextMonth} Deliverable`,
                   },
@@ -338,7 +338,7 @@ export class ClientJourneyWorkflow {
                 clientId: client.id,
                 to: client.email,
                 context: {
-                  clientName: client.brandName || client.creatorName,
+                  clientName: client.fullName || client.fullName,
                 },
               },
               { priority: JOB_PRIORITY.NORMAL }
@@ -400,7 +400,7 @@ export class ClientJourneyWorkflow {
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.brandName || client.creatorName,
+                clientName: client.fullName || client.fullName,
                 deliverableTitle: deliverable.title,
                 dueDate: deliverable.deliveredAt,
               },
@@ -481,7 +481,7 @@ export class ClientJourneyWorkflow {
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.brandName || client.creatorName,
+                clientName: client.fullName || client.fullName,
               },
             },
             { priority: JOB_PRIORITY.NORMAL }
@@ -590,7 +590,7 @@ export class ClientJourneyWorkflow {
               clientId: client.id,
               to: client.email,
               context: {
-                clientName: client.brandName || client.creatorName,
+                clientName: client.fullName || client.fullName,
                 milestone,
               },
             },

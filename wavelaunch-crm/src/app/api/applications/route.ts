@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
         convertedToClient: {
           select: {
             id: true,
-            creatorName: true,
-            brandName: true,
+            fullName: true,
           },
         },
       },

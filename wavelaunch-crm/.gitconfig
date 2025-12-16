@@ -1,0 +1,22 @@
+[core]
+    repositoryformatversion = 0
+    filemode = true
+    bare = false
+    logallrefupdates = true
+
+[remote "origin"]
+    url = https://github.com/arunavtnt-prog/penguin-wavelaunch-os.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+
+[branch "main"]
+    remote = origin
+    merge = refs/heads/main
+
+[branch]
+    main = main
+
+# IMPORTANT: Always push to penguin-wavelaunch-os.git main branch
+# Repository URL: https://github.com/arunavtnt-prog/penguin-wavelaunch-os.git
+# Working directory: /Users/arunav/Desktop/WavelaunchOS_Claude/WavelaunchOS/wavelaunch-crm
+# Main branch: main
+# DO NOT push to WavelaunchOS.git - use penguin-wavelaunch-os.git only

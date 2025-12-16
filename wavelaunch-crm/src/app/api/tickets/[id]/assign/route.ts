@@ -62,7 +62,7 @@ export async function POST(
         client: {
           select: {
             id: true,
-            creatorName: true,
+            fullName: true,
             email: true,
           },
         },

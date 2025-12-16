@@ -39,44 +39,41 @@ export async function POST(
     // Create client from application data
     const client = await prisma.client.create({
       data: {
-        creatorName: application.fullName,
+        fullName: application.fullName,
         email: application.email,
-        niche: application.industryNiche,
+        industryNiche: application.industryNiche,
+        country: application.country || '',
+        age: application.age || 18,
+        hopeToAchieve: application.hopeToAchieve || '',
+        keyPainPoints: application.keyPainPoints || '',
         status: 'ACTIVE',
         
         // Map application fields to client fields
-        visionStatement: application.visionForVenture,
-        targetIndustry: application.industryNiche,
+        visionForVenture: application.visionForVenture,
         targetAudience: application.targetAudience,
-        demographics: JSON.stringify({
-          profile: application.demographicProfile,
-          age: application.targetDemographicAge,
-          gender: application.audienceGenderSplit,
-          marital: application.audienceMaritalStatus,
-        }),
-        painPoints: application.keyPainPoints,
+        demographicProfile: application.demographicProfile,
         uniqueValueProps: application.uniqueValueProps,
         targetDemographicAge: application.targetDemographicAge,
-        brandImage: application.idealBrandImage,
+        idealBrandImage: application.idealBrandImage,
         brandPersonality: application.brandPersonality,
         preferredFont: application.preferredFont || '',
         
         // Optional fields
         professionalMilestones: application.professionalMilestones,
         personalTurningPoints: application.personalTurningPoints,
-        competitiveDifferentiation: application.differentiation,
-        emergingCompetitors: application.emergingCompetitors,
-        inspirationBrands: application.inspirationBrands,
-        brandingAesthetics: application.brandingAesthetics,
-        emotionsBrandEvokes: application.emotionsBrandEvokes,
+        differentiation: application.differentiation,
+        emergingCompetitors: application.emergingCompetitors || '',
+        inspirationBrands: application.inspirationBrands || '',
+        brandingAesthetics: application.brandingAesthetics || '',
+        emotionsBrandEvokes: application.emotionsBrandEvokes || '',
         scalingGoals: application.scalingGoals,
-        growthStrategies: application.growthStrategies,
-        longTermVision: application.longTermVision,
+        growthStrategies: application.growthStrategies || '',
+        longTermVision: application.longTermVision || '',
         specificDeadlines: application.specificDeadlines,
         additionalInfo: application.additionalInfo,
-        currentChannels: application.currentChannels,
-        audienceGenderSplit: application.audienceGenderSplit,
-        audienceMaritalStatus: application.audienceMaritalStatus,
+        currentChannels: application.currentChannels || '',
+        audienceGenderSplit: application.audienceGenderSplit || '',
+        audienceMaritalStatus: application.audienceMaritalStatus || '',
         brandValues: application.brandValues,
       },
     })
@@ -93,7 +90,7 @@ export async function POST(
     await prisma.activity.create({
       data: {
         type: 'CLIENT_CREATED',
-        description: `Created client from D26 application: ${client.creatorName}`,
+        description: `Created client from D26 application: ${client.fullName}`,
         metadata: JSON.stringify({
           applicationId: application.id,
           clientId: client.id,
