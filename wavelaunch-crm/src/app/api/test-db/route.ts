@@ -10,25 +10,18 @@ export async function GET(request: NextRequest) {
     const clientCount = await db.client.count()
     console.log('Client count:', clientCount)
     
-    // Test if fullName field exists by trying to select it
-    const testClient = await db.client.findFirst({
-      select: {
-        id: true,
-        fullName: true,
-        email: true
-      }
-    })
-    
-    console.log('Test client:', testClient?.id, testClient?.fullName, testClient?.email)
-    
-    // Check table structure
+    // Check table structure - get all columns to see what name field exists
     const tableInfo = await db.$queryRaw`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'clients' ORDER BY ordinal_position`
+    
+    // Try to find any name-related column
+    const nameColumns = await db.$queryRaw`SELECT column_name FROM information_schema.columns WHERE table_name = 'clients' AND column_name ILIKE '%name%'`
     
     return NextResponse.json({
       success: true,
       clientCount,
-      testClient,
-      tableColumns: tableInfo
+      testClient: null, // Skip the failing query
+      tableColumns: tableInfo,
+      nameColumns: nameColumns
     })
     
   } catch (error: unknown) {
