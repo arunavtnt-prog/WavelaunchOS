@@ -118,12 +118,36 @@ export default function SubmissionsPage() {
     }
   }
 
+  const convertToClient = async (application: Application) => {
+    try {
+      const response = await fetch(`/api/applications/${application.id}/convert-to-client`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          // Update application status to show it's been converted
+          await updateApplicationStatus(application.id, 'CONVERTED')
+          // Show success message or redirect to clients page
+          console.log('Application converted to client successfully')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to convert application to client:', error)
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING': return 'bg-gray-100 text-gray-600'
       case 'REVIEWED': return 'bg-blue-50 text-blue-600'
       case 'APPROVED': return 'bg-green-50 text-green-600'
       case 'REJECTED': return 'bg-red-50 text-red-600'
+      case 'CONVERTED': return 'bg-purple-50 text-purple-600'
       default: return 'bg-gray-50 text-gray-600'
     }
   }
@@ -134,6 +158,7 @@ export default function SubmissionsPage() {
       case 'REVIEWED': return <Eye className="h-4 w-4" />
       case 'APPROVED': return <CheckCircle className="h-4 w-4" />
       case 'REJECTED': return <XCircle className="h-4 w-4" />
+      case 'CONVERTED': return <CheckCircle className="h-4 w-4" />
       default: return <Clock className="h-4 w-4" />
     }
   }
@@ -476,6 +501,15 @@ export default function SubmissionsPage() {
                         Reject
                       </Button>
                     </>
+                  )}
+                  {selectedApplication.status === 'APPROVED' && (
+                    <Button 
+                      onClick={() => convertToClient(selectedApplication)}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Convert to Client
+                    </Button>
                   )}
                 </div>
               </div>

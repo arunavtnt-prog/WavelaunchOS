@@ -1,0 +1,104 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+
+// POST /api/applications/[id]/convert-to-client - Convert approved application to client
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Get the application
+    const application = await db.application.findUnique({
+      where: { id: params.id },
+    })
+
+    if (!application) {
+      return NextResponse.json(
+        { error: 'Application not found' },
+        { status: 404 }
+      )
+    }
+
+    if (application.status !== 'APPROVED') {
+      return NextResponse.json(
+        { error: 'Only approved applications can be converted to clients' },
+        { status: 400 }
+      )
+    }
+
+    // Check if client already exists with this email
+    const existingClient = await db.client.findUnique({
+      where: { email: application.email },
+    })
+
+    if (existingClient) {
+      return NextResponse.json(
+        { error: 'A client with this email already exists' },
+        { status: 400 }
+      )
+    }
+
+    // Create client from application data
+    const client = await db.client.create({
+      data: {
+        fullName: application.fullName,
+        email: application.email,
+        // Map application fields to client fields
+        country: application.country,
+        industryNiche: application.industryNiche,
+        // Basic info
+        age: application.age || 0,
+        instagramHandle: application.instagramHandle || '',
+        tiktokHandle: application.tiktokHandle || '',
+        // Career background
+        professionalMilestones: application.professionalMilestones,
+        personalTurningPoints: application.personalTurningPoints,
+        visionForVenture: application.visionForVenture,
+        hopeToAchieve: application.hopeToAchieve,
+        // Audience & demographics
+        targetAudience: application.targetAudience,
+        demographicProfile: application.demographicProfile,
+        targetDemographicAge: application.targetDemographicAge || '',
+        audienceGenderSplit: application.audienceGenderSplit || '',
+        audienceMaritalStatus: application.audienceMaritalStatus || '',
+        currentChannels: application.currentChannels,
+        keyPainPoints: application.keyPainPoints,
+        brandValues: application.brandValues,
+        // Market & category
+        differentiation: application.differentiation,
+        uniqueValueProps: application.uniqueValueProps,
+        emergingCompetitors: application.emergingCompetitors || '',
+        // Brand & vision
+        idealBrandImage: application.idealBrandImage,
+        inspirationBrands: application.inspirationBrands || '',
+        brandingAesthetics: application.brandingAesthetics,
+        emotionsBrandEvokes: application.emotionsBrandEvokes || '',
+        brandPersonality: application.brandPersonality,
+        preferredFont: application.preferredFont || '',
+        // Product ideas
+        productCategories: application.productCategories.split(',').map(cat => cat.trim()),
+        otherProductIdeas: application.otherProductIdeas || '',
+        // Scaling & execution
+        scalingGoals: application.scalingGoals,
+        growthStrategies: application.growthStrategies || '',
+        longTermVision: application.longTermVision,
+        specificDeadlines: application.specificDeadlines || '',
+        // Additional information
+        additionalInfo: application.additionalInfo || '',
+      },
+    })
+
+    return NextResponse.json({
+      success: true,
+      data: client,
+      message: 'Application successfully converted to client'
+    })
+
+  } catch (error) {
+    console.error('Error converting application to client:', error)
+    return NextResponse.json(
+      { error: 'Failed to convert application to client' },
+      { status: 500 }
+    )
+  }
+}

@@ -9,7 +9,7 @@ export async function PATCH(
   try {
     const { status, reviewNotes } = await request.json()
 
-    if (!status || !['PENDING', 'REVIEWED', 'APPROVED', 'REJECTED'].includes(status)) {
+    if (!status || !['PENDING', 'REVIEWED', 'APPROVED', 'REJECTED', 'CONVERTED'].includes(status)) {
       return NextResponse.json(
         { error: 'Invalid status' },
         { status: 400 }
