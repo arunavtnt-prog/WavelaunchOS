@@ -9,7 +9,7 @@ import { CapacityError, ConflictError, handleError } from '@/lib/utils/errors'
 export async function GET(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
 
     if (filters.search) {
       where.OR = [
-        { creatorName: { contains: filters.search, mode: 'insensitive' } },
-        { brandName: { contains: filters.search, mode: 'insensitive' } },
+        { fullName: { contains: filters.search, mode: 'insensitive' } },
         { email: { contains: filters.search, mode: 'insensitive' } },
+        { industryNiche: { contains: filters.search, mode: 'insensitive' } },
       ]
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.niche) {
-      where.niche = { contains: filters.niche, mode: 'insensitive' }
+      where.industryNiche = { contains: filters.niche, mode: 'insensitive' }
     }
 
     where.deletedAt = null // Only active clients
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth()
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -112,7 +112,6 @@ export async function POST(request: NextRequest) {
     const client = await db.client.create({
       data: {
         ...data,
-        niche: data.niche || data.targetIndustry,
         status: 'ACTIVE',
       },
     })
@@ -122,8 +121,8 @@ export async function POST(request: NextRequest) {
       data: {
         clientId: client.id,
         type: 'CLIENT_CREATED',
-        description: `Created client: ${client.creatorName}`,
-        userId: session.user?.id || '',
+        description: `Created client: ${client.fullName}`,
+        userId: session.user.id,
       },
     })
 

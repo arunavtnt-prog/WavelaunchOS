@@ -1,5 +1,3 @@
-// WavelaunchOS CRM - Complete Database Schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,61 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================================
-// AUTHENTICATION & USERS
-// ============================================================================
-
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         Role     @default(ADMIN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Security fields
-  lockedUntil      DateTime? // Account locked until this time
-  failedLoginCount Int       @default(0)
-  lastLoginAt      DateTime?
-  lastLoginIp      String?
-  sessionExpiry    DateTime? // Session expires at this time
-
-  // Relations
+  id                     String             @id @default(cuid())
+  email                  String             @unique
+  passwordHash           String
+  name                   String
+  role                   Role               @default(ADMIN)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  lockedUntil            DateTime?
+  failedLoginCount       Int                @default(0)
+  lastLoginAt            DateTime?
+  lastLoginIp            String?
+  sessionExpiry          DateTime?
+  activities             Activity[]
   businessPlansGenerated BusinessPlan[]
   deliverablesGenerated  Deliverable[]
   filesUploaded          File[]
-  notes                  Note[]
-  activities             Activity[]
-  loginAttempts          LoginAttempt[]
-
-  // Ticket system
-  assignedTickets        Ticket[]            @relation("AssignedTickets")
-  ticketComments         TicketComment[]
-  ticketAttachments      TicketAttachment[]
-
-  // Help center
   helpArticles           HelpArticle[]
+  loginAttempts          LoginAttempt[]
+  notes                  Note[]
+  ticketAttachments      TicketAttachment[]
+  ticketComments         TicketComment[]
+  assignedTickets        Ticket[]           @relation("AssignedTickets")
 
   @@map("users")
 }
 
-enum Role {
-  ADMIN
-  CLIENT
-}
-
-// Login attempt tracking for security
 model LoginAttempt {
   id        String   @id @default(cuid())
   email     String
   ip        String
   userAgent String?
   success   Boolean
-  reason    String?  // Failure reason: 'invalid_password', 'account_locked', etc.
+  reason    String?
   createdAt DateTime @default(now())
-
-  // Relations
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -73,115 +51,584 @@ model LoginAttempt {
   @@map("login_attempts")
 }
 
-// ============================================================================
-// CLIENT MANAGEMENT
-// ============================================================================
-
 model Client {
-  id          String   @id @default(cuid())
-  creatorName String
-  brandName   String?
-  email       String   @unique
-  status      ClientStatus @default(ACTIVE)
-
-  // Core Info
-  niche               String
-  goals               String?
-  socialHandles       String? // JSON
-  onboardedAt         DateTime @default(now())
-
-  // Required Fields (from onboarding)
-  visionStatement     String
-  targetIndustry      String
-  targetAudience      String
-  demographics        String // JSON
-  painPoints          String
-  uniqueValueProps    String
-  targetDemographicAge String
-  brandImage          String
-  brandPersonality    String
-  preferredFont       String
-
-  // Optional Fields
-  professionalMilestones    String?
-  personalTurningPoints     String?
-  competitiveDifferentiation String?
-  emergingCompetitors       String?
-  inspirationBrands         String?
-  brandingAesthetics        String?
-  emotionsBrandEvokes       String?
-  scalingGoals              String?
-  growthStrategies          String?
-  longTermVision            String?
-  additionalInfo            String?
-  specificDeadlines         String?
-  currentChannels           String?
-  audienceGenderSplit       String?
-  audienceMaritalStatus     String?
-  brandValues               String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  // Relations
-  businessPlans BusinessPlan[]
-  deliverables  Deliverable[]
-  files         File[]
-  notes         Note[]
-  activities    Activity[]
-  applications  Application[]
-
-  // Client Portal Relations
-  portalUser    ClientPortalUser?
-  portalMessages PortalMessage[]
-
-  // Notification preferences
-  notificationPreferences NotificationPreferences?
-
-  // Support tickets
-  tickets Ticket[]
+  id                         String                   @id @default(cuid())
+  fullName                   String
+  email                      String                   @unique
+  instagramHandle            String?
+  tiktokHandle               String?
+  country                    String
+  industryNiche              String
+  age                        Int
+  professionalMilestones     String
+  personalTurningPoints      String
+  visionForVenture           String
+  hopeToAchieve              String
+  targetAudience             String
+  demographicProfile         String
+  targetDemographicAge       String
+  audienceGenderSplit        String
+  audienceMaritalStatus      String
+  currentChannels            String
+  keyPainPoints              String
+  brandValues                String
+  differentiation            String
+  uniqueValueProps           String
+  emergingCompetitors        String
+  idealBrandImage            String
+  inspirationBrands          String
+  brandingAesthetics         String
+  emotionsBrandEvokes        String
+  brandPersonality           String
+  preferredFont              String
+  productCategories          String[] // JSON array as string
+  otherProductIdeas          String?
+  scalingGoals               String
+  growthStrategies           String
+  longTermVision             String
+  specificDeadlines          String?
+  additionalInfo             String?
+  status                     ClientStatus             @default(ACTIVE)
+  onboardedAt                DateTime                 @default(now())
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  deletedAt                  DateTime?
+  activities                 Activity[]
+  applications               Application[]
+  businessPlans              BusinessPlan[]
+  portalUser                 ClientPortalUser?
+  deliverables               Deliverable[]
+  files                      File[]
+  notes                      Note[]
+  notificationPreferences    NotificationPreferences?
+  portalMessages             PortalMessage[]
+  tickets                    Ticket[]
 
   @@map("clients")
+}
+
+model BusinessPlan {
+  id              String         @id @default(cuid())
+  clientId        String
+  version         Int            @default(1)
+  status          DocumentStatus @default(DRAFT)
+  contentMarkdown String
+  pdfPath         String?
+  generatedBy     String
+  generatedAt     DateTime       @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User           @relation(fields: [generatedBy], references: [id])
+
+  @@map("business_plans")
+}
+
+model Deliverable {
+  id              String          @id @default(cuid())
+  clientId        String
+  month           Int
+  title           String
+  type            DeliverableType @default(MAIN)
+  parentId        String?
+  contentMarkdown String
+  pdfPath         String?
+  status          DocumentStatus  @default(DRAFT)
+  generatedBy     String
+  generatedAt     DateTime        @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User            @relation(fields: [generatedBy], references: [id])
+  parent          Deliverable?    @relation("subdocuments", fields: [parentId], references: [id])
+  subdocuments    Deliverable[]   @relation("subdocuments")
+
+  @@map("deliverables")
+}
+
+model File {
+  id             String       @id @default(cuid())
+  clientId       String?
+  filename       String
+  filepath       String
+  filesize       Int
+  mimetype       String
+  category       FileCategory @default(UPLOAD)
+  uploadedBy     String
+  uploadedAt     DateTime     @default(now())
+  deletedAt      DateTime?
+  client         Client?      @relation(fields: [clientId], references: [id])
+  uploadedByUser User         @relation(fields: [uploadedBy], references: [id])
+
+  @@map("files")
+}
+
+model PromptTemplate {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  type        PromptTemplateType
+  content     String
+  variables   String?
+  yamlPath    String?
+  isActive    Boolean            @default(false)
+  isDefault   Boolean            @default(false)
+  version     Int                @default(1)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("prompt_templates")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  type        JobType
+  status      JobStatus @default(QUEUED)
+  payload     String
+  result      String?
+  error       String?
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  @@map("jobs")
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  clientId    String
+  content     String
+  isImportant Boolean  @default(false)
+  tags        String?
+  category    String?
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      User     @relation(fields: [authorId], references: [id])
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  clientId    String?
+  type        ActivityType
+  description String
+  metadata    String?
+  userId      String?
+  createdAt   DateTime     @default(now())
+  client      Client?      @relation(fields: [clientId], references: [id])
+  user        User?        @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
+
+model BackupLog {
+  id        String       @id @default(cuid())
+  filename  String
+  filepath  String
+  filesize  Int
+  status    BackupStatus
+  verified  Boolean      @default(false)
+  error     String?
+  createdAt DateTime     @default(now())
+
+  @@map("backup_logs")
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Application {
+  id                     String    @id @default(cuid())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  fullName               String
+  email                  String
+  instagramHandle        String?
+  tiktokHandle           String?
+  country                String
+  industryNiche          String
+  age                    Int
+  professionalMilestones String
+  personalTurningPoints  String
+  visionForVenture       String
+  hopeToAchieve          String
+  targetAudience         String
+  demographicProfile     String
+  targetDemographicAge   String
+  audienceGenderSplit    String
+  audienceMaritalStatus  String?
+  currentChannels        String
+  keyPainPoints          String
+  brandValues            String
+  differentiation        String
+  uniqueValueProps       String
+  emergingCompetitors    String?
+  idealBrandImage        String
+  inspirationBrands      String?
+  brandingAesthetics     String
+  emotionsBrandEvokes    String?
+  brandPersonality       String
+  preferredFont          String?
+  productCategories      String
+  otherProductIdeas      String?
+  scalingGoals           String
+  growthStrategies       String?
+  longTermVision         String
+  specificDeadlines      String?
+  additionalInfo         String?
+  zipFilePath            String?
+  zipFileName            String?
+  zipFileSize            Int?
+  termsAccepted          Boolean   @default(false)
+  status                 String    @default("PENDING")
+  reviewedAt             DateTime?
+  reviewNotes            String?
+  convertedToClientId    String?
+  convertedToClient      Client?   @relation(fields: [convertedToClientId], references: [id])
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([status])
+  @@map("applications")
+}
+
+model TokenUsage {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  operation        String
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  estimatedCost    Float
+  clientId         String?
+  userId           String?
+  jobId            String?
+  documentId       String?
+  documentType     String?
+  cacheHit         Boolean  @default(false)
+  cacheKey         String?
+  requestDuration  Int?
+  success          Boolean  @default(true)
+  errorMessage     String?
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([clientId])
+  @@index([cacheKey])
+  @@map("token_usage")
+}
+
+model PromptCache {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  cacheKey    String   @unique
+  promptHash  String
+  response    String
+  model       String
+  hitCount    Int      @default(0)
+  lastUsedAt  DateTime @default(now())
+  tokensSaved Int      @default(0)
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+  @@map("prompt_cache")
+}
+
+model GenerationCheckpoint {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  jobId             String   @unique
+  jobType           String
+  status            String
+  totalSections     Int
+  completedSections Int
+  currentSection    Int
+  documentId        String?
+  clientId          String
+  generatedContent  String
+  promptContext     String
+  canResume         Boolean  @default(true)
+  lastCheckpoint    DateTime @default(now())
+  errorMessage      String?
+
+  @@index([jobId])
+  @@index([clientId])
+  @@index([status])
+  @@map("generation_checkpoints")
+}
+
+model DocumentSection {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  documentId   String
+  documentType String
+  sectionName  String
+  sectionOrder Int
+  content      String
+  generatedBy  String?
+  generatedAt  DateTime?
+  tokensUsed   Int?
+  version      Int       @default(1)
+
+  @@index([documentId, documentType])
+  @@index([sectionName])
+  @@map("document_sections")
+}
+
+model TokenBudget {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  period           String
+  startDate        DateTime
+  endDate          DateTime
+  tokenLimit       Int
+  costLimit        Float
+  tokensUsed       Int      @default(0)
+  costUsed         Float    @default(0)
+  alertAt50        Boolean  @default(true)
+  alertAt75        Boolean  @default(true)
+  alertAt90        Boolean  @default(true)
+  alertAt100       Boolean  @default(true)
+  alert50Sent      Boolean  @default(false)
+  alert75Sent      Boolean  @default(false)
+  alert90Sent      Boolean  @default(false)
+  alert100Sent     Boolean  @default(false)
+  autoPauseAtLimit Boolean  @default(false)
+  isPaused         Boolean  @default(false)
+  isActive         Boolean  @default(true)
+
+  @@index([period])
+  @@index([endDate])
+  @@map("token_budgets")
+}
+
+model ClientPortalUser {
+  id                      String               @id @default(cuid())
+  clientId                String               @unique
+  email                   String               @unique
+  passwordHash            String
+  isActive                Boolean              @default(false)
+  invitedAt               DateTime             @default(now())
+  activatedAt             DateTime?
+  lastLoginAt             DateTime?
+  passwordChangedAt       DateTime?
+  emailVerified           Boolean              @default(false)
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  inviteToken             String?              @unique
+  inviteTokenExpiry       DateTime?
+  invitedBy               String?
+  completedOnboarding     Boolean              @default(false)
+  onboardingCompletedAt   DateTime?
+  notifyNewDeliverable    Boolean              @default(true)
+  notifyNewMessage        Boolean              @default(true)
+  notifyMilestoneReminder Boolean              @default(true)
+  notifyWeeklySummary     Boolean              @default(false)
+  client                  Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages                PortalMessage[]
+  notifications           PortalNotification[]
+
+  @@index([email])
+  @@index([clientId])
+  @@map("client_portal_users")
+}
+
+model PortalMessage {
+  id             String            @id @default(cuid())
+  threadId       String
+  clientUserId   String?
+  adminUserId    String?
+  clientId       String
+  subject        String
+  body           String
+  isFromAdmin    Boolean
+  isRead         Boolean           @default(false)
+  attachmentUrl  String?
+  attachmentName String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  client         Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientUser     ClientPortalUser? @relation(fields: [clientUserId], references: [id])
+
+  @@index([threadId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@map("portal_messages")
+}
+
+model PortalNotification {
+  id           String           @id @default(cuid())
+  clientUserId String
+  type         String
+  title        String
+  message      String
+  actionUrl    String?
+  isRead       Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  clientUser   ClientPortalUser @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clientUserId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("portal_notifications")
+}
+
+model NotificationPreferences {
+  id                      String   @id @default(cuid())
+  clientId                String   @unique
+  emailWelcome            Boolean  @default(true)
+  emailActivation         Boolean  @default(true)
+  emailBusinessPlanReady  Boolean  @default(true)
+  emailDeliverableReady   Boolean  @default(true)
+  emailDeliverableOverdue Boolean  @default(true)
+  emailMilestoneReached   Boolean  @default(true)
+  emailJourneyCompleted   Boolean  @default(true)
+  emailWeeklyDigest       Boolean  @default(false)
+  emailMarketingUpdates   Boolean  @default(false)
+  portalNewDeliverable    Boolean  @default(true)
+  portalNewMessage        Boolean  @default(true)
+  portalMilestoneReminder Boolean  @default(true)
+  portalAccountUpdate     Boolean  @default(true)
+  preferredContactMethod  String   @default("email")
+  reminderFrequency       String   @default("daily")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  client                  Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model Ticket {
+  id           String             @id @default(cuid())
+  clientId     String
+  assignedTo   String?
+  title        String
+  description  String
+  status       TicketStatus       @default(OPEN)
+  priority     TicketPriority     @default(MEDIUM)
+  category     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  closedAt     DateTime?
+  resolvedAt   DateTime?
+  attachments  TicketAttachment[]
+  comments     TicketComment[]
+  assignedUser User?              @relation("AssignedTickets", fields: [assignedTo], references: [id])
+  client       Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id         String   @id @default(cuid())
+  ticketId   String
+  authorId   String
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_comments")
+}
+
+model TicketAttachment {
+  id             String   @id @default(cuid())
+  ticketId       String
+  uploadedBy     String
+  filename       String
+  filepath       String
+  filesize       Int
+  mimetype       String
+  createdAt      DateTime @default(now())
+  ticket         Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedByUser User     @relation(fields: [uploadedBy], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+model HelpCategory {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  icon        String?
+  order       Int           @default(0)
+  isPublished Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  articles    HelpArticle[]
+
+  @@index([slug])
+  @@index([order])
+  @@map("help_categories")
+}
+
+model HelpArticle {
+  id          String       @id @default(cuid())
+  categoryId  String
+  title       String
+  slug        String       @unique
+  content     String
+  excerpt     String?
+  tags        String?
+  viewCount   Int          @default(0)
+  isPublished Boolean      @default(true)
+  isFeatured  Boolean      @default(false)
+  authorId    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  publishedAt DateTime?
+  author      User         @relation(fields: [authorId], references: [id])
+  category    HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([viewCount])
+  @@map("help_articles")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
 }
 
 enum ClientStatus {
   ACTIVE
   INACTIVE
   ARCHIVED
-}
-
-// ============================================================================
-// BUSINESS PLANS
-// ============================================================================
-
-model BusinessPlan {
-  id              String           @id @default(cuid())
-  clientId        String
-  version         Int              @default(1)
-  status          DocumentStatus   @default(DRAFT)
-
-  // Content
-  contentMarkdown String
-  pdfPath         String?
-
-  // Workflow
-  generatedBy     String
-  generatedAt     DateTime         @default(now())
-  approvedAt      DateTime?
-  deliveredAt     DateTime?
-  rejectionReason String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  client    Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  generatedByUser User @relation(fields: [generatedBy], references: [id])
-
-  @@map("business_plans")
 }
 
 enum DocumentStatus {
@@ -192,71 +639,9 @@ enum DocumentStatus {
   REJECTED
 }
 
-// ============================================================================
-// DELIVERABLES (M1-M8)
-// ============================================================================
-
-model Deliverable {
-  id       String         @id @default(cuid())
-  clientId String
-  month    Int // 1-8
-  title    String
-  type     DeliverableType @default(MAIN)
-  parentId String? // For subdocuments
-
-  // Content
-  contentMarkdown String
-  pdfPath         String?
-  status          DocumentStatus @default(DRAFT)
-
-  // Workflow
-  generatedBy     String
-  generatedAt     DateTime       @default(now())
-  approvedAt      DateTime?
-  deliveredAt     DateTime?
-  rejectionReason String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  client          Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  generatedByUser User         @relation(fields: [generatedBy], references: [id])
-  parent          Deliverable? @relation("subdocuments", fields: [parentId], references: [id])
-  subdocuments    Deliverable[] @relation("subdocuments")
-
-  @@map("deliverables")
-}
-
 enum DeliverableType {
   MAIN
   SUBDOCUMENT
-}
-
-// ============================================================================
-// FILES & STORAGE
-// ============================================================================
-
-model File {
-  id       String       @id @default(cuid())
-  clientId String?
-  filename String
-  filepath String
-  filesize Int // bytes
-  mimetype String
-  category FileCategory @default(UPLOAD)
-
-  // Metadata
-  uploadedBy String
-  uploadedAt DateTime @default(now())
-  deletedAt  DateTime?
-
-  // Relations
-  client       Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  uploadedByUser User  @relation(fields: [uploadedBy], references: [id])
-
-  @@map("files")
 }
 
 enum FileCategory {
@@ -264,29 +649,6 @@ enum FileCategory {
   DELIVERABLE
   UPLOAD
   MISC
-}
-
-// ============================================================================
-// PROMPT TEMPLATES
-// ============================================================================
-
-model PromptTemplate {
-  id          String              @id @default(cuid())
-  name        String
-  description String?
-  type        PromptTemplateType
-  content     String // The actual prompt text
-  variables   String? // JSON array of variable names like {clientName}, {industry}
-  yamlPath    String? // Optional, for backward compatibility
-  isActive    Boolean             @default(false)
-  isDefault   Boolean             @default(false)
-  version     Int                 @default(1)
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("prompt_templates")
 }
 
 enum PromptTemplateType {
@@ -300,27 +662,6 @@ enum PromptTemplateType {
   DELIVERABLE_M7
   DELIVERABLE_M8
   CUSTOM
-}
-
-// ============================================================================
-// JOB QUEUE
-// ============================================================================
-
-model Job {
-  id       String    @id @default(cuid())
-  type     JobType
-  status   JobStatus @default(QUEUED)
-  payload  String // JSON
-  result   String? // JSON
-  error    String?
-  attempts Int       @default(0)
-
-  // Metadata
-  createdAt   DateTime  @default(now())
-  startedAt   DateTime?
-  completedAt DateTime?
-
-  @@map("jobs")
 }
 
 enum JobType {
@@ -344,52 +685,6 @@ enum JobStatus {
   CANCELLED
 }
 
-// ============================================================================
-// NOTES
-// ============================================================================
-
-model Note {
-  id          String   @id @default(cuid())
-  clientId    String
-  content     String
-  isImportant Boolean  @default(false)
-  tags        String? // JSON array
-  category    String?
-
-  // Metadata
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  author User   @relation(fields: [authorId], references: [id])
-
-  @@map("notes")
-}
-
-// ============================================================================
-// ACTIVITY LOG
-// ============================================================================
-
-model Activity {
-  id          String       @id @default(cuid())
-  clientId    String?
-  type        ActivityType
-  description String
-  metadata    String? // JSON
-  userId      String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-
-  // Relations
-  client Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  user   User?   @relation(fields: [userId], references: [id])
-
-  @@map("activities")
-}
-
 enum ActivityType {
   CLIENT_CREATED
   CLIENT_UPDATED
@@ -407,6 +702,7 @@ enum ActivityType {
   DELIVERABLE_DELIVERED
   DELIVERABLE_REJECTED
   FILE_UPLOADED
+  APPLICATION_SUBMITTED
   FILE_DELETED
   NOTE_CREATED
   NOTE_UPDATED
@@ -419,449 +715,9 @@ enum ActivityType {
   SETTINGS_UPDATED
 }
 
-// ============================================================================
-// BACKUPS
-// ============================================================================
-
-model BackupLog {
-  id       String        @id @default(cuid())
-  filename String
-  filepath String
-  filesize Int // bytes
-  status   BackupStatus
-  verified Boolean       @default(false)
-  error    String?
-
-  // Metadata
-  createdAt DateTime @default(now())
-
-  @@map("backup_logs")
-}
-
 enum BackupStatus {
   SUCCESS
   FAILED
-}
-
-// ============================================================================
-// SETTINGS
-// ============================================================================
-
-model Settings {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String // JSON
-
-  // Metadata
-  updatedAt DateTime @updatedAt
-
-  @@map("settings")
-}
-
-// ============================================================================
-// APPLICATIONS (Intake Form Submissions)
-// ============================================================================
-
-model Application {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Basic Information
-  fullName         String
-  email            String
-  instagramHandle  String?
-  tiktokHandle     String?
-  country          String
-  industryNiche    String
-  age              Int
-
-  // Career Background
-  professionalMilestones String
-  personalTurningPoints  String
-  visionForVenture       String
-  hopeToAchieve          String
-
-  // Audience & Demographics
-  targetAudience        String
-  demographicProfile    String
-  targetDemographicAge  String
-  audienceGenderSplit   String
-  audienceMaritalStatus String?
-  currentChannels       String
-
-  // Audience Pain Points & Needs
-  keyPainPoints String
-  brandValues   String
-
-  // Competition & Market Understanding
-  differentiation     String
-  uniqueValueProps    String
-  emergingCompetitors String?
-
-  // Brand Identity Preferences
-  idealBrandImage     String
-  inspirationBrands   String?
-  brandingAesthetics  String
-  emotionsBrandEvokes String?
-  brandPersonality    String
-  preferredFont       String?
-
-  // Product Direction
-  productCategories String // JSON array
-  otherProductIdeas String?
-
-  // Business Goals
-  scalingGoals      String
-  growthStrategies  String?
-  longTermVision    String
-  specificDeadlines String?
-  additionalInfo    String?
-
-  // Logistics
-  zipFilePath String?
-  zipFileName String?
-  zipFileSize Int?
-  termsAccepted Boolean @default(false)
-
-  // Status tracking
-  status      String    @default("PENDING") // PENDING, REVIEWED, APPROVED, REJECTED
-  reviewedAt  DateTime?
-  reviewNotes String?
-
-  // Relation to CRM (for conversion)
-  convertedToClientId String?
-  convertedToClient   Client? @relation(fields: [convertedToClientId], references: [id], onDelete: SetNull)
-
-  @@index([email])
-  @@index([createdAt])
-  @@index([status])
-  @@map("applications")
-}
-
-// ============================================================================
-// TOKEN USAGE TRACKING & OPTIMIZATION
-// ============================================================================
-
-model TokenUsage {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  // Request Details
-  operation      String // GENERATE_BUSINESS_PLAN, GENERATE_DELIVERABLE, etc.
-  model          String // gpt-4, claude-3-opus, etc.
-  promptTokens   Int
-  completionTokens Int
-  totalTokens    Int
-
-  // Cost Tracking
-  estimatedCost  Float // In USD
-
-  // Context
-  clientId       String?
-  userId         String?
-  jobId          String?
-  documentId     String? // Business plan or deliverable ID
-  documentType   String? // BUSINESS_PLAN, DELIVERABLE
-
-  // Caching Info
-  cacheHit       Boolean @default(false)
-  cacheKey       String?
-
-  // Metadata
-  requestDuration Int? // milliseconds
-  success        Boolean @default(true)
-  errorMessage   String?
-
-  @@index([createdAt])
-  @@index([operation])
-  @@index([clientId])
-  @@index([cacheKey])
-  @@map("token_usage")
-}
-
-model PromptCache {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-
-  // Cache Key (hash of prompt + model + params)
-  cacheKey   String   @unique
-
-  // Cached Content
-  promptHash String // SHA-256 hash of the prompt
-  response   String // The generated content
-  model      String
-
-  // Usage Stats
-  hitCount   Int      @default(0)
-  lastUsedAt DateTime @default(now())
-
-  // Metadata
-  tokensSaved Int     @default(0) // Cumulative tokens saved by cache hits
-
-  @@index([cacheKey])
-  @@index([expiresAt])
-  @@map("prompt_cache")
-}
-
-model GenerationCheckpoint {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  // Job Details
-  jobId      String   @unique
-  jobType    String   // BUSINESS_PLAN, DELIVERABLE
-  status     String   // IN_PROGRESS, PAUSED, FAILED, COMPLETED
-
-  // Progress Tracking
-  totalSections     Int
-  completedSections Int
-  currentSection    Int
-
-  // Context Preservation
-  documentId     String?
-  clientId       String
-  generatedContent String // JSON: { section1: "...", section2: "..." }
-  promptContext    String // JSON: stored context for resuming
-
-  // Resume Info
-  canResume      Boolean  @default(true)
-  lastCheckpoint DateTime @default(now())
-  errorMessage   String?
-
-  @@index([jobId])
-  @@index([clientId])
-  @@index([status])
-  @@map("generation_checkpoints")
-}
-
-model DocumentSection {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Document Reference
-  documentId   String
-  documentType String // BUSINESS_PLAN, DELIVERABLE
-
-  // Section Details
-  sectionName  String // e.g., "Executive Summary", "Market Analysis"
-  sectionOrder Int
-  content      String
-
-  // Metadata
-  generatedBy    String?
-  generatedAt    DateTime?
-  tokensUsed     Int?
-  version        Int      @default(1)
-
-  @@index([documentId, documentType])
-  @@index([sectionName])
-  @@map("document_sections")
-}
-
-// ============================================================================
-// TOKEN BUDGET ALERTS
-// ============================================================================
-
-model TokenBudget {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Budget Period
-  period     String   // DAILY, WEEKLY, MONTHLY
-  startDate  DateTime
-  endDate    DateTime
-
-  // Budget Limits
-  tokenLimit Int // Maximum tokens allowed
-  costLimit  Float // Maximum cost in USD
-
-  // Current Usage
-  tokensUsed Int   @default(0)
-  costUsed   Float @default(0)
-
-  // Alert Thresholds
-  alertAt50  Boolean @default(true)
-  alertAt75  Boolean @default(true)
-  alertAt90  Boolean @default(true)
-  alertAt100 Boolean @default(true)
-
-  // Alert Status
-  alert50Sent  Boolean @default(false)
-  alert75Sent  Boolean @default(false)
-  alert90Sent  Boolean @default(false)
-  alert100Sent Boolean @default(false)
-
-  // Auto-Pause
-  autoPauseAtLimit Boolean @default(false)
-  isPaused         Boolean @default(false)
-  isActive         Boolean @default(true)
-
-  @@index([period])
-  @@index([endDate])
-  @@map("token_budgets")
-}
-
-
-// ============================================================================
-// CLIENT PORTAL
-// ============================================================================
-
-model ClientPortalUser {
-  id                    String    @id @default(cuid())
-  clientId              String    @unique
-  email                 String    @unique
-  passwordHash          String
-  isActive              Boolean   @default(false)
-  invitedAt             DateTime  @default(now())
-  activatedAt           DateTime?
-  lastLoginAt           DateTime?
-  passwordChangedAt     DateTime?
-  emailVerified         Boolean   @default(false)
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  // Invite system
-  inviteToken           String?   @unique
-  inviteTokenExpiry     DateTime?
-  invitedBy             String?   // Admin user ID who sent invite
-  completedOnboarding   Boolean   @default(false)
-  onboardingCompletedAt DateTime?
-
-  // Email preferences
-  notifyNewDeliverable    Boolean @default(true)
-  notifyNewMessage        Boolean @default(true)
-  notifyMilestoneReminder Boolean @default(true)
-  notifyWeeklySummary     Boolean @default(false)
-
-  // Relations
-  client        Client              @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  messages      PortalMessage[]
-  notifications PortalNotification[]
-
-  @@index([email])
-  @@index([clientId])
-  @@map("client_portal_users")
-}
-
-model PortalMessage {
-  id             String    @id @default(cuid())
-  threadId       String    // Group messages into conversations
-  clientUserId   String?   // If from client
-  adminUserId    String?   // If from admin
-  clientId       String    // Always reference client
-  subject        String
-  body           String
-  isFromAdmin    Boolean
-  isRead         Boolean   @default(false)
-  attachmentUrl  String?
-  attachmentName String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  // Relations
-  clientUser ClientPortalUser? @relation(fields: [clientUserId], references: [id])
-  client     Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
-
-  @@index([threadId])
-  @@index([clientId])
-  @@index([createdAt])
-  @@map("portal_messages")
-}
-
-model PortalNotification {
-  id           String   @id @default(cuid())
-  clientUserId String
-  type         String   // NEW_DELIVERABLE, NEW_MESSAGE, MILESTONE_REMINDER, ACCOUNT_UPDATE
-  title        String
-  message      String
-  actionUrl    String?  // Link to relevant page
-  isRead       Boolean  @default(false)
-  createdAt    DateTime @default(now())
-
-  // Relations
-  clientUser ClientPortalUser @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
-
-  @@index([clientUserId])
-  @@index([isRead])
-  @@index([createdAt])
-  @@map("portal_notifications")
-}
-
-// ============================================================================
-// NOTIFICATION PREFERENCES
-// ============================================================================
-
-model NotificationPreferences {
-  id       String  @id @default(cuid())
-  clientId String  @unique
-
-  // Email notifications
-  emailWelcome             Boolean @default(true)  // Welcome email on account creation
-  emailActivation          Boolean @default(true)  // Account activated notification
-  emailBusinessPlanReady   Boolean @default(true)  // Business plan completed
-  emailDeliverableReady    Boolean @default(true)  // New deliverable available
-  emailDeliverableOverdue  Boolean @default(true)  // Overdue reminders
-  emailMilestoneReached    Boolean @default(true)  // Milestone celebrations
-  emailJourneyCompleted    Boolean @default(true)  // 8-month journey completion
-  emailWeeklyDigest        Boolean @default(false) // Weekly progress digest
-  emailMarketingUpdates    Boolean @default(false) // Marketing and promotional emails
-
-  // In-app notifications (portal)
-  portalNewDeliverable     Boolean @default(true)  // New deliverable notification
-  portalNewMessage         Boolean @default(true)  // New message from team
-  portalMilestoneReminder  Boolean @default(true)  // Upcoming milestone reminders
-  portalAccountUpdate      Boolean @default(true)  // Account status changes
-
-  // Communication preferences
-  preferredContactMethod   String  @default("email") // "email", "portal", "both"
-  reminderFrequency        String  @default("daily")  // "daily", "weekly", "none"
-
-  // Metadata
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
-
-  @@map("notification_preferences")
-}
-
-// ============================================================================
-// TICKET/SUPPORT SYSTEM
-// ============================================================================
-
-model Ticket {
-  id          String       @id @default(cuid())
-  clientId    String
-  assignedTo  String?      // Admin user assigned to ticket
-  title       String
-  description String
-  status      TicketStatus @default(OPEN)
-  priority    TicketPriority @default(MEDIUM)
-  category    String?      // "technical", "billing", "general", etc.
-
-  // Metadata
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  closedAt    DateTime?
-  resolvedAt  DateTime?
-
-  // Relations
-  client       Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  assignedUser User?           @relation("AssignedTickets", fields: [assignedTo], references: [id])
-  comments     TicketComment[]
-  attachments  TicketAttachment[]
-
-  @@index([clientId])
-  @@index([assignedTo])
-  @@index([status])
-  @@index([priority])
-  @@index([createdAt])
-  @@map("tickets")
 }
 
 enum TicketStatus {
@@ -879,92 +735,3 @@ enum TicketPriority {
   HIGH
   URGENT
 }
-
-model TicketComment {
-  id        String   @id @default(cuid())
-  ticketId  String
-  authorId  String   // User who wrote the comment
-  content   String
-  isInternal Boolean @default(false) // Internal notes not visible to client
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  author User   @relation(fields: [authorId], references: [id])
-
-  @@index([ticketId])
-  @@index([authorId])
-  @@index([createdAt])
-  @@map("ticket_comments")
-}
-
-model TicketAttachment {
-  id        String   @id @default(cuid())
-  ticketId  String
-  uploadedBy String
-  filename  String
-  filepath  String
-  filesize  Int
-  mimetype  String
-  createdAt DateTime @default(now())
-
-  // Relations
-  ticket       Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  uploadedByUser User @relation(fields: [uploadedBy], references: [id])
-
-  @@index([ticketId])
-  @@map("ticket_attachments")
-}
-
-// ============================================================================
-// HELP CENTER
-// ============================================================================
-
-model HelpCategory {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  icon        String?  // Icon name for UI
-  order       Int      @default(0)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  articles HelpArticle[]
-
-  @@index([slug])
-  @@index([order])
-  @@map("help_categories")
-}
-
-model HelpArticle {
-  id          String   @id @default(cuid())
-  categoryId  String
-  title       String
-  slug        String   @unique
-  content     String   // Markdown content
-  excerpt     String?  // Short summary
-  tags        String?  // JSON array of tags
-  viewCount   Int      @default(0)
-  isPublished Boolean  @default(true)
-  isFeatured  Boolean  @default(false)
-  authorId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  publishedAt DateTime?
-
-  // Relations
-  category HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  author   User         @relation(fields: [authorId], references: [id])
-
-  @@index([categoryId])
-  @@index([slug])
-  @@index([isPublished])
-  @@index([isFeatured])
-  @@index([viewCount])
-  @@map("help_articles")
-}
-
