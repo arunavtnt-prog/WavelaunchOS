@@ -106,22 +106,30 @@ export async function POST(
       message: 'Application successfully converted to client'
     })
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error converting application to client:', error)
-    console.error('Error details:', error.message)
-    console.error('Error stack:', error.stack)
+    
+    // Type guard to safely access error properties
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    const errorCode = (error as any)?.code
+    const errorMeta = (error as any)?.meta
+    const errorName = (error as any)?.name
+    
+    console.error('Error details:', errorMessage)
+    if (errorStack) console.error('Error stack:', errorStack)
     
     // Check for specific database errors
-    if (error.code === 'P2002') {
-      console.error('Unique constraint violation:', error.meta)
+    if (errorCode === 'P2002') {
+      console.error('Unique constraint violation:', errorMeta)
       return NextResponse.json(
         { error: 'A client with this email already exists' },
         { status: 400 }
       )
     }
     
-    if (error.code === 'P2025') {
-      console.error('Record not found:', error.meta)
+    if (errorCode === 'P2025') {
+      console.error('Record not found:', errorMeta)
       return NextResponse.json(
         { error: 'Application not found or already converted' },
         { status: 404 }
@@ -129,16 +137,16 @@ export async function POST(
     }
     
     // Check for Prisma validation errors
-    if (error.name === 'PrismaClientValidationError') {
-      console.error('Prisma validation error:', error.message)
+    if (errorName === 'PrismaClientValidationError') {
+      console.error('Prisma validation error:', errorMessage)
       return NextResponse.json(
-        { error: 'Database schema mismatch. Please check field mappings.', details: error.message },
+        { error: 'Database schema mismatch. Please check field mappings.', details: errorMessage },
         { status: 500 }
       )
     }
     
     return NextResponse.json(
-      { error: 'Failed to convert application to client', details: error.message },
+      { error: 'Failed to convert application to client', details: errorMessage },
       { status: 500 }
     )
   }
