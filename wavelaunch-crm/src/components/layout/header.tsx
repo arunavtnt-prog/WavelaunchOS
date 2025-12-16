@@ -2,14 +2,8 @@
 
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Settings, ChevronDown } from 'lucide-react'
+import { Settings, Sun, Moon, Monitor } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import Link from 'next/link'
 
 const getPageTitle = (pathname: string): string => {
@@ -35,6 +29,22 @@ export function Header() {
   const { theme, setTheme } = useTheme()
   const pageTitle = getPageTitle(pathname)
 
+  const toggleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark')
+    } else if (theme === 'dark') {
+      setTheme('system')
+    } else {
+      setTheme('light')
+    }
+  }
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="h-4 w-4" />
+    if (theme === 'dark') return <Moon className="h-4 w-4" />
+    return <Monitor className="h-4 w-4" />
+  }
+
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-card/50 px-6 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="flex items-center gap-4">
@@ -42,30 +52,9 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 border-border/50 text-sm"
-            >
-              <span className="text-muted-foreground">Select a theme:</span>
-              <span className="font-medium">Blue</span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={() => setTheme('light')}>
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleTheme}>
+          {getThemeIcon()}
+        </Button>
 
         <Button variant="ghost" size="icon" className="h-9 w-9" asChild>
           <Link href="/settings">
