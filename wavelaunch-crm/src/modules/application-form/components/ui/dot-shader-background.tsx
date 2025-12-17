@@ -1,10 +1,13 @@
 'use client'
 
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { Canvas, ThreeEvent, useFrame, useThree, extend } from '@react-three/fiber'
 import { shaderMaterial, useTrailTexture } from '@react-three/drei'
 import { useTheme } from '@/components/theme-provider'
 import * as THREE from 'three'
+
+// Client-side only check
+const isClient = typeof window !== 'undefined'
 
 // Define the shader material
 const DotMaterial = shaderMaterial(
@@ -193,6 +196,16 @@ function Scene() {
 }
 
 export const DotScreenShader = () => {
+    const [isMounted, setIsMounted] = useState(false)
+    
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+    
+    if (!isMounted || !isClient) {
+        return <div className="absolute inset-0 z-[-1] pointer-events-none" />
+    }
+    
     return (
         <div className="absolute inset-0 z-[-1] pointer-events-none">
             <Canvas
