@@ -5,7 +5,13 @@ export default async function middleware(req: any) {
   const { pathname } = new URL(req.url)
 
   // Admin routes - check for NextAuth session token
-  const isPublicRoute = pathname === '/login' || pathname.startsWith('/api/auth')
+  // Public routes that don't require authentication
+  const isPublicRoute =
+    pathname === '/login' ||
+    pathname.startsWith('/api/auth') ||
+    pathname === '/api/applications' ||           // Public application submission
+    pathname.startsWith('/api/applications/submit') ||  // Alternative submit endpoint
+    pathname.startsWith('/api/applications/external')   // External API endpoint
   
   if (!isPublicRoute && !pathname.startsWith('/portal/')) {
     const cookieStore = await cookies()
