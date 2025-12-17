@@ -119,13 +119,7 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc',
       },
       include: {
-        convertedToClient: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          } as const,
-        },
+        convertedToClient: true,
       },
     })
 
