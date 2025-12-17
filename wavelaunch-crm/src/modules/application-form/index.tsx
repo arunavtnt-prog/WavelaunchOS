@@ -120,24 +120,24 @@ export default function ApplicationFormRoot() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent py-16 pl-[8%] pr-[16%] md:pl-[12%] md:pr-[22%] flex flex-col items-start relative transition-colors duration-300 overflow-hidden">
-      {/* Editorial Progress Rail */}
+    <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden">
+      {/* Editorial Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-70 hover:opacity-90 transition-opacity"
+        className="w-full max-w-2xl mb-10 flex items-center justify-between ml-0 md:-ml-4"
       >
-        <h1 className="font-serif text-[52px] md:text-[64px] text-foreground tracking-[-0.02em] leading-[0.9]">
+        <h1 className="font-serif text-[44px] md:text-[56px] text-foreground tracking-[-0.02em] leading-[0.9]">
           Wavelaunch Studio
         </h1>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-6 text-[10px] font-light text-foreground/30 hidden sm:flex">
-            <span className="tracking-[0.3em] uppercase">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
-            <div className="flex gap-2">
+          <div className="flex items-center gap-5 text-[10px] font-light text-foreground/25 hidden sm:flex">
+            <span className="tracking-[0.25em] uppercase">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
+            <div className="flex gap-1.5">
               {FORM_STEPS.map((_, i) => (
                 <div
                   key={i}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${i <= currentStep ? 'bg-foreground/50' : 'bg-foreground/10'}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${i <= currentStep ? 'bg-foreground/40' : 'bg-foreground/10'}`}
                 />
               ))}
             </div>
@@ -174,12 +174,12 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-between items-center pt-24 mt-16">
+              <div className="flex justify-between items-center pt-20 mt-12">
                 <button
                   type="button"
                   onClick={handleBack}
                   disabled={currentStep === 0}
-                  className={`text-foreground/30 hover:text-foreground/60 text-[13px] font-light tracking-[0.08em] transition-colors ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`text-foreground/35 hover:text-foreground/60 text-[13px] font-light tracking-[0.05em] transition-colors ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
                 >
                   <span className="inline-flex items-center gap-2">
                     <ChevronLeft className="w-3.5 h-3.5" />
@@ -190,7 +190,7 @@ export default function ApplicationFormRoot() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="text-foreground/80 hover:text-foreground border-b border-foreground/20 hover:border-foreground/40 bg-transparent px-0 py-1.5 text-[11px] font-light tracking-[0.25em] uppercase transition-all"
+                  className="text-foreground/70 hover:text-foreground border-b border-foreground/25 hover:border-foreground/50 bg-transparent px-0 pb-1 text-[12px] font-light tracking-[0.2em] uppercase transition-all"
                 >
                   {currentStep === FORM_STEPS.length - 1 ? "Submit" : "Next"}
                 </button>
@@ -203,8 +203,8 @@ export default function ApplicationFormRoot() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="fixed bottom-6 left-0 right-0 text-center text-[8px] text-foreground/8 font-light tracking-[0.45em] uppercase select-none pointer-events-none"
+        transition={{ delay: 0.6 }}
+        className="w-full max-w-2xl mt-auto pt-24 pb-8 text-center text-[9px] text-foreground/10 font-light tracking-[0.4em] uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>
