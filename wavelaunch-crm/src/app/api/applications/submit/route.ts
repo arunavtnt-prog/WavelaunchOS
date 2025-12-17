@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
     // Convert FormData to object
     const data: Record<string, string> = {}
     formData.forEach((value, key) => {
+      console.log(`FormData: ${key} = ${value} (type: ${typeof value})`)
       if (key !== 'zipFile' && typeof value === 'string') {
         data[key] = value
       }
