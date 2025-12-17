@@ -5,7 +5,7 @@ import { ApplicationFormData } from '@/schemas/application'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { COUNTRIES } from '@/types'
+import { COUNTRIES } from '@/constants/countries'
 
 interface StepProps {
   form: UseFormReturn<ApplicationFormData>

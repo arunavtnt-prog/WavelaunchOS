@@ -38,13 +38,7 @@ const PRODUCT_CATEGORIES = [
   'Merchandise',
 ]
 
-// Country list (abbreviated)
-const COUNTRIES = [
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 'France',
-  'Spain', 'Italy', 'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Finland',
-  'India', 'Japan', 'South Korea', 'Singapore', 'UAE', 'Brazil', 'Mexico',
-  'Argentina', 'South Africa', 'Nigeria', 'Kenya', 'Other'
-]
+import { COUNTRIES } from '@/constants/countries'
 
 // Initial form state
 const initialFormData = {
