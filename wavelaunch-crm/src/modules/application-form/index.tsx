@@ -23,8 +23,6 @@ import { StepProductDirection } from './components/application-form/step-product
 import { StepBusinessGoals } from './components/application-form/step-business-goals'
 import { StepLogistics } from './components/application-form/step-logistics'
 
-import { ModeToggle } from './components/mode-toggle'
-
 export default function ApplicationFormRoot() {
   const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
@@ -146,7 +144,6 @@ export default function ApplicationFormRoot() {
               ))}
             </div>
           </div>
-          <ModeToggle />
         </div>
       </motion.div>
 

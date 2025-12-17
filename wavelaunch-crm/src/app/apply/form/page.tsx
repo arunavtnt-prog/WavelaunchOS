@@ -1,6 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
 
 const ApplicationFormRoot = dynamic(() => import('@/modules/application-form').then(mod => mod.default), {
   ssr: false,
@@ -8,5 +10,10 @@ const ApplicationFormRoot = dynamic(() => import('@/modules/application-form').t
 })
 
 export default function ApplyFormPage() {
-  return <ApplicationFormRoot />
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="wavelaunch-theme">
+      <ApplicationFormRoot />
+      <Toaster />
+    </ThemeProvider>
+  )
 }
