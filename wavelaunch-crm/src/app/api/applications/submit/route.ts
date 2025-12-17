@@ -4,6 +4,35 @@ import { z } from 'zod'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
+// CORS configuration
+const ALLOWED_ORIGINS = [
+  'https://apply.wavelaunch.org',
+  'https://penguin-wavelaunch-os.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001',
+]
+
+function getCorsHeaders(origin: string | null) {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Credentials': 'true',
+  }
+}
+
+// OPTIONS handler for CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  return new NextResponse(null, {
+    status: 204,
+    headers: getCorsHeaders(origin),
+  })
+}
+
 // Google Sheets integration (async, non-blocking)
 async function pushToGoogleSheets(application: any) {
   try {
@@ -104,6 +133,9 @@ const applicationSchema = z.object({
 
 // POST /api/applications/submit - Public endpoint for application submission
 export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
   try {
     const formData = await request.formData()
 
@@ -166,7 +198,7 @@ export async function POST(request: NextRequest) {
       const errorMessages = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
       return NextResponse.json(
         { success: false, error: `Validation failed: ${errorMessages}` },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -176,7 +208,7 @@ export async function POST(request: NextRequest) {
     if (!validatedData.termsAccepted) {
       return NextResponse.json(
         { success: false, error: 'You must accept the terms and conditions' },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       )
     }
 
@@ -192,7 +224,7 @@ export async function POST(request: NextRequest) {
       if (zipFile.size > MAX_SIZE) {
         return NextResponse.json(
           { success: false, error: 'File size must be less than 25MB' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
 
@@ -200,7 +232,7 @@ export async function POST(request: NextRequest) {
       if (!zipFile.name.endsWith('.zip')) {
         return NextResponse.json(
           { success: false, error: 'Only ZIP files are allowed' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
 
@@ -293,20 +325,23 @@ export async function POST(request: NextRequest) {
       // Don't fail the request if email fails
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: application.id,
-        email: application.email,
-        name: application.fullName,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          id: application.id,
+          email: application.email,
+          name: application.fullName,
+        },
+        message: 'Application submitted successfully',
       },
-      message: 'Application submitted successfully',
-    })
+      { headers: corsHeaders }
+    )
   } catch (error) {
     console.error('Application submission error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to submit application. Please try again.' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     )
   }
 }

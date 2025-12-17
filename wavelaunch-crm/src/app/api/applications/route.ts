@@ -1,14 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
+import { z } from 'zod'
 
-// GET /api/applications - Get all applications
+// CORS configuration
+const ALLOWED_ORIGINS = [
+  'https://apply.wavelaunch.org',
+  'https://penguin-wavelaunch-os.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001',
+]
+
+function getCorsHeaders(origin: string | null) {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : ALLOWED_ORIGINS[0]
+  return {
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  }
+}
+
+// OPTIONS handler for CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  return new NextResponse(null, {
+    status: 204,
+    headers: getCorsHeaders(origin),
+  })
+}
+
+// Validation schema for public application submission
+const applicationSchema = z.object({
+  // Basic Information
+  name: z.string().min(1, 'Full name is required'),
+  email: z.string().email('Invalid email format'),
+  instagramHandle: z.string().optional().default(''),
+  tiktokHandle: z.string().optional().default(''),
+  country: z.string().min(1, 'Country is required'),
+  industryNiche: z.string().min(1, 'Industry/niche is required'),
+  age: z.coerce.number().min(18, 'Must be 18 or older'),
+
+  // Career Background
+  professionalMilestones: z.string().min(1, 'Professional milestones is required'),
+  personalTurningPoints: z.string().min(1, 'Personal turning points is required'),
+  visionForVenture: z.string().min(1, 'Vision for venture is required'),
+  hopeToAchieve: z.string().min(1, 'What you hope to achieve is required'),
+
+  // Audience & Demographics
+  targetAudience: z.string().min(1, 'Target audience is required'),
+  demographicProfile: z.string().min(1, 'Demographic profile is required'),
+  targetDemographicAge: z.string().min(1, 'Target demographic age is required'),
+  audienceGenderSplit: z.string().min(1, 'Audience gender split is required'),
+  audienceMaritalStatus: z.string().optional().default(''),
+  currentChannels: z.string().min(1, 'Current channels is required'),
+
+  // Pain Points & Values
+  keyPainPoints: z.string().min(1, 'Key pain points is required'),
+  brandValues: z.string().min(1, 'Brand values is required'),
+
+  // Competition & Market
+  differentiation: z.string().min(1, 'Differentiation is required'),
+  uniqueValueProps: z.string().min(1, 'Unique value props is required'),
+  emergingCompetitors: z.string().optional().default(''),
+
+  // Brand Identity
+  idealBrandImage: z.string().min(1, 'Ideal brand image is required'),
+  inspirationBrands: z.string().optional().default(''),
+  brandingAesthetics: z.string().min(1, 'Branding aesthetics is required'),
+  emotionsBrandEvokes: z.string().optional().default(''),
+  brandPersonality: z.string().min(1, 'Brand personality is required'),
+  preferredFont: z.string().optional().default(''),
+
+  // Products & Goals
+  productCategories: z.union([
+    z.array(z.string()),
+    z.string().transform((val) => {
+      try {
+        return JSON.parse(val)
+      } catch {
+        return val.split(',').map(s => s.trim()).filter(Boolean)
+      }
+    }),
+  ]).default([]),
+  otherProductIdeas: z.string().optional().default(''),
+  scalingGoals: z.string().min(1, 'Scaling goals is required'),
+  growthStrategies: z.string().optional().default(''),
+  longTermVision: z.string().min(1, 'Long-term vision is required'),
+  specificDeadlines: z.string().optional().default(''),
+  additionalInfo: z.string().optional().default(''),
+
+  // Terms
+  termsAccepted: z.union([
+    z.boolean(),
+    z.string().transform(val => val === 'true'),
+  ]).default(false),
+})
+
+// GET /api/applications - Get all applications (admin only)
 export async function GET(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
   try {
     const session = await auth()
 
     if (!session?.user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401, headers: corsHeaders }
+      )
     }
 
     const applications = await prisma.application.findMany({
@@ -26,15 +129,152 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return NextResponse.json({
-      success: true,
-      data: applications,
-    })
+    return NextResponse.json(
+      { success: true, data: applications },
+      { headers: corsHeaders }
+    )
   } catch (error) {
     console.error('Fetch applications error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch applications' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
+    )
+  }
+}
+
+// POST /api/applications - Public endpoint for application submission
+export async function POST(request: NextRequest) {
+  const origin = request.headers.get('origin')
+  const corsHeaders = getCorsHeaders(origin)
+
+  try {
+    // Parse request body (JSON or FormData)
+    let data: Record<string, unknown>
+    const contentType = request.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      data = await request.json()
+    } else if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      data = {}
+      formData.forEach((value, key) => {
+        if (typeof value === 'string') {
+          data[key] = value
+        }
+      })
+    } else {
+      // Try JSON first, fall back to text
+      try {
+        data = await request.json()
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid content type. Use application/json or multipart/form-data' },
+          { status: 400, headers: corsHeaders }
+        )
+      }
+    }
+
+    // Normalize field names (support both 'name' and 'fullName')
+    if (data.fullName && !data.name) {
+      data.name = data.fullName
+    }
+
+    // Validate the data
+    const validationResult = applicationSchema.safeParse(data)
+    if (!validationResult.success) {
+      const errorMessages = validationResult.error.errors
+        .map(e => `${e.path.join('.')}: ${e.message}`)
+        .join(', ')
+      return NextResponse.json(
+        { success: false, error: `Validation failed: ${errorMessages}` },
+        { status: 400, headers: corsHeaders }
+      )
+    }
+
+    const validatedData = validationResult.data
+
+    // Check if terms were accepted
+    if (!validatedData.termsAccepted) {
+      return NextResponse.json(
+        { success: false, error: 'You must accept the terms and conditions' },
+        { status: 400, headers: corsHeaders }
+      )
+    }
+
+    // Check for duplicate email
+    const existingApplication = await prisma.application.findFirst({
+      where: { email: validatedData.email },
+    })
+
+    if (existingApplication) {
+      return NextResponse.json(
+        { success: false, error: 'An application with this email already exists' },
+        { status: 409, headers: corsHeaders }
+      )
+    }
+
+    // Create the application in the database
+    const application = await prisma.application.create({
+      data: {
+        fullName: validatedData.name,
+        email: validatedData.email,
+        instagramHandle: validatedData.instagramHandle || null,
+        tiktokHandle: validatedData.tiktokHandle || null,
+        country: validatedData.country,
+        industryNiche: validatedData.industryNiche,
+        age: validatedData.age,
+        professionalMilestones: validatedData.professionalMilestones,
+        personalTurningPoints: validatedData.personalTurningPoints,
+        visionForVenture: validatedData.visionForVenture,
+        hopeToAchieve: validatedData.hopeToAchieve,
+        targetAudience: validatedData.targetAudience,
+        demographicProfile: validatedData.demographicProfile,
+        targetDemographicAge: validatedData.targetDemographicAge,
+        audienceGenderSplit: validatedData.audienceGenderSplit,
+        audienceMaritalStatus: validatedData.audienceMaritalStatus || null,
+        currentChannels: validatedData.currentChannels,
+        keyPainPoints: validatedData.keyPainPoints,
+        brandValues: validatedData.brandValues,
+        differentiation: validatedData.differentiation,
+        uniqueValueProps: validatedData.uniqueValueProps,
+        emergingCompetitors: validatedData.emergingCompetitors || null,
+        idealBrandImage: validatedData.idealBrandImage,
+        inspirationBrands: validatedData.inspirationBrands || null,
+        brandingAesthetics: validatedData.brandingAesthetics,
+        emotionsBrandEvokes: validatedData.emotionsBrandEvokes || null,
+        brandPersonality: validatedData.brandPersonality,
+        preferredFont: validatedData.preferredFont || null,
+        productCategories: JSON.stringify(validatedData.productCategories),
+        otherProductIdeas: validatedData.otherProductIdeas || null,
+        scalingGoals: validatedData.scalingGoals,
+        growthStrategies: validatedData.growthStrategies || null,
+        longTermVision: validatedData.longTermVision,
+        specificDeadlines: validatedData.specificDeadlines || null,
+        additionalInfo: validatedData.additionalInfo || null,
+        termsAccepted: true,
+        status: 'PENDING',
+      },
+    })
+
+    console.log(`New application submitted: ${application.id} - ${application.email}`)
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          id: application.id,
+          email: application.email,
+          name: application.fullName,
+        },
+        message: 'Application submitted successfully',
+      },
+      { headers: corsHeaders }
+    )
+  } catch (error) {
+    console.error('Application submission error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Failed to submit application. Please try again.' },
+      { status: 500, headers: corsHeaders }
     )
   }
 }
