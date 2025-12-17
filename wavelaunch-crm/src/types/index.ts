@@ -120,7 +120,7 @@ export type PaginatedResponse<T> = {
 }
 
 // Form Types
-export interface OnboardingFormData = {
+export interface OnboardingFormData {
   // Required
   creatorName: string
   email: string
