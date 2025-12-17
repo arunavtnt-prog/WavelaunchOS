@@ -147,6 +147,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Handle special cases
+    if (!data.productCategories) {
+      // If no productCategories in FormData, set empty array
+      data.productCategories = '[]'
+    }
+
     // Normalize payload - map old field names to new schema names
     const normalizeApplicationPayload = (input: Record<string, string>) => {
       return {
