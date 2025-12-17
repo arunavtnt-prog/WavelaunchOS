@@ -25,7 +25,6 @@ export default function ReviewPage() {
       toast({
         title: 'No Data Found',
         description: 'Please complete the application first.',
-        variant: 'destructive',
       })
       router.push('/apply')
       return
@@ -80,14 +79,12 @@ export default function ReviewPage() {
         toast({
           title: 'Submission Failed',
           description: result.error || 'Please try again.',
-          variant: 'destructive',
         })
       }
     } catch (error) {
       toast({
         title: 'Submission Error',
         description: 'An error occurred. Please try again.',
-        variant: 'destructive',
       })
     } finally {
       setIsSubmitting(false)

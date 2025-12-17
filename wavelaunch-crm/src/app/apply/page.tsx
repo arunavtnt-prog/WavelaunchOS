@@ -81,7 +81,6 @@ export default function ApplicationPage() {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields correctly.',
-        variant: 'destructive',
       })
     }
   }
