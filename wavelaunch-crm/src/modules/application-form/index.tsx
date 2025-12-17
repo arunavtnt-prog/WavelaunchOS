@@ -122,7 +122,7 @@ export default function ApplicationFormRoot() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden">
+    <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden">
       {/* Editorial Progress Rail */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
