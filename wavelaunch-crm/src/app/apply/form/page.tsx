@@ -213,8 +213,15 @@ export default function ApplicationFormPage() {
   }
 
   const handleSubmit = async () => {
-    if (!validateStep(8)) return
+    console.log('handleSubmit called, currentStep:', currentStep)
+    console.log('formData:', formData)
+    
+    if (!validateStep(8)) {
+      console.log('Validation failed, errors:', errors)
+      return
+    }
 
+    console.log('Validation passed, starting submission')
     setIsSubmitting(true)
     try {
       const submitData = new FormData()
@@ -230,12 +237,15 @@ export default function ApplicationFormPage() {
         }
       })
 
+      console.log('Submitting to /api/applications/submit...')
       const response = await fetch('/api/applications/submit', {
         method: 'POST',
         body: submitData,
       })
 
+      console.log('Response status:', response.status)
       const result = await response.json()
+      console.log('Response result:', result)
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to submit application')
