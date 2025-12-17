@@ -148,6 +148,17 @@ export async function POST(request: NextRequest) {
   const corsHeaders = getCorsHeaders(origin)
 
   try {
+    // Test database connection first
+    try {
+      await prisma.$queryRaw`SELECT 1`
+    } catch (dbError) {
+      console.error('Database connection failed:', dbError)
+      return NextResponse.json(
+        { success: false, error: 'Database connection failed. Please try again later.' },
+        { status: 500, headers: corsHeaders }
+      )
+    }
+
     // Parse request body (JSON or FormData)
     let data: Record<string, unknown>
     const contentType = request.headers.get('content-type') || ''
@@ -244,7 +255,9 @@ export async function POST(request: NextRequest) {
         emotionsBrandEvokes: validatedData.emotionsBrandEvokes || null,
         brandPersonality: validatedData.brandPersonality,
         preferredFont: validatedData.preferredFont || null,
-        productCategories: JSON.stringify(validatedData.productCategories),
+        productCategories: Array.isArray(validatedData.productCategories) 
+          ? JSON.stringify(validatedData.productCategories)
+          : '[]',
         otherProductIdeas: validatedData.otherProductIdeas || null,
         scalingGoals: validatedData.scalingGoals,
         growthStrategies: validatedData.growthStrategies || null,
@@ -272,8 +285,22 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Application submission error:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    })
+    
+    // Return more detailed error in development
+    const isDevelopment = process.env.NODE_ENV === 'development'
     return NextResponse.json(
-      { success: false, error: 'Failed to submit application. Please try again.' },
+      { 
+        success: false, 
+        error: isDevelopment 
+          ? `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`
+          : 'Failed to submit application. Please try again.',
+        ...(isDevelopment && { details: String(error) })
+      },
       { status: 500, headers: corsHeaders }
     )
   }
