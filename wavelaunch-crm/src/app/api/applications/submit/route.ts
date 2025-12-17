@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
     const normalizeApplicationPayload = (input: Record<string, string>) => {
       return {
         // Required fields with fallbacks
-        name: input.name ?? input.creatorName ?? "",
+        name: input.name ?? input.fullName ?? input.creatorName ?? "",
         email: input.email ?? "",
         instagramHandle: input.instagramHandle ?? "",
         tiktokHandle: input.tiktokHandle ?? "",
