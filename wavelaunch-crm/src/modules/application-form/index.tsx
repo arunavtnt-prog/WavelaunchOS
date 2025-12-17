@@ -1,190 +1,204 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft } from 'lucide-react'
 
-export default function WelcomePage() {
+import { ApplicationFormData, applicationSchema } from './schemas/application'
+import { FORM_STEPS } from './types'
+import { Button } from '@/components/ui/button'
+import { useToast } from '@/components/ui/use-toast'
+import { saveFormData, loadFormData, hasSavedData } from './lib/autosave'
+
+import { StepBasicInfo } from './components/application-form/step-basic-info'
+import { StepCareerBackground } from './components/application-form/step-career'
+import { StepAudienceDemographics } from './components/application-form/step-audience'
+import { StepPainPoints } from './components/application-form/step-pain-points'
+import { StepCompetition } from './components/application-form/step-competition'
+import { StepBrandIdentity } from './components/application-form/step-brand-identity'
+import { StepProductDirection } from './components/application-form/step-product'
+import { StepBusinessGoals } from './components/application-form/step-business-goals'
+import { StepLogistics } from './components/application-form/step-logistics'
+
+import { ModeToggle } from './components/mode-toggle'
+import { DotScreenShader } from './components/ui/dot-shader-background'
+
+export default function ApplicationFormRoot() {
   const router = useRouter()
+  const { toast } = useToast()
+  const [currentStep, setCurrentStep] = useState(0)
+  const [zipFile, setZipFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const features = [
-    'Product development & manufacturing',
-    'Branding & website creation',
-    'Marketing, SEO & analytics',
-    'Logistics & customer support',
-    'Up to $50,000 investment from Wavelaunch VC',
-    'You keep 100% ownership',
-  ]
+  const form = useForm<ApplicationFormData>({
+    resolver: zodResolver(applicationSchema),
+    mode: 'onChange',
+    defaultValues: {
+      productCategories: [],
+      termsAccepted: false,
+    },
+  })
 
-  const requirements = [
-    '5-10% onboarding fee',
-    '6-12 months commitment',
-    'Active participation in brand planning',
-    'Alignment with long-term vision',
-  ]
+  const { handleSubmit, trigger, watch } = form
+
+  // Load saved data on mount
+  useEffect(() => {
+    if (hasSavedData()) {
+      const savedData = loadFormData()
+      Object.entries(savedData).forEach(([key, value]) => {
+        form.setValue(key as keyof ApplicationFormData, value as any)
+      })
+      toast({
+        title: 'Progress Restored',
+        description: 'Your previous answers have been loaded.',
+      })
+    }
+  }, [])
+
+  // Autosave on form changes
+  useEffect(() => {
+    const subscription = watch((value) => {
+      saveFormData(value as Partial<ApplicationFormData>)
+    })
+    return () => subscription.unsubscribe()
+  }, [watch])
+
+  const handleNext = async () => {
+    const step = FORM_STEPS[currentStep]
+    const isValid = await trigger(step.fields as any)
+
+    if (isValid) {
+      if (currentStep < FORM_STEPS.length - 1) {
+        setCurrentStep(currentStep + 1)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        router.push('/apply/review')
+      }
+    } else {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in all required fields correctly.',
+      })
+    }
+  }
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0: return <StepBasicInfo form={form} />
+      case 1: return <StepCareerBackground form={form} />
+      case 2: return <StepAudienceDemographics form={form} />
+      case 3: return <StepPainPoints form={form} />
+      case 4: return <StepCompetition form={form} />
+      case 5: return <StepBrandIdentity form={form} />
+      case 6: return <StepProductDirection form={form} />
+      case 7: return <StepBusinessGoals form={form} />
+      case 8: return <StepLogistics form={form} zipFile={zipFile} setZipFile={setZipFile} />
+      default: return null
+    }
+  }
+
+  const currentStepData = FORM_STEPS[currentStep]
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-12 md:py-20 max-w-5xl">
-        {/* Hero Section */}
+    <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden isolate">
+      {/* Dot Shader Background */}
+      <DotScreenShader />
+
+      {/* Editorial Progress Rail */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-80 hover:opacity-100 transition-opacity"
+      >
+        <h1 className="font-serif text-[48px] text-foreground tracking-tight leading-none">
+          Wavelaunch Studio
+        </h1>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground hidden sm:flex">
+            <span className="tracking-widest uppercase opacity-40">0{currentStep + 1} / 0{FORM_STEPS.length}</span>
+            <div className="flex gap-1.5">
+              {FORM_STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1 h-1 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-foreground/80' : 'bg-foreground/10'}`}
+                />
+              ))}
+            </div>
+          </div>
+          <ModeToggle />
+        </div>
+      </motion.div>
+
+      {/* Sleek Divider */}
+      <motion.div
+        initial={{ scaleX: 0, opacity: 0 }}
+        animate={{ scaleX: 1, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
+        className="w-full max-w-2xl h-px bg-black/50 dark:bg-zinc-800/50 mb-16"
+      />
+
+      {/* Main Form Panel */}
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          key={currentStep}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-2xl"
         >
-          <div className="inline-flex items-center gap-2 bg-secondary px-6 py-3 rounded-full mb-8">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-sm font-semibold">Wavelaunch Studio</span>
+          <div className="mb-16">
+            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4 leading-tight">{currentStepData.title}</h2>
+            {currentStepData.description && (
+              <p className="text-muted-foreground text-lg leading-relaxed max-w-lg font-light">{currentStepData.description}</p>
+            )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            Welcome to the Wavelaunch Studio Application
-          </h1>
+          <div className="relative">
+            <form className="space-y-12">
+              {renderStep()}
 
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-3xl mx-auto">
-            A brand-building accelerator for creators and influencers. We help you launch
-            your own profitable D2C businesses with complete end-to-end support.
-          </p>
+              <div className="flex justify-between items-center pt-16 mt-8">
+                <Button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={currentStep === 0}
+                  className={`bg-white dark:bg-neutral-900 text-foreground border border-input z-10 hover:bg-accent hover:text-accent-foreground px-6 py-6 text-sm font-medium rounded transition-all shadow-sm ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-sm font-medium tracking-wide rounded transition-all shadow-none hover:shadow-lg active:scale-[0.98]"
+                >
+                  {currentStep === FORM_STEPS.length - 1 ? "Complete Application" : "Continue"}
+                </Button>
+              </div>
+            </form>
+          </div>
         </motion.div>
+      </AnimatePresence>
 
-        {/* Main Content */}
-        <div className="space-y-6">
-          {/* What We Offer */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>What We Offer</CardTitle>
-                <CardDescription>
-                  Complete end-to-end support for building your brand
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {features.map((feature, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{feature}</span>
-                    </motion.div>
-                  ))}
-                </div>
-                <p className="mt-6 text-sm text-muted-foreground leading-relaxed">
-                  Our team manages everything end-to-end while you collaborate on creative
-                  direction and strategy. You maintain full ownership of your brand while we
-                  invest in its growth.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Your Commitment */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Commitment</CardTitle>
-                <CardDescription>
-                  What we need from you to ensure success
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {requirements.map((req, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + index * 0.1 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
-                      </div>
-                      <span className="text-sm">{req}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Why This Form Exists */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Why This Form Exists</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Your answers help us evaluate fit, understand your audience, identify brand
-                  opportunities, and create a custom business roadmap. This roadmap will be
-                  shared with you and evaluated internally by Wavelaunch VC to ensure we can
-                  deliver the best possible outcome for your brand.
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="text-center pt-8"
-          >
-            <Button
-              size="lg"
-              onClick={() => router.push('/apply')}
-              className="px-12"
-            >
-              Start Application
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <p className="mt-4 text-sm text-muted-foreground">
-              The application takes approximately 15-20 minutes to complete
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="text-center mt-16 text-sm text-muted-foreground"
-        >
-          <p>
-            Learn more about Wavelaunch VC at{' '}
-            <a
-              href={process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline font-medium"
-            >
-              wavelaunch.vc
-            </a>
-          </p>
-        </motion.div>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="mt-24 text-center text-[10px] text-muted-foreground/60 font-medium tracking-[0.2em] uppercase"
+      >
+        Confidential Admissions Portal
+      </motion.div>
     </div>
   )
 }
