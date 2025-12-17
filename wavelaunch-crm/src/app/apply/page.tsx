@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 
 import { ApplicationFormData, applicationSchema } from '@/schemas/application'
-import { FORM_STEPS } from '@/types'
+import { FORM_STEPS } from '@/constants/formSteps'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { saveFormData, loadFormData, hasSavedData } from '@/lib/autosave'
