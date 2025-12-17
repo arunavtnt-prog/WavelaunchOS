@@ -128,7 +128,10 @@ const applicationSchema = z.object({
   additionalInfo: z.string().optional().default(''),
 
   // Terms
-  termsAccepted: z.string().transform(val => val === 'true'),
+  termsAccepted: z.union([z.string(), z.boolean()]).transform(val => {
+    if (typeof val === 'boolean') return val
+    return val === 'true'
+  }),
 })
 
 // POST /api/applications/submit - Public endpoint for application submission
