@@ -148,17 +148,6 @@ export async function POST(request: NextRequest) {
   const corsHeaders = getCorsHeaders(origin)
 
   try {
-    // Test database connection first
-    try {
-      await prisma.$queryRaw`SELECT 1`
-    } catch (dbError) {
-      console.error('Database connection failed:', dbError)
-      return NextResponse.json(
-        { success: false, error: 'Database connection failed. Please try again later.' },
-        { status: 500, headers: corsHeaders }
-      )
-    }
-
     // Parse request body (JSON or FormData)
     let data: Record<string, unknown>
     const contentType = request.headers.get('content-type') || ''
