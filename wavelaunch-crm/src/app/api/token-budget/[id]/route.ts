@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { resetBudget } from '@/lib/ai/token-tracker'
 import { z } from 'zod'
@@ -30,7 +30,7 @@ export async function PATCH(
     const body = await request.json()
     const data = updateBudgetSchema.parse(body)
 
-    const budget = await db.tokenBudget.update({
+    const budget = await prisma.tokenBudget.update({
       where: { id: params.id },
       data,
     })
@@ -61,7 +61,7 @@ export async function POST(
 
     await resetBudget(params.id)
 
-    const budget = await db.tokenBudget.findUnique({
+    const budget = await prisma.tokenBudget.findUnique({
       where: { id: params.id },
     })
 
@@ -90,7 +90,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await db.tokenBudget.delete({
+    await prisma.tokenBudget.delete({
       where: { id: params.id },
     })
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { jobQueue } from '@/lib/jobs'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
@@ -21,7 +21,7 @@ export async function POST(
     }
 
     // Verify deliverable exists
-    const deliverable = await db.deliverable.findUnique({
+    const deliverable = await prisma.deliverable.findUnique({
       where: { id: params.id },
     })
 

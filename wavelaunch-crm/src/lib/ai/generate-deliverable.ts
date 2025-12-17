@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getClaudeClient } from './claude'
 import { promptLoader } from '@/lib/prompts/loader'
 import { buildDeliverableContext } from '@/lib/prompts/context-builder'
@@ -17,7 +17,7 @@ export async function generateDeliverable(
     }
 
     // Get client
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: clientId },
     })
 
@@ -26,7 +26,7 @@ export async function generateDeliverable(
     }
 
     // Check if deliverable already exists
-    const existing = await db.deliverable.findFirst({
+    const existing = await prisma.deliverable.findFirst({
       where: {
         clientId,
         month,
@@ -68,7 +68,7 @@ export async function generateDeliverable(
     })
 
     // Save to database
-    const deliverable = await db.deliverable.create({
+    const deliverable = await prisma.deliverable.create({
       data: {
         clientId,
         month,
@@ -81,7 +81,7 @@ export async function generateDeliverable(
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId,
         type: 'DELIVERABLE_GENERATED',

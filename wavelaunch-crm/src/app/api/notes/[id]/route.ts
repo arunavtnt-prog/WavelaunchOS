@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -21,7 +21,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const note = await db.note.findUnique({
+    const note = await prisma.note.findUnique({
       where: { id: params.id },
       include: {
         client: {
@@ -72,7 +72,7 @@ export async function PATCH(
     }
 
     // Check note exists
-    const existingNote = await db.note.findUnique({
+    const existingNote = await prisma.note.findUnique({
       where: { id: params.id },
     })
 
@@ -93,14 +93,14 @@ export async function PATCH(
     }
 
     // Update note
-    const note = await db.note.update({
+    const note = await prisma.note.update({
       where: { id: params.id },
       data: noteUpdates,
     })
 
     // Log activity if important status changed
     if (updates.isImportant !== undefined) {
-      await db.activity.create({
+      await prisma.activity.create({
         data: {
           clientId: note.clientId,
           type: 'NOTE_UPDATED',
@@ -136,7 +136,7 @@ export async function DELETE(
     }
 
     // Check note exists
-    const existingNote = await db.note.findUnique({
+    const existingNote = await prisma.note.findUnique({
       where: { id: params.id },
     })
 
@@ -148,12 +148,12 @@ export async function DELETE(
     }
 
     // Delete note
-    await db.note.delete({
+    await prisma.note.delete({
       where: { id: params.id },
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: existingNote.clientId,
         type: 'NOTE_DELETED',

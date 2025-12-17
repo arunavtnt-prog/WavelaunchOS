@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 // POST /api/applications/[id]/convert-to-client - Convert approved application to client
 export async function POST(
@@ -10,7 +10,7 @@ export async function POST(
     const { id } = params
 
     // Get the application
-    const application = await db.application.findUnique({
+    const application = await prisma.application.findUnique({
       where: { id },
     })
 
@@ -37,7 +37,7 @@ export async function POST(
     }
 
     // Check if client already exists with this email
-    const existingClient = await db.client.findUnique({
+    const existingClient = await prisma.client.findUnique({
       where: { email: application.email },
     })
 
@@ -58,7 +58,7 @@ export async function POST(
     }
 
     // Use a transaction to create client AND update application atomically
-    const result = await db.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // Create client from application data with safe defaults
       const client = await tx.client.create({
         data: {

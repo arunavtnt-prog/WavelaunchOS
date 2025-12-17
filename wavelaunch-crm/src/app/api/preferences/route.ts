@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { updatePreferencesSchema } from '@/schemas/preferences'
 import {
   successResponse,
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth()
 
     // Get user's client record
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { email: user.email },
     })
 
@@ -29,13 +29,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get or create preferences
-    let preferences = await db.notificationPreferences.findUnique({
+    let preferences = await prisma.notificationPreferences.findUnique({
       where: { clientId: client.id },
     })
 
     if (!preferences) {
       // Create default preferences
-      preferences = await db.notificationPreferences.create({
+      preferences = await prisma.notificationPreferences.create({
         data: {
           clientId: client.id,
         },
@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest) {
     const data = validation.data
 
     // Get user's client record
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { email: user.email },
     })
 
@@ -81,7 +81,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update or create preferences
-    const preferences = await db.notificationPreferences.upsert({
+    const preferences = await prisma.notificationPreferences.upsert({
       where: { clientId: client.id },
       update: data,
       create: {

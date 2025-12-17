@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { successResponse, createdResponse, validationErrorResponse, handleError } from '@/lib/api/responses'
 import { z } from 'zod'
 
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAdmin()
 
-    const webhooks = await db.$queryRaw<any[]>`
+    const webhooks = await prisma.$queryRaw<any[]>`
       SELECT * FROM webhooks
       ORDER BY created_at DESC
     `
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     const { name, url, secret, events } = validation.data
     const id = `wh_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    await db.$executeRaw`
+    await prisma.$executeRaw`
       INSERT INTO webhooks (id, name, url, secret, events, created_by, created_at, updated_at)
       VALUES (
         ${id},

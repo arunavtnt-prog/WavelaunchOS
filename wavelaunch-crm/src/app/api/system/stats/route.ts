@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import * as fs from 'fs/promises'
 import * as path from 'path'
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     // File storage
-    const fileStorage = await db.file.aggregate({
+    const fileStorage = await prisma.file.aggregate({
       _sum: { filesize: true },
       _count: true,
     })
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Job queue stats
-    const jobStats = await db.job.groupBy({
+    const jobStats = await prisma.job.groupBy({
       by: ['status'],
       _count: true,
     })
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Recent failed jobs
-    const recentFailedJobs = await db.job.findMany({
+    const recentFailedJobs = await prisma.job.findMany({
       where: { status: 'FAILED' },
       orderBy: { createdAt: 'desc' },
       take: 5,
@@ -87,11 +87,11 @@ export async function GET(request: NextRequest) {
       noteCount,
       activityCount,
     ] = await Promise.all([
-      db.client.count({ where: { deletedAt: null } }),
-      db.businessPlan.count(),
-      db.deliverable.count(),
-      db.note.count(),
-      db.activity.count(),
+      prisma.client.count({ where: { deletedAt: null } }),
+      prisma.businessPlan.count(),
+      prisma.deliverable.count(),
+      prisma.note.count(),
+      prisma.activity.count(),
     ])
 
     // System uptime (app start time - would need to be tracked in production)

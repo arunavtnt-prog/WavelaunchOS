@@ -5,7 +5,7 @@
  * Sends HTTP callbacks when events occur in the CRM.
  */
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { logInfo, logError, logWarn } from '@/lib/logging/logger'
 import crypto from 'crypto'
 
@@ -82,7 +82,7 @@ export class WebhookService {
     // via migration in actual database
     try {
       // This will work once migration is applied
-      const webhooks = await db.$queryRaw<any[]>`
+      const webhooks = await prisma.$queryRaw<any[]>`
         SELECT * FROM webhooks
         WHERE is_active = true
         AND events::jsonb @> ${JSON.stringify([event])}::jsonb
@@ -235,7 +235,7 @@ export class WebhookService {
     success: boolean
   }): Promise<void> {
     try {
-      await db.$executeRaw`
+      await prisma.$executeRaw`
         INSERT INTO webhook_deliveries (
           id, webhook_id, event, payload, response_status,
           response_body, error, attempts, success, created_at, delivered_at
@@ -264,7 +264,7 @@ export class WebhookService {
    */
   private async updateLastTriggered(webhookId: string): Promise<void> {
     try {
-      await db.$executeRaw`
+      await prisma.$executeRaw`
         UPDATE webhooks
         SET last_triggered_at = NOW()
         WHERE id = ${webhookId}

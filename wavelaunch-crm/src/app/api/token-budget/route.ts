@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const budgets = await db.tokenBudget.findMany({
+    const budgets = await prisma.tokenBudget.findMany({
       orderBy: { createdAt: 'desc' },
     })
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const data = createBudgetSchema.parse(body)
 
     // Deactivate existing budget for this period
-    await db.tokenBudget.updateMany({
+    await prisma.tokenBudget.updateMany({
       where: {
         period: data.period,
         isActive: true,
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Create new budget
-    const budget = await db.tokenBudget.create({
+    const budget = await prisma.tokenBudget.create({
       data: {
         ...data,
         isActive: true,

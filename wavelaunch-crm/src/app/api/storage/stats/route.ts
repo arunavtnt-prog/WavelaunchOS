@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { STORAGE_LIMIT_BYTES, STORAGE_WARNING_THRESHOLD } from '@/lib/utils/constants'
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total storage used
-    const totalStorage = await db.file.aggregate({
+    const totalStorage = await prisma.file.aggregate({
       _sum: {
         filesize: true,
       },
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const warningThresholdBytes = STORAGE_LIMIT_BYTES * STORAGE_WARNING_THRESHOLD
 
     // Get storage by category
-    const storageByCategory = await db.file.groupBy({
+    const storageByCategory = await prisma.file.groupBy({
       by: ['category'],
       _sum: {
         filesize: true,
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Get storage by client (top 10)
-    const storageByClient = await db.file.groupBy({
+    const storageByClient = await prisma.file.groupBy({
       by: ['clientId'],
       _sum: {
         filesize: true,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Enrich client data
     const clientIds = storageByClient.map((s) => s.clientId).filter((id): id is string => id !== null)
-    const clients = await db.client.findMany({
+    const clients = await prisma.client.findMany({
       where: { id: { in: clientIds } },
       select: {
         id: true,

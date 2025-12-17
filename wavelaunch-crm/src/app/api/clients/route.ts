@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { createClientSchema, clientFilterSchema } from '@/schemas/client'
 import { MAX_CLIENTS } from '@/lib/utils/constants'
 import { CapacityError, ConflictError, handleError } from '@/lib/utils/errors'
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     
     const [clients, total] = await Promise.all([
-      db.client.findMany({
+      prisma.client.findMany({
         where,
         orderBy: { [filters.sortBy]: filters.sortOrder },
         skip: (filters.page - 1) * filters.pageSize,
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      db.client.count({ where }),
+      prisma.client.count({ where }),
     ])
 
     return NextResponse.json({
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check capacity
-    const clientCount = await db.client.count()
+    const clientCount = await prisma.client.count()
 
     if (clientCount >= MAX_CLIENTS) {
       throw new CapacityError('Client', MAX_CLIENTS)
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     const data = createClientSchema.parse(body)
 
     // Check for duplicate email
-    const existing = await db.client.findUnique({
+    const existing = await prisma.client.findUnique({
       where: { email: data.email },
     })
 
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create client
-    const client = await db.client.create({
+    const client = await prisma.client.create({
       data: {
         ...data,
         fullName: data.fullName,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: client.id,
         type: 'CLIENT_CREATED',

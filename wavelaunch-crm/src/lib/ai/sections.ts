@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 // Define business plan sections
 export const BUSINESS_PLAN_SECTIONS = [
@@ -119,7 +119,7 @@ export async function storeSections(
     const sections = parseMarkdownSections(content)
 
     // Delete existing sections for this document
-    await db.documentSection.deleteMany({
+    await prisma.documentSection.deleteMany({
       where: {
         documentId,
         documentType,
@@ -128,7 +128,7 @@ export async function storeSections(
 
     // Create new sections
     for (const section of sections) {
-      await db.documentSection.create({
+      await prisma.documentSection.create({
         data: {
           documentId,
           documentType,
@@ -153,7 +153,7 @@ export async function getSections(
   documentId: string,
   documentType: 'BUSINESS_PLAN' | 'DELIVERABLE'
 ) {
-  return await db.documentSection.findMany({
+  return await prisma.documentSection.findMany({
     where: {
       documentId,
       documentType,

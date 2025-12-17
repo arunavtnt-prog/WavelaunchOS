@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get notes
-    const notes = await db.note.findMany({
+    const notes = await prisma.note.findMany({
       where,
       orderBy: [
         { isImportant: 'desc' },
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const { clientId, content, tags, isImportant } = createNoteSchema.parse(body)
 
     // Verify client exists
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: clientId, deletedAt: null },
     })
 
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create note
-    const note = await db.note.create({
+    const note = await prisma.note.create({
       data: {
         clientId,
         content,
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId,
         type: 'NOTE_CREATED',

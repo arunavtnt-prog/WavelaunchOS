@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 // PATCH /api/applications/[id] - Update application status
 export async function PATCH(
@@ -16,7 +16,7 @@ export async function PATCH(
       )
     }
 
-    const application = await db.application.update({
+    const application = await prisma.application.update({
       where: { id: params.id },
       data: {
         status,

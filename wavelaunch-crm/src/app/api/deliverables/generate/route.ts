@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { jobQueue } from '@/lib/jobs'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const { clientId, month } = generateDeliverableSchema.parse(body)
 
     // Verify client exists
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: clientId, deletedAt: null },
     })
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if deliverable already exists
-    const existing = await db.deliverable.findFirst({
+    const existing = await prisma.deliverable.findFirst({
       where: { clientId, month, type: 'MAIN' },
     })
 

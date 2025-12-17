@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { createHelpCategorySchema } from '@/schemas/help'
 import {
   successResponse,
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const data = validation.data
 
     // Create category
-    const category = await db.helpCategory.create({
+    const category = await prisma.helpCategory.create({
       data: {
         name: data.name,
         slug: data.slug,
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const categories = await db.helpCategory.findMany({
+    const categories = await prisma.helpCategory.findMany({
       where,
       orderBy: { order: 'asc' },
       include: {

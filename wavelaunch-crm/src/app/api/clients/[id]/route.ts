@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { updateClientSchema } from '@/schemas/client'
 import { NotFoundError, handleError } from '@/lib/utils/errors'
 import { requireAuth, authorizeClientAccess } from '@/lib/auth/authorize'
@@ -20,7 +20,7 @@ export async function GET(
       return forbiddenResponse('You do not have permission to access this client')
     }
 
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: params.id, deletedAt: null },
       include: {
         businessPlans: {
@@ -92,7 +92,7 @@ export async function PATCH(
     const body = await request.json()
     const data = updateClientSchema.parse(body)
 
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: params.id, deletedAt: null },
     })
 
@@ -100,13 +100,13 @@ export async function PATCH(
       return notFoundResponse('Client')
     }
 
-    const updated = await db.client.update({
+    const updated = await prisma.client.update({
       where: { id: params.id },
       data,
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: updated.id,
         type: 'CLIENT_UPDATED',
@@ -142,7 +142,7 @@ export async function DELETE(
       return forbiddenResponse('Only administrators can delete clients')
     }
 
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: params.id, deletedAt: null },
     })
 
@@ -151,13 +151,13 @@ export async function DELETE(
     }
 
     // Soft delete
-    await db.client.update({
+    await prisma.client.update({
       where: { id: params.id },
       data: { deletedAt: new Date() },
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: client.id,
         type: 'CLIENT_DELETED',

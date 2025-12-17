@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin } from '@/lib/auth/authorize'
 import { jobQueue } from '@/lib/jobs'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/api/responses'
 
 /**
@@ -18,12 +18,12 @@ export async function GET(request: NextRequest) {
 
     // Get database stats
     const [totalJobs, queuedJobs, processingJobs, completedJobs, failedJobs, recentJobs] = await Promise.all([
-      db.job.count(),
-      db.job.count({ where: { status: 'QUEUED' } }),
-      db.job.count({ where: { status: 'PROCESSING' } }),
-      db.job.count({ where: { status: 'COMPLETED' } }),
-      db.job.count({ where: { status: 'FAILED' } }),
-      db.job.findMany({
+      prisma.job.count(),
+      prisma.job.count({ where: { status: 'QUEUED' } }),
+      prisma.job.count({ where: { status: 'PROCESSING' } }),
+      prisma.job.count({ where: { status: 'COMPLETED' } }),
+      prisma.job.count({ where: { status: 'FAILED' } }),
+      prisma.job.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
         select: {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     const successRate = totalProcessed > 0 ? (completedJobs / totalProcessed) * 100 : 0
 
     // Get job type breakdown
-    const jobTypeBreakdown = await db.job.groupBy({
+    const jobTypeBreakdown = await prisma.job.groupBy({
       by: ['type', 'status'],
       _count: {
         id: true,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Get average processing time (last 100 completed jobs)
-    const recentCompleted = await db.job.findMany({
+    const recentCompleted = await prisma.job.findMany({
       where: {
         status: 'COMPLETED',
         startedAt: { not: null },

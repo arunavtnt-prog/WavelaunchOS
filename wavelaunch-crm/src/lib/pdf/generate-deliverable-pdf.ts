@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { generatePDF, type PDFQuality } from './generator'
 import { AppError } from '@/lib/utils/errors'
 import * as path from 'path'
@@ -22,7 +22,7 @@ export async function generateDeliverablePDF(
 
   try {
     // Fetch deliverable with client info
-    const deliverable = await db.deliverable.findUnique({
+    const deliverable = await prisma.deliverable.findUnique({
       where: { id: deliverableId },
       include: {
         client: true,
@@ -70,7 +70,7 @@ export async function generateDeliverablePDF(
     }
 
     // Create file record in database
-    const file = await db.file.create({
+    const file = await prisma.file.create({
       data: {
         clientId: deliverable.clientId,
         filename,
@@ -83,7 +83,7 @@ export async function generateDeliverablePDF(
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: deliverable.clientId,
         type: 'FILE_UPLOADED',

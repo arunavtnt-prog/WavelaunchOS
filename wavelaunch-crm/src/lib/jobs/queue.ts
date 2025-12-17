@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { JobType, JobStatus } from '@prisma/client'
 import { MAX_JOB_RETRIES, JOB_RETRY_DELAYS } from '@/lib/utils/constants'
 
@@ -17,7 +17,7 @@ export class JobQueue {
   private maxConcurrency = 1 // Only 1 AI job at a time
 
   async enqueue(type: JobType, payload: JobPayload): Promise<string> {
-    const job = await db.job.create({
+    const job = await prisma.job.create({
       data: {
         type,
         status: 'QUEUED',
@@ -33,28 +33,28 @@ export class JobQueue {
   }
 
   async getJob(id: string) {
-    return db.job.findUnique({ where: { id } })
+    return prisma.job.findUnique({ where: { id } })
   }
 
   async getJobsByStatus(status: JobStatus) {
-    return db.job.findMany({
+    return prisma.job.findMany({
       where: { status },
       orderBy: { createdAt: 'asc' },
     })
   }
 
   async cancelJob(id: string) {
-    await db.job.update({
+    await prisma.job.update({
       where: { id },
       data: { status: 'CANCELLED' },
     })
   }
 
   async retryJob(id: string) {
-    const job = await db.job.findUnique({ where: { id } })
+    const job = await prisma.job.findUnique({ where: { id } })
     if (!job) throw new Error('Job not found')
 
-    await db.job.update({
+    await prisma.job.update({
       where: { id },
       data: {
         status: 'QUEUED',
@@ -74,7 +74,7 @@ export class JobQueue {
     }
 
     // Get next queued job
-    const job = await db.job.findFirst({
+    const job = await prisma.job.findFirst({
       where: { status: 'QUEUED' },
       orderBy: { createdAt: 'asc' },
     })
@@ -84,7 +84,7 @@ export class JobQueue {
     // Mark as processing
     this.processing.set(job.id, true)
 
-    await db.job.update({
+    await prisma.job.update({
       where: { id: job.id },
       data: {
         status: 'PROCESSING',
@@ -98,7 +98,7 @@ export class JobQueue {
       const result = await this.executeJob(job.type, payload)
 
       // Mark as completed
-      await db.job.update({
+      await prisma.job.update({
         where: { id: job.id },
         data: {
           status: 'COMPLETED',
@@ -115,7 +115,7 @@ export class JobQueue {
 
         // Schedule retry
         setTimeout(async () => {
-          await db.job.update({
+          await prisma.job.update({
             where: { id: job.id },
             data: {
               status: 'QUEUED',
@@ -127,7 +127,7 @@ export class JobQueue {
         }, delay)
       } else {
         // Mark as failed
-        await db.job.update({
+        await prisma.job.update({
           where: { id: job.id },
           data: {
             status: 'FAILED',
@@ -228,7 +228,7 @@ export class JobQueue {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
 
-    const deleted = await db.job.deleteMany({
+    const deleted = await prisma.job.deleteMany({
       where: {
         status: 'COMPLETED',
         completedAt: {

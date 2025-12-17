@@ -17,7 +17,7 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq'
 import { JobType, JobStatus } from '@prisma/client'
 import { getRedis, isRedisAvailable } from '@/lib/redis/client'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { logInfo, logError, logDebug } from '@/lib/logging/logger'
 
 export type JobPayload = {
@@ -147,7 +147,7 @@ class BullMQJobQueue {
         try {
           // Update database status to PROCESSING
           if (job.data.jobId) {
-            await db.job.update({
+            await prisma.job.update({
               where: { id: job.data.jobId },
               data: {
                 status: 'PROCESSING',
@@ -161,7 +161,7 @@ class BullMQJobQueue {
 
           // Update database status to COMPLETED
           if (job.data.jobId) {
-            await db.job.update({
+            await prisma.job.update({
               where: { id: job.data.jobId },
               data: {
                 status: 'COMPLETED',
@@ -188,7 +188,7 @@ class BullMQJobQueue {
           // Update database with error
           if (job.data.jobId) {
             const attempts = job.attemptsMade + 1
-            await db.job.update({
+            await prisma.job.update({
               where: { id: job.data.jobId },
               data: {
                 attempts,
@@ -313,7 +313,7 @@ class BullMQJobQueue {
     }
 
     // Create job record in database
-    const dbJob = await db.job.create({
+    const dbJob = await prisma.job.create({
       data: {
         type,
         status: 'QUEUED',
@@ -343,7 +343,7 @@ class BullMQJobQueue {
    * Get job status from BullMQ
    */
   async getJobStatus(id: string): Promise<JobStatus | null> {
-    const dbJob = await db.job.findUnique({ where: { id } })
+    const dbJob = await prisma.job.findUnique({ where: { id } })
     return dbJob?.status || null
   }
 
@@ -351,7 +351,7 @@ class BullMQJobQueue {
    * Cancel a job
    */
   async cancelJob(id: string): Promise<void> {
-    const dbJob = await db.job.findUnique({ where: { id } })
+    const dbJob = await prisma.job.findUnique({ where: { id } })
     if (!dbJob) {
       throw new Error('Job not found')
     }
@@ -367,7 +367,7 @@ class BullMQJobQueue {
     }
 
     // Update database
-    await db.job.update({
+    await prisma.job.update({
       where: { id },
       data: { status: 'CANCELLED' },
     })
@@ -379,13 +379,13 @@ class BullMQJobQueue {
    * Retry a failed job
    */
   async retryJob(id: string): Promise<void> {
-    const dbJob = await db.job.findUnique({ where: { id } })
+    const dbJob = await prisma.job.findUnique({ where: { id } })
     if (!dbJob) {
       throw new Error('Job not found')
     }
 
     // Reset attempts and status in database
-    await db.job.update({
+    await prisma.job.update({
       where: { id },
       data: {
         status: 'QUEUED',
@@ -506,7 +506,7 @@ class BullMQJobQueue {
     const cutoffDate = new Date()
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
 
-    const deleted = await db.job.deleteMany({
+    const deleted = await prisma.job.deleteMany({
       where: {
         status: 'COMPLETED',
         completedAt: {

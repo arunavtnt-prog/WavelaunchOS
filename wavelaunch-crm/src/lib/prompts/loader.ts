@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import yaml from 'yaml'
 import Mustache from 'mustache'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { PromptTemplateType } from '@prisma/client'
 
 export type PromptTemplate = {
@@ -24,7 +24,7 @@ export class PromptLoader {
     }
 
     // Get active template from database
-    const template = await db.promptTemplate.findFirst({
+    const template = await prisma.promptTemplate.findFirst({
       where: { type, isActive: true },
     })
 

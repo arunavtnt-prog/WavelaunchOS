@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { updateHelpArticleSchema } from '@/schemas/help'
 import {
   successResponse,
@@ -29,7 +29,7 @@ export async function GET(
       where.isPublished = true
     }
 
-    const article = await db.helpArticle.findFirst({
+    const article = await prisma.helpArticle.findFirst({
       where,
       include: {
         category: {
@@ -54,7 +54,7 @@ export async function GET(
     }
 
     // Increment view count
-    await db.helpArticle.update({
+    await prisma.helpArticle.update({
       where: { id: article.id },
       data: { viewCount: { increment: 1 } },
     })
@@ -91,7 +91,7 @@ export async function PATCH(
     const data = validation.data
 
     // Find article by slug
-    const existingArticle = await db.helpArticle.findUnique({
+    const existingArticle = await prisma.helpArticle.findUnique({
       where: { slug: params.slug },
     })
 
@@ -117,7 +117,7 @@ export async function PATCH(
     if (data.isFeatured !== undefined) updateData.isFeatured = data.isFeatured
 
     // Update article
-    const article = await db.helpArticle.update({
+    const article = await prisma.helpArticle.update({
       where: { slug: params.slug },
       data: updateData,
       include: {
@@ -154,7 +154,7 @@ export async function DELETE(
     await requireAdmin()
 
     // Find article by slug
-    const article = await db.helpArticle.findUnique({
+    const article = await prisma.helpArticle.findUnique({
       where: { slug: params.slug },
     })
 
@@ -163,7 +163,7 @@ export async function DELETE(
     }
 
     // Delete article
-    await db.helpArticle.delete({
+    await prisma.helpArticle.delete({
       where: { slug: params.slug },
     })
 

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 export interface CheckpointData {
   jobId: string
@@ -19,7 +19,7 @@ export interface CheckpointData {
  */
 export async function saveCheckpoint(data: CheckpointData): Promise<void> {
   try {
-    await db.generationCheckpoint.upsert({
+    await prisma.generationCheckpoint.upsert({
       where: { jobId: data.jobId },
       create: {
         jobId: data.jobId,
@@ -51,7 +51,7 @@ export async function saveCheckpoint(data: CheckpointData): Promise<void> {
  */
 export async function getCheckpoint(jobId: string) {
   try {
-    const checkpoint = await db.generationCheckpoint.findUnique({
+    const checkpoint = await prisma.generationCheckpoint.findUnique({
       where: { jobId },
     })
 
@@ -75,7 +75,7 @@ export async function getCheckpoint(jobId: string) {
  */
 export async function completeCheckpoint(jobId: string): Promise<void> {
   try {
-    await db.generationCheckpoint.update({
+    await prisma.generationCheckpoint.update({
       where: { jobId },
       data: {
         status: 'COMPLETED',
@@ -95,7 +95,7 @@ export async function failCheckpoint(
   errorMessage?: string
 ): Promise<void> {
   try {
-    await db.generationCheckpoint.update({
+    await prisma.generationCheckpoint.update({
       where: { jobId },
       data: {
         status: 'FAILED',
@@ -113,7 +113,7 @@ export async function failCheckpoint(
  */
 export async function deleteCheckpoint(jobId: string): Promise<void> {
   try {
-    await db.generationCheckpoint.delete({
+    await prisma.generationCheckpoint.delete({
       where: { jobId },
     })
   } catch (error) {
@@ -137,7 +137,7 @@ export async function getResumableCheckpoints(clientId?: string) {
       where.clientId = clientId
     }
 
-    const checkpoints = await db.generationCheckpoint.findMany({
+    const checkpoints = await prisma.generationCheckpoint.findMany({
       where,
       orderBy: {
         createdAt: 'desc',
@@ -163,7 +163,7 @@ export async function cleanupOldCheckpoints(): Promise<number> {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
 
-    const result = await db.generationCheckpoint.deleteMany({
+    const result = await prisma.generationCheckpoint.deleteMany({
       where: {
         status: 'COMPLETED',
         createdAt: {

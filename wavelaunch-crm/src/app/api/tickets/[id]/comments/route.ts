@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { createTicketCommentSchema } from '@/schemas/ticket'
 import {
   successResponse,
@@ -31,7 +31,7 @@ export async function POST(
     const data = validation.data
 
     // Check if ticket exists
-    const ticket = await db.ticket.findUnique({
+    const ticket = await prisma.ticket.findUnique({
       where: { id: params.id },
       include: {
         client: true,
@@ -43,7 +43,7 @@ export async function POST(
     }
 
     // Create comment
-    const comment = await db.ticketComment.create({
+    const comment = await prisma.ticketComment.create({
       data: {
         ticketId: params.id,
         authorId: user.id,
@@ -63,7 +63,7 @@ export async function POST(
     })
 
     // Update ticket's updatedAt timestamp
-    await db.ticket.update({
+    await prisma.ticket.update({
       where: { id: params.id },
       data: { updatedAt: new Date() },
     })
@@ -97,7 +97,7 @@ export async function GET(
     const user = await requireAuth()
 
     // Check if ticket exists
-    const ticket = await db.ticket.findUnique({
+    const ticket = await prisma.ticket.findUnique({
       where: { id: params.id },
     })
 
@@ -112,7 +112,7 @@ export async function GET(
       where.isInternal = false
     }
 
-    const comments = await db.ticketComment.findMany({
+    const comments = await prisma.ticketComment.findMany({
       where,
       orderBy: { createdAt: 'asc' },
       include: {

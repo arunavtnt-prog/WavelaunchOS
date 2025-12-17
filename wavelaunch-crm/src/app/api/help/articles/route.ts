@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { createHelpArticleSchema, searchHelpArticlesSchema } from '@/schemas/help'
 import {
   successResponse,
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const data = validation.data
 
     // Create article
-    const article = await db.helpArticle.create({
+    const article = await prisma.helpArticle.create({
       data: {
         categoryId: data.categoryId,
         title: data.title,
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
 
     // Get articles with pagination
     const [articles, total] = await Promise.all([
-      db.helpArticle.findMany({
+      prisma.helpArticle.findMany({
         where,
         skip,
         take,
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      db.helpArticle.count({ where }),
+      prisma.helpArticle.count({ where }),
     ])
 
     // Parse tags from JSON

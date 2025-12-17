@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { assignTicketSchema } from '@/schemas/ticket'
 import {
   successResponse,
@@ -31,7 +31,7 @@ export async function POST(
     const { assignedTo } = validation.data
 
     // Check if ticket exists
-    const existingTicket = await db.ticket.findUnique({
+    const existingTicket = await prisma.ticket.findUnique({
       where: { id: params.id },
     })
 
@@ -41,7 +41,7 @@ export async function POST(
 
     // If assigning to someone, verify user exists
     if (assignedTo) {
-      const assignee = await db.user.findUnique({
+      const assignee = await prisma.user.findUnique({
         where: { id: assignedTo },
       })
 
@@ -51,7 +51,7 @@ export async function POST(
     }
 
     // Update ticket assignment
-    const ticket = await db.ticket.update({
+    const ticket = await prisma.ticket.update({
       where: { id: params.id },
       data: {
         assignedTo,

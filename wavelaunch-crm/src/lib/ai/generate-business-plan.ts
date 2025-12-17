@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { getClaudeClient } from './claude'
 import { promptLoader } from '@/lib/prompts/loader'
 import { buildClientContext } from '@/lib/prompts/context-builder'
@@ -10,7 +10,7 @@ export async function generateBusinessPlan(
 ): Promise<JobResult> {
   try {
     // Get client
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: clientId },
     })
 
@@ -28,7 +28,7 @@ export async function generateBusinessPlan(
     const prompt = promptLoader.renderPrompt(template, context)
 
     // Get current version first
-    const existingPlans = await db.businessPlan.findMany({
+    const existingPlans = await prisma.businessPlan.findMany({
       where: { clientId },
       orderBy: { version: 'desc' },
       take: 1,
@@ -52,7 +52,7 @@ export async function generateBusinessPlan(
     })
 
     // Save to database
-    const businessPlan = await db.businessPlan.create({
+    const businessPlan = await prisma.businessPlan.create({
       data: {
         clientId,
         version,
@@ -63,7 +63,7 @@ export async function generateBusinessPlan(
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId,
         type: 'BUSINESS_PLAN_GENERATED',

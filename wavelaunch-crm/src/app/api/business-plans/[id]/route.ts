@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { updateBusinessPlanSchema } from '@/schemas/business-plan'
 
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const businessPlan = await db.businessPlan.findUnique({
+    const businessPlan = await prisma.businessPlan.findUnique({
       where: { id: params.id },
       include: {
         client: {
@@ -67,7 +67,7 @@ export async function PATCH(
     }
 
     // Get existing business plan
-    const existingPlan = await db.businessPlan.findUnique({
+    const existingPlan = await prisma.businessPlan.findUnique({
       where: { id: params.id },
       include: {
         client: true,
@@ -85,7 +85,7 @@ export async function PATCH(
     const data = updateBusinessPlanSchema.parse(body)
 
     // Update business plan
-    const updatedPlan = await db.businessPlan.update({
+    const updatedPlan = await prisma.businessPlan.update({
       where: { id: params.id },
       data: {
         contentMarkdown: data.contentMarkdown,
@@ -104,7 +104,7 @@ export async function PATCH(
       }
     }
 
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: existingPlan.clientId,
         type: 'BUSINESS_PLAN_UPDATED',

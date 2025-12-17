@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import crypto from 'crypto'
 
 /**
@@ -52,7 +52,7 @@ export function generatePromptHash(prompt: string): string {
  */
 export async function checkCache(cacheKey: string): Promise<string | null> {
   try {
-    const cached = await db.promptCache.findUnique({
+    const cached = await prisma.promptCache.findUnique({
       where: { cacheKey },
     })
 
@@ -63,14 +63,14 @@ export async function checkCache(cacheKey: string): Promise<string | null> {
     // Check if expired
     if (new Date() > cached.expiresAt) {
       // Delete expired cache
-      await db.promptCache.delete({
+      await prisma.promptCache.delete({
         where: { id: cached.id },
       })
       return null
     }
 
     // Update hit count and last used
-    await db.promptCache.update({
+    await prisma.promptCache.update({
       where: { id: cached.id },
       data: {
         hitCount: cached.hitCount + 1,
@@ -99,7 +99,7 @@ export async function storeCache(
     const expiresAt = new Date()
     expiresAt.setHours(expiresAt.getHours() + ttlHours)
 
-    await db.promptCache.upsert({
+    await prisma.promptCache.upsert({
       where: { cacheKey },
       create: {
         cacheKey,
@@ -129,12 +129,12 @@ export async function storeCache(
  */
 export async function updateTokensSaved(cacheKey: string, tokens: number): Promise<void> {
   try {
-    const cached = await db.promptCache.findUnique({
+    const cached = await prisma.promptCache.findUnique({
       where: { cacheKey },
     })
 
     if (cached) {
-      await db.promptCache.update({
+      await prisma.promptCache.update({
         where: { id: cached.id },
         data: {
           tokensSaved: cached.tokensSaved + tokens,
@@ -154,18 +154,18 @@ async function evictOldCacheEntries(): Promise<void> {
   try {
     const MAX_CACHE_SIZE = 1000
 
-    const count = await db.promptCache.count()
+    const count = await prisma.promptCache.count()
 
     if (count > MAX_CACHE_SIZE) {
       // Get the oldest entries (LRU)
-      const toDelete = await db.promptCache.findMany({
+      const toDelete = await prisma.promptCache.findMany({
         orderBy: { lastUsedAt: 'asc' },
         take: count - MAX_CACHE_SIZE,
         select: { id: true },
       })
 
       // Delete them
-      await db.promptCache.deleteMany({
+      await prisma.promptCache.deleteMany({
         where: {
           id: {
             in: toDelete.map((c) => c.id),
@@ -183,7 +183,7 @@ async function evictOldCacheEntries(): Promise<void> {
  */
 export async function clearExpiredCache(): Promise<number> {
   try {
-    const result = await db.promptCache.deleteMany({
+    const result = await prisma.promptCache.deleteMany({
       where: {
         expiresAt: {
           lt: new Date(),
@@ -208,7 +208,7 @@ export async function getCacheStats(): Promise<{
   cacheHitRate: number
 }> {
   try {
-    const caches = await db.promptCache.findMany({
+    const caches = await prisma.promptCache.findMany({
       select: {
         hitCount: true,
         tokensSaved: true,
@@ -220,7 +220,7 @@ export async function getCacheStats(): Promise<{
     const totalTokensSaved = caches.reduce((sum, c) => sum + c.tokensSaved, 0)
 
     // Get total token usage to calculate hit rate
-    const tokenUsage = await db.tokenUsage.findMany({
+    const tokenUsage = await prisma.tokenUsage.findMany({
       select: {
         cacheHit: true,
       },

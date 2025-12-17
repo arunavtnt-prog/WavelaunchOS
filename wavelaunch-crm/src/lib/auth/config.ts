@@ -1,6 +1,6 @@
 import { NextAuthConfig } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { loginSchema } from '@/schemas/auth'
 import { Role } from '@prisma/client'
 import { compare } from 'bcryptjs'
@@ -19,7 +19,7 @@ export const authConfig: NextAuthConfig = {
           const { email, password } = loginSchema.parse(credentials)
 
           // Find user
-          const user = await db.user.findUnique({
+          const user = await prisma.user.findUnique({
             where: { email },
           })
 

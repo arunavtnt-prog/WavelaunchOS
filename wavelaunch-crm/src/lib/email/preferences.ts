@@ -4,7 +4,7 @@
  * Utilities for checking and managing client notification preferences.
  */
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { logDebug } from '@/lib/logging/logger'
 
 export type EmailNotificationType =
@@ -27,13 +27,13 @@ export async function shouldSendEmail(
 ): Promise<boolean> {
   try {
     // Get client preferences
-    let preferences = await db.notificationPreferences.findUnique({
+    let preferences = await prisma.notificationPreferences.findUnique({
       where: { clientId },
     })
 
     // If no preferences exist, create default ones
     if (!preferences) {
-      preferences = await db.notificationPreferences.create({
+      preferences = await prisma.notificationPreferences.create({
         data: { clientId },
       })
     }
@@ -63,13 +63,13 @@ export async function shouldSendEmail(
  * Get client notification preferences
  */
 export async function getNotificationPreferences(clientId: string) {
-  let preferences = await db.notificationPreferences.findUnique({
+  let preferences = await prisma.notificationPreferences.findUnique({
     where: { clientId },
   })
 
   // Create default preferences if they don't exist
   if (!preferences) {
-    preferences = await db.notificationPreferences.create({
+    preferences = await prisma.notificationPreferences.create({
       data: { clientId },
     })
   }
@@ -104,7 +104,7 @@ export async function updateNotificationPreferences(
   await getNotificationPreferences(clientId)
 
   // Update preferences
-  return db.notificationPreferences.update({
+  return prisma.notificationPreferences.update({
     where: { clientId },
     data: updates,
   })

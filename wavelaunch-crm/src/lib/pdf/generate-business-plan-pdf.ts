@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { generatePDF, type PDFQuality } from './generator'
 import { AppError } from '@/lib/utils/errors'
 import * as path from 'path'
@@ -22,7 +22,7 @@ export async function generateBusinessPlanPDF(
 
   try {
     // Fetch business plan with client info
-    const businessPlan = await db.businessPlan.findUnique({
+    const businessPlan = await prisma.businessPlan.findUnique({
       where: { id: businessPlanId },
       include: {
         client: true,
@@ -70,7 +70,7 @@ export async function generateBusinessPlanPDF(
     }
 
     // Create file record in database
-    const file = await db.file.create({
+    const file = await prisma.file.create({
       data: {
         clientId: businessPlan.clientId,
         filename,
@@ -83,7 +83,7 @@ export async function generateBusinessPlanPDF(
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: businessPlan.clientId,
         type: 'FILE_UPLOADED',

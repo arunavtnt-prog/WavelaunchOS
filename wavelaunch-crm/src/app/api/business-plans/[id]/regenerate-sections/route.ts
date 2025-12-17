@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { getClaudeClient } from '@/lib/ai/claude'
 import { promptLoader } from '@/lib/prompts/loader'
@@ -27,7 +27,7 @@ export async function POST(
     const { sectionNames } = regenerateSectionsSchema.parse(body)
 
     // Get business plan
-    const businessPlan = await db.businessPlan.findUnique({
+    const businessPlan = await prisma.businessPlan.findUnique({
       where: { id: params.id },
       include: {
         client: true,
@@ -108,7 +108,7 @@ Generate only this section, nothing else.`
       })
 
       // Update the section in database
-      await db.documentSection.update({
+      await prisma.documentSection.update({
         where: { id: section.id },
         data: {
           content: sectionContent.replace(/^##\s+.+\n+/, ''), // Remove heading as we store it separately
@@ -128,7 +128,7 @@ Generate only this section, nothing else.`
     const fullContent = combineSections(updatedSections)
 
     // Update business plan with combined content
-    await db.businessPlan.update({
+    await prisma.businessPlan.update({
       where: { id: params.id },
       data: {
         contentMarkdown: fullContent,
@@ -137,7 +137,7 @@ Generate only this section, nothing else.`
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: businessPlan.clientId,
         type: 'BUSINESS_PLAN_UPDATED',

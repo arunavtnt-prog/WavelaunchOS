@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { createTicketSchema, ticketFilterSchema } from '@/schemas/ticket'
 import {
   successResponse,
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const data = validation.data
 
     // Create ticket
-    const ticket = await db.ticket.create({
+    const ticket = await prisma.ticket.create({
       data: {
         clientId: data.clientId,
         title: data.title,
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     // Get tickets with pagination
     const [tickets, total] = await Promise.all([
-      db.ticket.findMany({
+      prisma.ticket.findMany({
         where,
         skip,
         take,
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
           },
         },
       }),
-      db.ticket.count({ where }),
+      prisma.ticket.count({ where }),
     ])
 
     return successResponse(

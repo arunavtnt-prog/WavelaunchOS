@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { getSections, storeSections, combineSections } from '@/lib/ai/sections'
 
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const businessPlan = await db.businessPlan.findUnique({
+    const businessPlan = await prisma.businessPlan.findUnique({
       where: { id: params.id },
     })
 

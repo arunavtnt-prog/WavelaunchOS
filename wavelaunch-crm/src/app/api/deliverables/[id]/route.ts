@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -21,7 +21,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const deliverable = await db.deliverable.findUnique({
+    const deliverable = await prisma.deliverable.findUnique({
       where: { id: params.id },
       include: {
         client: {
@@ -73,7 +73,7 @@ export async function PATCH(
     }
 
     // Get existing deliverable
-    const existingDeliverable = await db.deliverable.findUnique({
+    const existingDeliverable = await prisma.deliverable.findUnique({
       where: { id: params.id },
       include: {
         client: true,
@@ -91,7 +91,7 @@ export async function PATCH(
     const data = updateDeliverableSchema.parse(body)
 
     // Update deliverable
-    const updatedDeliverable = await db.deliverable.update({
+    const updatedDeliverable = await prisma.deliverable.update({
       where: { id: params.id },
       data: {
         contentMarkdown: data.contentMarkdown,
@@ -110,7 +110,7 @@ export async function PATCH(
       }
     }
 
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: existingDeliverable.clientId,
         type: 'DELIVERABLE_UPDATED',

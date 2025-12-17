@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,14 +7,14 @@ export async function GET(request: NextRequest) {
     console.log('Testing database connection...')
     
     // Test if we can query the clients table
-    const clientCount = await db.client.count()
+    const clientCount = await prisma.client.count()
     console.log('Client count:', clientCount)
     
     // Check table structure - get all columns to see what name field exists
-    const tableInfo = await db.$queryRaw`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'clients' ORDER BY ordinal_position`
+    const tableInfo = await prisma.$queryRaw`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'clients' ORDER BY ordinal_position`
     
     // Try to find any name-related column
-    const nameColumns = await db.$queryRaw`SELECT column_name FROM information_schema.columns WHERE table_name = 'clients' AND column_name ILIKE '%name%'`
+    const nameColumns = await prisma.$queryRaw`SELECT column_name FROM information_schema.columns WHERE table_name = 'clients' AND column_name ILIKE '%name%'`
     
     return NextResponse.json({
       success: true,

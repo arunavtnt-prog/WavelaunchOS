@@ -5,7 +5,7 @@
  * Includes client metrics, deliverable tracking, AI usage, and performance stats.
  */
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { logDebug } from '@/lib/logging/logger'
 import { apiCache, cacheKeys, CACHE_TTL } from '@/lib/cache/api-cache'
 
@@ -138,13 +138,13 @@ export class AnalyticsService {
   private async getOverviewMetrics() {
     const [totalClients, activeClients, totalBusinessPlans, totalDeliverables] =
       await Promise.all([
-        db.client.count({ where: { deletedAt: null } }),
-        db.client.count({ where: { status: 'ACTIVE', deletedAt: null } }),
-        db.businessPlan.count(),
-        db.deliverable.count(),
+        prisma.client.count({ where: { deletedAt: null } }),
+        prisma.client.count({ where: { status: 'ACTIVE', deletedAt: null } }),
+        prisma.businessPlan.count(),
+        prisma.deliverable.count(),
       ])
 
-    const completedDeliverables = await db.deliverable.count({
+    const completedDeliverables = await prisma.deliverable.count({
       where: { status: { in: ['APPROVED', 'DELIVERED'] } },
     })
 
@@ -166,7 +166,7 @@ export class AnalyticsService {
    * Get client metrics
    */
   private async getClientMetrics() {
-    const clients = await db.client.findMany({
+    const clients = await prisma.client.findMany({
       where: { deletedAt: null },
       include: {
         _count: {
@@ -215,7 +215,7 @@ export class AnalyticsService {
    * Get deliverable metrics
    */
   private async getDeliverableMetrics() {
-    const deliverables = await db.deliverable.findMany({
+    const deliverables = await prisma.deliverable.findMany({
       select: {
         month: true,
         status: true,
@@ -265,7 +265,7 @@ export class AnalyticsService {
       completedCount > 0 ? Math.round((totalCompletionTime / completedCount) * 10) / 10 : 0
 
     // Count overdue (simplified - would need dueDate field for accuracy)
-    const overdueCount = await db.deliverable.count({
+    const overdueCount = await prisma.deliverable.count({
       where: { status: { in: ['DRAFT', 'PENDING_REVIEW'] } },
     })
 
@@ -282,7 +282,7 @@ export class AnalyticsService {
    * Get AI usage metrics
    */
   private async getAIUsageMetrics() {
-    const tokenUsage = await db.tokenUsage.aggregate({
+    const tokenUsage = await prisma.tokenUsage.aggregate({
       _sum: {
         totalTokens: true,
         estimatedCost: true,
@@ -291,8 +291,8 @@ export class AnalyticsService {
     })
 
     const [businessPlansCount, deliverablesCount] = await Promise.all([
-      db.tokenUsage.count({ where: { operation: 'GENERATE_BUSINESS_PLAN' } }),
-      db.tokenUsage.count({ where: { operation: 'GENERATE_DELIVERABLE' } }),
+      prisma.tokenUsage.count({ where: { operation: 'GENERATE_BUSINESS_PLAN' } }),
+      prisma.tokenUsage.count({ where: { operation: 'GENERATE_DELIVERABLE' } }),
     ])
 
     const totalTokensUsed = tokenUsage._sum.totalTokens || 0
@@ -319,12 +319,12 @@ export class AnalyticsService {
    */
   private async getSystemHealthMetrics() {
     const [totalJobs, queuedJobs, failedJobs] = await Promise.all([
-      db.job.count(),
-      db.job.count({ where: { status: 'QUEUED' } }),
-      db.job.count({ where: { status: 'FAILED' } }),
+      prisma.job.count(),
+      prisma.job.count({ where: { status: 'QUEUED' } }),
+      prisma.job.count({ where: { status: 'FAILED' } }),
     ])
 
-    const completedJobs = await db.job.count({ where: { status: 'COMPLETED' } })
+    const completedJobs = await prisma.job.count({ where: { status: 'COMPLETED' } })
     const successRate =
       completedJobs + failedJobs > 0
         ? Math.round((completedJobs / (completedJobs + failedJobs)) * 100)
@@ -332,7 +332,7 @@ export class AnalyticsService {
 
     // Storage metrics (simplified)
     const storageLimit = parseInt(process.env.STORAGE_LIMIT_GB || '50') * 1024 * 1024 * 1024
-    const files = await db.file.aggregate({
+    const files = await prisma.file.aggregate({
       _sum: { filesize: true },
     })
     const storageUsed = files._sum.filesize || 0
@@ -355,15 +355,15 @@ export class AnalyticsService {
     startOfDay.setHours(0, 0, 0, 0)
 
     const [activitiesGrouped, actionsToday, uniqueUsersToday] = await Promise.all([
-      db.activity.groupBy({
+      prisma.activity.groupBy({
         by: ['type'],
         _count: true,
         _max: { createdAt: true },
         orderBy: { _count: { type: 'desc' } },
         take: 10,
       }),
-      db.activity.count({ where: { createdAt: { gte: startOfDay } } }),
-      db.activity.findMany({
+      prisma.activity.count({ where: { createdAt: { gte: startOfDay } } }),
+      prisma.activity.findMany({
         where: { createdAt: { gte: startOfDay }, userId: { not: null } },
         select: { userId: true },
         distinct: ['userId'],
@@ -390,7 +390,7 @@ export class AnalyticsService {
     return apiCache.getOrSet(
       `${cacheKeys.client(clientId)}:analytics`,
       async () => {
-        const client = await db.client.findUnique({
+        const client = await prisma.client.findUnique({
           where: { id: clientId },
           include: {
             _count: {
@@ -526,7 +526,7 @@ export class AnalyticsService {
     startDate: Date,
     groupBy: 'day' | 'week' | 'month'
   ): Promise<TimeSeriesData> {
-    const clients = await db.client.findMany({
+    const clients = await prisma.client.findMany({
       where: {
         onboardedAt: { gte: startDate },
         deletedAt: null,
@@ -559,7 +559,7 @@ export class AnalyticsService {
     startDate: Date,
     groupBy: 'day' | 'week' | 'month'
   ): Promise<TimeSeriesData> {
-    const deliverables = await db.deliverable.findMany({
+    const deliverables = await prisma.deliverable.findMany({
       where: {
         approvedAt: { gte: startDate },
         status: { in: ['APPROVED', 'DELIVERED'] },

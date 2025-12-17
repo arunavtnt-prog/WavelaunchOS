@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { NotFoundError, handleError } from '@/lib/utils/errors'
 
 // GET /api/clients/[id]/activity - Get client activity log
@@ -15,7 +15,7 @@ export async function GET(
     }
 
     // Verify client exists
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: params.id, deletedAt: null },
     })
 
@@ -23,7 +23,7 @@ export async function GET(
       throw new NotFoundError('Client', params.id)
     }
 
-    const activities = await db.activity.findMany({
+    const activities = await prisma.activity.findMany({
       where: { clientId: params.id },
       orderBy: { createdAt: 'desc' },
       include: {

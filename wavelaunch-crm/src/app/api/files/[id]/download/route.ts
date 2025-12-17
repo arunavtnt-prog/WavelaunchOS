@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { requireAuth, authorizeResourceOwnership } from '@/lib/auth/authorize'
 import { forbiddenResponse, notFoundResponse } from '@/lib/api/responses'
@@ -16,7 +16,7 @@ export async function GET(
     const user = await requireAuth()
 
     // Fetch file record
-    const file = await db.file.findUnique({
+    const file = await prisma.file.findUnique({
       where: { id: params.id },
     })
 

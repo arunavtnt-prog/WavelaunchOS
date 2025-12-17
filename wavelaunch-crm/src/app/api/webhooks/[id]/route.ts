@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { successResponse, notFoundResponse, validationErrorResponse, handleError } from '@/lib/api/responses'
 import { z } from 'zod'
 
@@ -22,7 +22,7 @@ export async function GET(
   try {
     await requireAdmin()
 
-    const webhooks = await db.$queryRaw<any[]>`
+    const webhooks = await prisma.$queryRaw<any[]>`
       SELECT * FROM webhooks WHERE id = ${params.id}
     `
 
@@ -94,7 +94,7 @@ export async function PUT(
 
     updates.push('updated_at = NOW()')
 
-    await db.$executeRawUnsafe(`
+    await prisma.$executeRawUnsafe(`
       UPDATE webhooks SET ${updates.join(', ')}
       WHERE id = $${values.length + 1}
     `, ...values, params.id)
@@ -115,7 +115,7 @@ export async function DELETE(
   try {
     await requireAdmin()
 
-    await db.$executeRaw`
+    await prisma.$executeRaw`
       DELETE FROM webhooks WHERE id = ${params.id}
     `
 

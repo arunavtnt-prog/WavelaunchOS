@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     if (validatedCategory) where.category = validatedCategory
 
     // Get files
-    const files = await db.file.findMany({
+    const files = await prisma.file.findMany({
       where,
       orderBy: { uploadedAt: 'desc' },
       include: {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Calculate total storage used
-    const totalStorage = await db.file.aggregate({
+    const totalStorage = await prisma.file.aggregate({
       _sum: {
         filesize: true,
       },

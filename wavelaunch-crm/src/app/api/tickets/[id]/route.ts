@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/authorize'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { updateTicketSchema } from '@/schemas/ticket'
 import {
   successResponse,
@@ -20,7 +20,7 @@ export async function GET(
   try {
     await requireAuth()
 
-    const ticket = await db.ticket.findUnique({
+    const ticket = await prisma.ticket.findUnique({
       where: { id: params.id },
       include: {
         client: {
@@ -94,7 +94,7 @@ export async function PATCH(
     const data = validation.data
 
     // Check if ticket exists
-    const existingTicket = await db.ticket.findUnique({
+    const existingTicket = await prisma.ticket.findUnique({
       where: { id: params.id },
     })
 
@@ -113,7 +113,7 @@ export async function PATCH(
       updateData.resolvedAt = new Date()
     }
 
-    const ticket = await db.ticket.update({
+    const ticket = await prisma.ticket.update({
       where: { id: params.id },
       data: updateData,
       include: {
@@ -160,7 +160,7 @@ export async function DELETE(
     const user = await requireAuth()
 
     // Check if ticket exists
-    const ticket = await db.ticket.findUnique({
+    const ticket = await prisma.ticket.findUnique({
       where: { id: params.id },
     })
 
@@ -169,7 +169,7 @@ export async function DELETE(
     }
 
     // Delete ticket (cascade will delete comments and attachments)
-    await db.ticket.delete({
+    await prisma.ticket.delete({
       where: { id: params.id },
     })
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { getCheckpoint, saveCheckpoint, completeCheckpoint, failCheckpoint } from '@/lib/ai/checkpoints'
 import { getClaudeClient } from '@/lib/ai/claude'
@@ -132,7 +132,7 @@ Generate only this section, nothing else.`
       .join('\n\n')
 
     // Get or create business plan
-    const existingPlans = await db.businessPlan.findMany({
+    const existingPlans = await prisma.businessPlan.findMany({
       where: { clientId: checkpoint.clientId },
       orderBy: { version: 'desc' },
       take: 1,
@@ -141,7 +141,7 @@ Generate only this section, nothing else.`
     const version = existingPlans.length > 0 ? existingPlans[0].version + 1 : 1
 
     // Save business plan
-    await db.businessPlan.create({
+    await prisma.businessPlan.create({
       data: {
         clientId: checkpoint.clientId,
         version,
@@ -155,7 +155,7 @@ Generate only this section, nothing else.`
     await completeCheckpoint(checkpoint.jobId)
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: checkpoint.clientId,
         type: 'BUSINESS_PLAN_GENERATED',

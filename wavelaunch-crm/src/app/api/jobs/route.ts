@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 
 // GET /api/jobs - List all jobs
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (type) where.type = type
 
     // Get jobs
-    const jobs = await db.job.findMany({
+    const jobs = await prisma.job.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: limit,

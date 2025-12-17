@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import * as fs from 'fs/promises'
 
@@ -16,7 +16,7 @@ export async function DELETE(
     }
 
     // Get file record
-    const file = await db.file.findUnique({
+    const file = await prisma.file.findUnique({
       where: { id: params.id },
     })
 
@@ -36,12 +36,12 @@ export async function DELETE(
     }
 
     // Delete file record from database
-    await db.file.delete({
+    await prisma.file.delete({
       where: { id: params.id },
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: file.clientId,
         type: 'FILE_DELETED',

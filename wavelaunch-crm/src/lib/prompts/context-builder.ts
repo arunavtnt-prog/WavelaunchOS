@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { Client, Deliverable } from '@prisma/client'
 
 export type ClientContext = {
@@ -30,7 +30,7 @@ export type DeliverableContext = ClientContext & {
 }
 
 export async function buildClientContext(clientId: string): Promise<ClientContext> {
-  const client = await db.client.findUnique({
+  const client = await prisma.client.findUnique({
     where: { id: clientId },
   })
 
@@ -81,7 +81,7 @@ export async function buildDeliverableContext(
   let previousSummary: string | undefined
 
   if (month > 1) {
-    const previousDeliverables = await db.deliverable.findMany({
+    const previousDeliverables = await prisma.deliverable.findMany({
       where: {
         clientId,
         month: { lt: month },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError, StorageError } from '@/lib/utils/errors'
 import { STORAGE_LIMIT_BYTES } from '@/lib/utils/constants'
 import { requireAuth, authorizeClientAccess } from '@/lib/auth/authorize'
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify client exists
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: validatedClientId, deletedAt: null },
     })
 
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check total storage before processing file
-    const totalStorage = await db.file.aggregate({
+    const totalStorage = await prisma.file.aggregate({
       _sum: {
         filesize: true,
       },
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
     tempFilePath = null // Moved successfully
 
     // Create file record
-    const fileRecord = await db.file.create({
+    const fileRecord = await prisma.file.create({
       data: {
         clientId: validatedClientId,
         filename: validation.sanitizedFilename,
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Log activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         clientId: validatedClientId,
         type: 'FILE_UPLOADED',

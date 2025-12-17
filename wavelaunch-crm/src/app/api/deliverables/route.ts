@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     // If clientId provided, filter by client and verify it exists
     if (validatedClientId) {
-      const client = await db.client.findUnique({
+      const client = await prisma.client.findUnique({
         where: { id: validatedClientId, deletedAt: null },
       })
 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get deliverables
-    const deliverables = await db.deliverable.findMany({
+    const deliverables = await prisma.deliverable.findMany({
       where,
       orderBy: [{ createdAt: 'desc' }],
       include: {

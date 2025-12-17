@@ -5,7 +5,7 @@
  * Supports filtering, sorting, and custom date ranges.
  */
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { logInfo } from '@/lib/logging/logger'
 
 export type ReportType =
@@ -140,7 +140,7 @@ export class ReportGenerator {
       if (filters.endDate) where.onboardedAt.lte = filters.endDate
     }
 
-    const clients = await db.client.findMany({
+    const clients = await prisma.client.findMany({
       where,
       include: {
         _count: {
@@ -198,7 +198,7 @@ export class ReportGenerator {
       if (filters.endDate) where.createdAt.lte = filters.endDate
     }
 
-    const deliverables = await db.deliverable.findMany({
+    const deliverables = await prisma.deliverable.findMany({
       where,
       include: {
         client: {
@@ -259,7 +259,7 @@ export class ReportGenerator {
       if (filters.endDate) where.generatedAt.lte = filters.endDate
     }
 
-    const plans = await db.businessPlan.findMany({
+    const plans = await prisma.businessPlan.findMany({
       where,
       include: {
         client: {
@@ -323,7 +323,7 @@ export class ReportGenerator {
       if (filters.endDate) where.createdAt.lte = filters.endDate
     }
 
-    const activities = await db.activity.findMany({
+    const activities = await prisma.activity.findMany({
       where,
       include: {
         client: {
@@ -378,7 +378,7 @@ export class ReportGenerator {
       if (filters.endDate) where.createdAt.lte = filters.endDate
     }
 
-    const jobs = await db.job.findMany({
+    const jobs = await prisma.job.findMany({
       where,
       orderBy: sortBy ? { [sortBy]: sortOrder || 'desc' } : { createdAt: 'desc' },
       take: limit,
@@ -421,7 +421,7 @@ export class ReportGenerator {
       if (filters.endDate) where.createdAt.lte = filters.endDate
     }
 
-    const tickets = await db.ticket.findMany({
+    const tickets = await prisma.ticket.findMany({
       where,
       include: {
         client: {
@@ -481,7 +481,7 @@ export class ReportGenerator {
       if (filters.endDate) where.createdAt.lte = filters.endDate
     }
 
-    const usage = await db.tokenUsage.findMany({
+    const usage = await prisma.tokenUsage.findMany({
       where,
       orderBy: sortBy ? { [sortBy]: sortOrder || 'desc' } : { createdAt: 'desc' },
       take: limit,

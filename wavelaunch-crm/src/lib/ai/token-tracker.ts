@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 
 // Token cost per 1K tokens (approximate Claude pricing)
 const COST_PER_1K_INPUT = 0.003 // $3 per 1M input tokens
@@ -26,7 +26,7 @@ export async function logTokenUsage(data: TokenUsageData): Promise<void> {
       (data.promptTokens / 1000) * COST_PER_1K_INPUT +
       (data.completionTokens / 1000) * COST_PER_1K_OUTPUT
 
-    await db.tokenUsage.create({
+    await prisma.tokenUsage.create({
       data: {
         operation: data.operation,
         model: data.model,
@@ -60,7 +60,7 @@ async function updateBudgetUsage(
 ): Promise<void> {
   try {
     // Get active budget for this period
-    const budget = await db.tokenBudget.findFirst({
+    const budget = await prisma.tokenBudget.findFirst({
       where: {
         period,
         isActive: true,
@@ -75,7 +75,7 @@ async function updateBudgetUsage(
     const newTokensUsed = budget.tokensUsed + tokens
     const newCostUsed = budget.costUsed + cost
 
-    await db.tokenBudget.update({
+    await prisma.tokenBudget.update({
       where: { id: budget.id },
       data: {
         tokensUsed: newTokensUsed,
@@ -101,7 +101,7 @@ async function updateBudgetUsage(
 
     // Auto-pause if enabled and limit reached
     if (maxPercentage >= 100 && budget.autoPauseAtLimit && !budget.isPaused) {
-      await db.tokenBudget.update({
+      await prisma.tokenBudget.update({
         where: { id: budget.id },
         data: { isPaused: true },
       })
@@ -123,7 +123,7 @@ async function sendBudgetAlert(
 ): Promise<void> {
   try {
     // Log alert to activity
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         type: 'CLIENT_UPDATED',
         description: `${period} token budget ${threshold}% threshold reached. Used ${tokensUsed.toLocaleString()} tokens ($${costUsed.toFixed(2)})`,
@@ -148,7 +148,7 @@ export async function checkBudget(): Promise<{
 }> {
   try {
     // Check if any active budget is paused
-    const pausedBudget = await db.tokenBudget.findFirst({
+    const pausedBudget = await prisma.tokenBudget.findFirst({
       where: {
         isActive: true,
         isPaused: true,
@@ -192,7 +192,7 @@ export async function getTokenStats(period?: {
       if (period.end) where.createdAt.lte = period.end
     }
 
-    const usages = await db.tokenUsage.findMany({
+    const usages = await prisma.tokenUsage.findMany({
       where,
     })
 
@@ -254,7 +254,7 @@ export async function getTokenStats(period?: {
  */
 export async function resetBudget(budgetId: string): Promise<void> {
   try {
-    await db.tokenBudget.update({
+    await prisma.tokenBudget.update({
       where: { id: budgetId },
       data: {
         tokensUsed: 0,
@@ -291,7 +291,7 @@ export async function getBudgetStatus(): Promise<{
   }
 }> {
   try {
-    const budgets = await db.tokenBudget.findMany({
+    const budgets = await prisma.tokenBudget.findMany({
       where: { isActive: true },
     })
 

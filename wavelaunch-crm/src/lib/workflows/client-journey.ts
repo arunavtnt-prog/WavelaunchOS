@@ -12,7 +12,7 @@
  * - Configurable automation rules
  */
 
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/db'
 import { jobQueue, JOB_PRIORITY } from '@/lib/jobs'
 import { logInfo, logError, logDebug } from '@/lib/logging/logger'
 import type { Client, Deliverable } from '@prisma/client'
@@ -92,7 +92,7 @@ export class ClientJourneyWorkflow {
    * Triggers when a new client is added to the system
    */
   private async onClientCreated(event: WorkflowEvent): Promise<void> {
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: event.clientId },
     })
 
@@ -132,7 +132,7 @@ export class ClientJourneyWorkflow {
     }
 
     // 2. Create activity log
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         userId: event.userId,
         type: 'CLIENT_CREATED',
@@ -152,7 +152,7 @@ export class ClientJourneyWorkflow {
    * Triggers when client status changes to ACTIVE
    */
   private async onClientActivated(event: WorkflowEvent): Promise<void> {
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: event.clientId },
     })
 
@@ -184,7 +184,7 @@ export class ClientJourneyWorkflow {
     }
 
     // 2. Auto-generate business plan (if not exists)
-    const existingPlan = await db.businessPlan.findFirst({
+    const existingPlan = await prisma.businessPlan.findFirst({
       where: { clientId: client.id },
     })
 
@@ -201,7 +201,7 @@ export class ClientJourneyWorkflow {
     }
 
     // 2. Schedule Month 1 deliverable generation (delayed by 1 hour to allow business plan to complete)
-    const existingM1 = await db.deliverable.findFirst({
+    const existingM1 = await prisma.deliverable.findFirst({
       where: {
         clientId: client.id,
         month: 1,
@@ -251,7 +251,7 @@ export class ClientJourneyWorkflow {
       const nextMonth = deliverable.month + 1
 
       // Check if next month's deliverable already exists
-      const existingNext = await db.deliverable.findFirst({
+      const existingNext = await prisma.deliverable.findFirst({
         where: {
           clientId: event.clientId,
           month: nextMonth,
@@ -282,7 +282,7 @@ export class ClientJourneyWorkflow {
 
         // Send notification email (if enabled)
         if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-          const client = await db.client.findUnique({
+          const client = await prisma.client.findUnique({
             where: { id: event.clientId },
           })
 
@@ -322,7 +322,7 @@ export class ClientJourneyWorkflow {
 
       // Send completion email (if enabled)
       if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-        const client = await db.client.findUnique({
+        const client = await prisma.client.findUnique({
           where: { id: event.clientId },
         })
 
@@ -349,7 +349,7 @@ export class ClientJourneyWorkflow {
       }
 
       // Create milestone activity
-      await db.activity.create({
+      await prisma.activity.create({
         data: {
           userId: event.userId,
           type: 'CLIENT_UPDATED',
@@ -384,7 +384,7 @@ export class ClientJourneyWorkflow {
 
     // Send reminder email (if enabled)
     if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-      const client = await db.client.findUnique({
+      const client = await prisma.client.findUnique({
         where: { id: event.clientId },
       })
 
@@ -413,7 +413,7 @@ export class ClientJourneyWorkflow {
     }
 
     // Create activity log
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         userId: event.userId,
         type: 'DELIVERABLE_APPROVED',
@@ -442,7 +442,7 @@ export class ClientJourneyWorkflow {
 
     // Auto-generate PDF (if enabled)
     if (process.env.AUTO_GENERATE_PDF === 'true') {
-      const businessPlan = await db.businessPlan.findFirst({
+      const businessPlan = await prisma.businessPlan.findFirst({
         where: { clientId: event.clientId },
         orderBy: { version: 'desc' },
       })
@@ -465,7 +465,7 @@ export class ClientJourneyWorkflow {
 
     // Send notification email (if enabled)
     if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-      const client = await db.client.findUnique({
+      const client = await prisma.client.findUnique({
         where: { id: event.clientId },
       })
 
@@ -504,7 +504,7 @@ export class ClientJourneyWorkflow {
   private async onMonthTransition(event: WorkflowEvent): Promise<void> {
     logInfo('Month transition workflow started', { clientId: event.clientId })
 
-    const client = await db.client.findUnique({
+    const client = await prisma.client.findUnique({
       where: { id: event.clientId },
       include: {
         deliverables: {
@@ -560,7 +560,7 @@ export class ClientJourneyWorkflow {
     })
 
     // Create activity log
-    await db.activity.create({
+    await prisma.activity.create({
       data: {
         userId: event.userId,
         type: 'CLIENT_UPDATED',
@@ -574,7 +574,7 @@ export class ClientJourneyWorkflow {
 
     // Send milestone email (if enabled)
     if (process.env.ENABLE_EMAIL_WORKFLOWS === 'true') {
-      const client = await db.client.findUnique({
+      const client = await prisma.client.findUnique({
         where: { id: event.clientId },
       })
 
@@ -616,7 +616,7 @@ export class ClientJourneyWorkflow {
 
     const now = new Date()
 
-    const overdueDeliverables = await db.deliverable.findMany({
+    const overdueDeliverables = await prisma.deliverable.findMany({
       where: {
         status: 'DRAFT',
       },
