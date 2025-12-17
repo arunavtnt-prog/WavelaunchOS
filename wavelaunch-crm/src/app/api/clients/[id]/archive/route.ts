@@ -47,10 +47,10 @@ export async function POST(
     await prisma.activity.create({
       data: {
         type: 'CLIENT_ARCHIVED',
-        description: `Archived client: ${archivedClient.name}`,
+        description: `Archived client: ${archivedClient.fullName}`,
         metadata: JSON.stringify({
           clientId: archivedClient.id,
-          name: archivedClient.name,
+          name: archivedClient.fullName,
         }),
         clientId: archivedClient.id,
         userId: session.user.id,

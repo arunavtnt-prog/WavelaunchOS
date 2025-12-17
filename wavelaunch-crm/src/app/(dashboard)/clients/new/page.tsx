@@ -80,9 +80,9 @@ export default function NewClientPage() {
                 {...register('fullName')}
                 placeholder="John Doe"
               />
-              {errors.name && (
+              {errors.fullName && (
                 <p className="text-sm text-destructive">
-                  {errors.name.message}
+                  {errors.fullName.message}
                 </p>
               )}
             </div>

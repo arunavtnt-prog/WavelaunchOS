@@ -51,8 +51,8 @@ export async function generateBusinessPlanPDF(
     const result = await generatePDF({
       content: businessPlan.contentMarkdown,
       metadata: {
-        clientName: businessPlan.client.name,
-        brandName: businessPlan.client.name || undefined,
+        clientName: businessPlan.client.fullName,
+        brandName: businessPlan.client.fullName || undefined,
         industry: businessPlan.client.industryNiche,
         version: businessPlan.version,
         date: format(businessPlan.createdAt, 'MMMM dd, yyyy'),

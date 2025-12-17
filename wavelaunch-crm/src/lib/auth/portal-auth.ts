@@ -168,7 +168,7 @@ export async function getPortalUser(userId: string) {
       client: {
         select: {
           id: true,
-          name: true,
+          fullName: true,
           email: true,
           industryNiche: true,
           status: true,

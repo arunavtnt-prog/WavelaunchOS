@@ -47,10 +47,10 @@ export async function POST(
     await prisma.activity.create({
       data: {
         type: 'CLIENT_RESTORED',
-        description: `Restored client: ${restoredClient.name}`,
+        description: `Restored client: ${restoredClient.fullName}`,
         metadata: JSON.stringify({
           clientId: restoredClient.id,
-          name: restoredClient.name,
+          name: restoredClient.fullName,
         }),
         clientId: restoredClient.id,
         userId: session.user.id,

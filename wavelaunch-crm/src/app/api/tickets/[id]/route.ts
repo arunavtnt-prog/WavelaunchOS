@@ -26,7 +26,7 @@ export async function GET(
         client: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
           },
         },
@@ -120,7 +120,7 @@ export async function PATCH(
         client: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
           },
         },

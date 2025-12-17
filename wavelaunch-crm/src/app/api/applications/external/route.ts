@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     // Create application in CRM database
     const application = await prisma.application.create({
       data: {
-        name: data.name,
+        fullName: data.name,
         email: data.email,
         instagramHandle: data.instagramHandle,
         tiktokHandle: data.tiktokHandle,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     await prisma.activity.create({
       data: {
         type: 'CLIENT_CREATED',
-        description: `External application submitted by ${application.name}`,
+        description: `External application submitted by ${application.fullName}`,
         metadata: JSON.stringify({
           source: 'public_form',
           applicationId: application.id,

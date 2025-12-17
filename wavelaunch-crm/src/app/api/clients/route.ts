@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
     const client = await db.client.create({
       data: {
         ...data,
+        fullName: data.fullName,
         status: 'ACTIVE',
         // Set required fields that might be missing from form data
         audienceGenderSplit: data.audienceGenderSplit || '',
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
       data: {
         clientId: client.id,
         type: 'CLIENT_CREATED',
-        description: `Created client: ${client.name}`,
+        description: `Created client: ${client.fullName}`,
         userId: session.user.id,
       },
     })

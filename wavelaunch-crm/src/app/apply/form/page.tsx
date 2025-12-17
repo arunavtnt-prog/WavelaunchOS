@@ -285,7 +285,7 @@ export default function ApplicationFormPage() {
                   <Input
                     id="fullName"
                     value={formData.name}
-                    onChange={(e) => updateField('fullName', e.target.value)}
+                    onChange={(e) => updateField('name', e.target.value)}
                     placeholder="Your full name"
                   />
                   {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}

@@ -36,8 +36,8 @@ export default async function PortalLayout({
           user={{
             email: userData.email,
             client: {
-              name: userData.client.name,
-              brandName: userData.client.name,
+              name: userData.client.fullName,
+              brandName: userData.client.fullName,
             },
           }}
         />

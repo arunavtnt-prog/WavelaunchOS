@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       where: { id: { in: clientIds } },
       select: {
         id: true,
-        name: true,
+        fullName: true,
       },
     })
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       const client = clients.find((c) => c.id === storage.clientId)
       return {
         clientId: storage.clientId,
-        clientName: client?.name || 'Unknown',
+        clientName: client?.fullName || 'Unknown',
         fileCount: storage._count,
         storageBytes: storage._sum.filesize || 0,
       }

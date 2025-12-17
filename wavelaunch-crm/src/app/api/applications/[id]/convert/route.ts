@@ -39,7 +39,7 @@ export async function POST(
     // Create client from application data
     const client = await prisma.client.create({
       data: {
-        name: application.name,
+        fullName: application.fullName,
         email: application.email,
         industryNiche: application.industryNiche,
         country: application.country || '',
@@ -90,7 +90,7 @@ export async function POST(
     await prisma.activity.create({
       data: {
         type: 'CLIENT_CREATED',
-        description: `Created client from D26 application: ${client.name}`,
+        description: `Created client from D26 application: ${client.fullName}`,
         metadata: JSON.stringify({
           applicationId: application.id,
           clientId: client.id,

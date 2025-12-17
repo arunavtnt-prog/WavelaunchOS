@@ -7,18 +7,14 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('// Convert to Client API endpoint')
-    console.log('// Updated: Dec 17 2025 - Fixed production database schema issues for application ID:', params.id)
-    
+    const { id } = params
+
     // Get the application
     const application = await db.application.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
-    console.log('Found application:', application?.id, 'Status:', application?.status)
-
     if (!application) {
-      console.log('Application not found')
       return NextResponse.json(
         { error: 'Application not found' },
         { status: 404 }
@@ -26,9 +22,16 @@ export async function POST(
     }
 
     if (application.status !== 'APPROVED') {
-      console.log('Application not approved, status:', application.status)
       return NextResponse.json(
         { error: 'Only approved applications can be converted to clients' },
+        { status: 400 }
+      )
+    }
+
+    // Check if already converted
+    if (application.convertedToClientId) {
+      return NextResponse.json(
+        { error: 'This application has already been converted to a client' },
         { status: 400 }
       )
     }
@@ -38,74 +41,117 @@ export async function POST(
       where: { email: application.email },
     })
 
-    console.log('Existing client check:', existingClient?.email)
-
     if (existingClient) {
-      console.log('Client already exists with this email')
       return NextResponse.json(
         { error: 'A client with this email already exists' },
         { status: 400 }
       )
     }
 
-    console.log('Creating client from application data...')
-    // Create client from application data using production schema
-    const client = await db.client.create({
-      data: {
-        name: application.fullName, // Production schema uses 'name' field, application uses 'fullName'
-        email: application.email,
-        phone: '', // Production schema has phone field, set to empty for now
-        status: 'ACTIVE', // Production schema has status field
-      },
-    }) as any // Type assertion to bypass schema mismatch
+    // Parse productCategories - handle both string and potential null
+    let productCategoriesArray: string[] = []
+    if (application.productCategories) {
+      productCategoriesArray = application.productCategories
+        .split(',')
+        .map(cat => cat.trim())
+        .filter(cat => cat.length > 0)
+    }
 
-    console.log('Client created successfully:', client.id, (client as any).name)
+    // Use a transaction to create client AND update application atomically
+    const result = await db.$transaction(async (tx) => {
+      // Create client from application data with safe defaults
+      const client = await tx.client.create({
+        data: {
+          fullName: application.fullName,
+          email: application.email,
+          country: application.country,
+          industryNiche: application.industryNiche,
+          age: application.age ?? 0,
+          instagramHandle: application.instagramHandle ?? '',
+          tiktokHandle: application.tiktokHandle ?? '',
+          // Career background
+          professionalMilestones: application.professionalMilestones ?? '',
+          personalTurningPoints: application.personalTurningPoints ?? '',
+          visionForVenture: application.visionForVenture ?? '',
+          hopeToAchieve: application.hopeToAchieve ?? '',
+          // Audience & demographics
+          targetAudience: application.targetAudience ?? '',
+          demographicProfile: application.demographicProfile ?? '',
+          targetDemographicAge: application.targetDemographicAge ?? '',
+          audienceGenderSplit: application.audienceGenderSplit ?? '',
+          audienceMaritalStatus: application.audienceMaritalStatus ?? '',
+          currentChannels: application.currentChannels ?? '',
+          keyPainPoints: application.keyPainPoints ?? '',
+          brandValues: application.brandValues ?? '',
+          // Market & category
+          differentiation: application.differentiation ?? '',
+          uniqueValueProps: application.uniqueValueProps ?? '',
+          emergingCompetitors: application.emergingCompetitors ?? '',
+          // Brand & vision
+          idealBrandImage: application.idealBrandImage ?? '',
+          inspirationBrands: application.inspirationBrands ?? '',
+          brandingAesthetics: application.brandingAesthetics ?? '',
+          emotionsBrandEvokes: application.emotionsBrandEvokes ?? '',
+          brandPersonality: application.brandPersonality ?? '',
+          preferredFont: application.preferredFont ?? '',
+          // Product ideas
+          productCategories: productCategoriesArray,
+          otherProductIdeas: application.otherProductIdeas ?? '',
+          // Scaling & execution
+          scalingGoals: application.scalingGoals ?? '',
+          growthStrategies: application.growthStrategies ?? '',
+          longTermVision: application.longTermVision ?? '',
+          specificDeadlines: application.specificDeadlines ?? '',
+          // Additional information
+          additionalInfo: application.additionalInfo ?? '',
+        },
+      })
+
+      // Update application to mark as converted
+      await tx.application.update({
+        where: { id },
+        data: {
+          status: 'CONVERTED',
+          convertedToClientId: client.id,
+          reviewedAt: new Date(),
+        },
+      })
+
+      return client
+    })
 
     return NextResponse.json({
       success: true,
-      data: client,
+      data: result,
       message: 'Application successfully converted to client'
     })
 
   } catch (error: unknown) {
     console.error('Error converting application to client:', error)
-    
-    // Type guard to safely access error properties
+
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    const errorStack = error instanceof Error ? error.stack : undefined
-    const errorCode = (error as any)?.code
-    const errorMeta = (error as any)?.meta
-    const errorName = (error as any)?.name
-    
-    console.error('Error details:', errorMessage)
-    if (errorStack) console.error('Error stack:', errorStack)
-    
-    // Check for specific database errors
+    const errorCode = (error as { code?: string })?.code
+    const errorMeta = (error as { meta?: unknown })?.meta
+
+    // Handle specific Prisma errors
     if (errorCode === 'P2002') {
-      console.error('Unique constraint violation:', errorMeta)
       return NextResponse.json(
         { error: 'A client with this email already exists' },
         { status: 400 }
       )
     }
-    
+
     if (errorCode === 'P2025') {
-      console.error('Record not found:', errorMeta)
       return NextResponse.json(
         { error: 'Application not found or already converted' },
         { status: 404 }
       )
     }
-    
-    // Check for Prisma validation errors
-    if (errorName === 'PrismaClientValidationError') {
-      console.error('Prisma validation error:', errorMessage)
-      return NextResponse.json(
-        { error: 'Database schema mismatch. Please check field mappings.', details: errorMessage },
-        { status: 500 }
-      )
-    }
-    
+
+    // Log detailed error for debugging
+    console.error('Prisma error code:', errorCode)
+    console.error('Prisma error meta:', errorMeta)
+
     return NextResponse.json(
       { error: 'Failed to convert application to client', details: errorMessage },
       { status: 500 }

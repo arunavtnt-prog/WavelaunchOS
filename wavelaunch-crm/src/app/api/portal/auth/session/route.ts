@@ -43,7 +43,7 @@ export async function GET() {
         },
         client: {
           id: portalUser.client.id,
-          name: portalUser.client.name,
+          name: portalUser.client.fullName,
           email: portalUser.client.email,
           industryNiche: portalUser.client.industryNiche,
           status: portalUser.client.status,

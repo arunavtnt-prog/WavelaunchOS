@@ -227,7 +227,7 @@ export async function POST(request: NextRequest) {
     // Create the application in the database
     const application = await prisma.application.create({
       data: {
-        name: validatedData.name,
+        fullName: validatedData.name,
         email: validatedData.email,
         instagramHandle: validatedData.instagramHandle || null,
         tiktokHandle: validatedData.tiktokHandle || null,
@@ -298,7 +298,7 @@ export async function POST(request: NextRequest) {
       data: {
         id: application.id,
         email: application.email,
-        name: application.name,
+        name: application.fullName,
       },
       message: 'Application submitted successfully',
     })
@@ -314,7 +314,7 @@ export async function POST(request: NextRequest) {
 // Send notification email to admin
 async function sendAdminNotification(application: {
   id: string
-  name: string
+  fullName: string
   email: string
   country: string
   industryNiche: string
@@ -330,7 +330,7 @@ async function sendAdminNotification(application: {
     console.log('No email provider configured. Admin notification skipped.')
     console.log('New application:', {
       id: application.id,
-      name: application.name,
+      name: application.fullName,
       email: application.email,
       country: application.country,
       niche: application.industryNiche,
@@ -367,7 +367,7 @@ async function sendAdminNotification(application: {
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Name</td>
-                <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; text-align: right;">${application.name}</td>
+                <td style="padding: 8px 0; color: #0f172a; font-size: 14px; font-weight: 500; text-align: right;">${application.fullName}</td>
               </tr>
               <tr>
                 <td style="padding: 8px 0; color: #64748b; font-size: 14px;">Email</td>
@@ -406,7 +406,7 @@ async function sendAdminNotification(application: {
     await resend.emails.send({
       from: process.env.SMTP_FROM || 'Wavelaunch <noreply@wavelaunch.studio>',
       to: adminEmail,
-      subject: `New Application: ${application.name} (${application.industryNiche})`,
+      subject: `New Application: ${application.fullName} (${application.industryNiche})`,
       html: emailHtml,
     })
   } else if (hasSmtp) {
@@ -423,7 +423,7 @@ async function sendAdminNotification(application: {
     await transporter.sendMail({
       from: process.env.SMTP_FROM || 'Wavelaunch <noreply@wavelaunch.studio>',
       to: adminEmail,
-      subject: `New Application: ${application.name} (${application.industryNiche})`,
+      subject: `New Application: ${application.fullName} (${application.industryNiche})`,
       html: emailHtml,
     })
   }
@@ -431,7 +431,7 @@ async function sendAdminNotification(application: {
 
 // Send confirmation email to applicant
 async function sendApplicantConfirmation(application: {
-  name: string
+  fullName: string
   email: string
 }) {
   // Check if we have email configuration
@@ -465,7 +465,7 @@ async function sendApplicantConfirmation(application: {
           </h1>
 
           <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">
-            Hi ${application.name},
+            Hi ${application.fullName},
           </p>
 
           <p style="color: #475569; font-size: 16px; line-height: 1.6; margin: 0 0 16px 0;">

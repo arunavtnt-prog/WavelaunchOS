@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
       await prisma.activity.create({
         data: {
           type: 'CLIENT_UPDATED',
-          description: `Bulk updated client status to ${status}: ${client.name}`,
+          description: `Bulk updated client status to ${status}: ${client.fullName}`,
           metadata: JSON.stringify({
             clientId: client.id,
-            name: client.name,
+            name: client.fullName,
             oldStatus: client.status,
             newStatus: status,
           }),
