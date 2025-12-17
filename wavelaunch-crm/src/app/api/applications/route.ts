@@ -137,6 +137,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/applications - Public endpoint for application submission
+// Cache cleared: $(date)
 export async function POST(request: NextRequest) {
   const origin = request.headers.get('origin')
   const corsHeaders = getCorsHeaders(origin)
