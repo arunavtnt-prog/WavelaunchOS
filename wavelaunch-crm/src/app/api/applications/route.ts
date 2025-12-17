@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
             id: true,
             fullName: true,
             email: true,
-          },
+          } as const,
         },
       },
     })
