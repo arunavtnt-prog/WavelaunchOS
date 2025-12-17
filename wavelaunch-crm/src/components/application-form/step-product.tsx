@@ -5,7 +5,7 @@ import { ApplicationFormData } from '@/schemas/application'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
-import { PRODUCT_CATEGORIES } from '@/types'
+import { PRODUCT_CATEGORIES } from '@/constants/brand'
 import { useState, useEffect } from 'react'
 
 interface StepProps {
