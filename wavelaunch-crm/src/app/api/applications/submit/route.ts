@@ -113,7 +113,8 @@ const applicationSchema = z.object({
   preferredFont: z.string().optional().default(''),
 
   // Products & Goals
-  productCategories: z.string().transform((val) => {
+  productCategories: z.union([z.string(), z.array(z.string())]).transform((val) => {
+    if (Array.isArray(val)) return val
     try {
       return JSON.parse(val)
     } catch {
