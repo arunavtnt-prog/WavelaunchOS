@@ -24,14 +24,18 @@ import { StepBusinessGoals } from './components/application-form/step-business-g
 import { StepLogistics } from './components/application-form/step-logistics'
 
 import { ModeToggle } from './components/mode-toggle'
-import { DotScreenShader } from './components/ui/dot-shader-background'
 
 export default function ApplicationFormRoot() {
+  const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [zipFile, setZipFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
@@ -46,7 +50,7 @@ export default function ApplicationFormRoot() {
 
   // Load saved data on mount
   useEffect(() => {
-    if (hasSavedData()) {
+    if (isMounted && hasSavedData()) {
       const savedData = loadFormData()
       Object.entries(savedData).forEach(([key, value]) => {
         form.setValue(key as keyof ApplicationFormData, value as any)
@@ -56,15 +60,17 @@ export default function ApplicationFormRoot() {
         description: 'Your previous answers have been loaded.',
       })
     }
-  }, [])
+  }, [isMounted])
 
   // Autosave on form changes
   useEffect(() => {
-    const subscription = watch((value) => {
-      saveFormData(value as Partial<ApplicationFormData>)
-    })
-    return () => subscription.unsubscribe()
-  }, [watch])
+    if (isMounted) {
+      const subscription = watch((value) => {
+        saveFormData(value as Partial<ApplicationFormData>)
+      })
+      return () => subscription.unsubscribe()
+    }
+  }, [watch, isMounted])
 
   const handleNext = async () => {
     const step = FORM_STEPS[currentStep]
@@ -109,11 +115,16 @@ export default function ApplicationFormRoot() {
 
   const currentStepData = FORM_STEPS[currentStep]
 
-  return (
-    <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden isolate">
-      {/* Dot Shader Background */}
-      <DotScreenShader />
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center justify-center">
+        <div className="text-center">Loading...</div>
+      </div>
+    )
+  }
 
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden">
       {/* Editorial Progress Rail */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
