@@ -5,9 +5,6 @@ export const metadata: Metadata = {
   description: 'Apply to work with Wavelaunch Studio - Creator Partnership Application',
 }
 
-// Force dynamic rendering for the apply section
-export const dynamic = 'force-dynamic'
-
 export default function ApplyLayout({
   children,
 }: {
