@@ -325,7 +325,7 @@ export default function ApplicationFormPage() {
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="country">Country *</Label>
-                  <Select value={formData.country} onValueChange={(v) => updateField('country', v)}>
+                  <Select value={formData.country || ''} onValueChange={(v) => updateField('country', v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
