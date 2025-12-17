@@ -13,43 +13,35 @@ export function StepPainPoints({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-10">
+      <div className="space-y-3">
         <Label htmlFor="keyPainPoints">
-          Key needs and pain points you want to address <span className="text-red-500">*</span>
+          Key Pain Points <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="keyPainPoints"
           {...register('keyPainPoints')}
-          placeholder="What problems does your audience face? What needs are not being met by current solutions?"
+          placeholder="Problems your audience faces..."
           rows={5}
-          className="resize-none"
         />
         {errors.keyPainPoints && (
-          <p className="text-sm text-red-500">{errors.keyPainPoints.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.keyPainPoints.message}</p>
         )}
-        <p className="text-sm text-slate-500">
-          Be specific about the challenges and frustrations your target audience experiences
-        </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="brandValues">
-          Values or principles your brand must embody <span className="text-red-500">*</span>
+          Brand Values <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="brandValues"
           {...register('brandValues')}
-          placeholder="What core values and principles should your brand represent? What do you stand for?"
+          placeholder="Core principles your brand represents..."
           rows={5}
-          className="resize-none"
         />
         {errors.brandValues && (
-          <p className="text-sm text-red-500">{errors.brandValues.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.brandValues.message}</p>
         )}
-        <p className="text-sm text-slate-500">
-          Think about authenticity, sustainability, innovation, inclusivity, quality, etc.
-        </p>
       </div>
     </div>
   )

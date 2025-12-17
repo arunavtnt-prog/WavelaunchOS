@@ -13,87 +13,79 @@ export function StepBusinessGoals({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-10">
+      <div className="space-y-3">
         <Label htmlFor="scalingGoals">
-          Personal goals for scaling <span className="text-red-500">*</span>
+          Scaling Goals <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="scalingGoals"
           {...register('scalingGoals')}
-          placeholder="What are your revenue targets, growth milestones, and scaling objectives?"
+          placeholder="Revenue targets, growth milestones..."
           rows={4}
-          className="resize-none"
         />
         {errors.scalingGoals && (
-          <p className="text-sm text-red-500">{errors.scalingGoals.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.scalingGoals.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="growthStrategies">
-          Strategies/channels you want to explore <span className="text-red-500">*</span>
+          Growth Strategies <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="growthStrategies"
           {...register('growthStrategies')}
-          placeholder="Which marketing channels, platforms, or strategies are you interested in leveraging?"
+          placeholder="Marketing channels, platforms..."
           rows={4}
-          className="resize-none"
         />
         {errors.growthStrategies && (
-          <p className="text-sm text-red-500">{errors.growthStrategies.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.growthStrategies.message}</p>
         )}
-        <p className="text-sm text-slate-500">
-          Examples: Social media, influencer partnerships, email marketing, paid ads, SEO, content marketing
-        </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="longTermVision">
-          Long-term vision for your brand <span className="text-red-500">*</span>
+          Long-Term Vision <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="longTermVision"
           {...register('longTermVision')}
-          placeholder="Where do you see your brand in 3-5 years? What's the ultimate vision?"
+          placeholder="Where you see your brand in 3-5 years..."
           rows={4}
-          className="resize-none"
         />
         {errors.longTermVision && (
-          <p className="text-sm text-red-500">{errors.longTermVision.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.longTermVision.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="specificDeadlines">
-          Deadlines or milestones we should consider (optional)
+          Key Deadlines
         </Label>
         <Textarea
           id="specificDeadlines"
           {...register('specificDeadlines')}
-          placeholder="Any important dates, launch windows, or time-sensitive goals..."
+          placeholder="Important dates, launch windows..."
           rows={3}
-          className="resize-none"
         />
         {errors.specificDeadlines && (
-          <p className="text-sm text-red-500">{errors.specificDeadlines.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.specificDeadlines.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="additionalInfo">
-          Any other relevant information? (optional)
+          Additional Information
         </Label>
         <Textarea
           id="additionalInfo"
           {...register('additionalInfo')}
-          placeholder="Share anything else you think we should know about you or your brand vision..."
+          placeholder="Anything else we should know..."
           rows={4}
-          className="resize-none"
         />
         {errors.additionalInfo && (
-          <p className="text-sm text-red-500">{errors.additionalInfo.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.additionalInfo.message}</p>
         )}
       </div>
     </div>

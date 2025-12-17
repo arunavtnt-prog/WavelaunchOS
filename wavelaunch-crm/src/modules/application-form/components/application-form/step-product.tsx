@@ -43,17 +43,17 @@ export function StepProductDirection({ form }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {suggestedCategories.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm font-medium text-blue-900 mb-2">
-            Suggested based on your niche ({industryNiche}):
+        <div className="border-b border-white/10 pb-8">
+          <p className="text-xs font-normal tracking-wide uppercase text-foreground/40 mb-4">
+            Suggested for {industryNiche}
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {suggestedCategories.map((cat) => (
               <span
                 key={cat.value}
-                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                className="px-4 py-2 border border-white/20 text-foreground/70 text-sm"
               >
                 {cat.label}
               </span>
@@ -62,11 +62,11 @@ export function StepProductDirection({ form }: StepProps) {
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-4">
         <Label>
-          Product categories you're interested in <span className="text-red-500">*</span>
+          Product Categories <span className="text-foreground/30">*</span>
         </Label>
-        <div className="grid md:grid-cols-2 gap-4 mt-3">
+        <div className="grid md:grid-cols-2 gap-4 mt-4">
           {PRODUCT_CATEGORIES.map((category) => (
             <div key={category.value} className="flex items-start space-x-3">
               <Checkbox
@@ -78,7 +78,7 @@ export function StepProductDirection({ form }: StepProps) {
               />
               <Label
                 htmlFor={category.value}
-                className="font-normal cursor-pointer leading-tight"
+                className="font-normal normal-case tracking-normal text-foreground/70 cursor-pointer leading-tight text-sm"
               >
                 {category.label}
               </Label>
@@ -86,23 +86,22 @@ export function StepProductDirection({ form }: StepProps) {
           ))}
         </div>
         {errors.productCategories && (
-          <p className="text-sm text-red-500">{errors.productCategories.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.productCategories.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="otherProductIdeas">
-          Other product ideas (optional)
+          Other Product Ideas
         </Label>
         <Textarea
           id="otherProductIdeas"
           {...register('otherProductIdeas')}
-          placeholder="If you have product ideas not listed above, describe them here..."
+          placeholder="Additional product ideas..."
           rows={3}
-          className="resize-none"
         />
         {errors.otherProductIdeas && (
-          <p className="text-sm text-red-500">{errors.otherProductIdeas.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.otherProductIdeas.message}</p>
         )}
       </div>
     </div>

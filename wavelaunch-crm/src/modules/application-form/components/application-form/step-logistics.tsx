@@ -57,31 +57,25 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
+    <div className="space-y-10">
+      <div className="space-y-4">
         <Label htmlFor="zipFile">
-          Upload Media Kit & Supporting Documents
+          Media Kit
         </Label>
-        <p className="text-sm text-slate-600">
-          Upload a ZIP file containing your media kit, previous collaborations, brand photos,
-          and any other relevant materials (max 25 MB).
-        </p>
 
-        <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+        <div className="border border-white/20 p-10 text-center hover:border-white/40 transition-colors">
           {!zipFile ? (
             <label
               htmlFor="zipFile"
-              className="cursor-pointer flex flex-col items-center gap-3"
+              className="cursor-pointer flex flex-col items-center gap-4"
             >
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-                <Upload className="w-8 h-8 text-blue-600" />
-              </div>
+              <Upload className="w-6 h-6 text-foreground/30" />
               <div>
-                <p className="text-sm font-medium text-slate-700">
-                  Click to upload or drag and drop
+                <p className="text-sm text-foreground/60">
+                  Upload ZIP file
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  ZIP file only, max 25 MB
+                <p className="text-xs text-foreground/30 mt-2">
+                  Max 25 MB
                 </p>
               </div>
               <input
@@ -93,78 +87,72 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
               />
             </label>
           ) : (
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
-                <Upload className="w-8 h-8 text-green-600" />
-              </div>
+            <div className="flex flex-col items-center gap-4">
+              <Upload className="w-6 h-6 text-foreground/50" />
               <div>
-                <p className="text-sm font-medium text-slate-700">{zipFile.name}</p>
-                <p className="text-xs text-slate-500 mt-1">{formatFileSize(zipFile.size)}</p>
+                <p className="text-sm text-foreground/70">{zipFile.name}</p>
+                <p className="text-xs text-foreground/30 mt-1">{formatFileSize(zipFile.size)}</p>
               </div>
               <button
                 type="button"
                 onClick={handleRemoveFile}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                className="text-xs text-foreground/40 hover:text-foreground/70 transition-colors"
               >
-                Remove file
+                Remove
               </button>
             </div>
           )}
         </div>
 
         {uploadError && (
-          <p className="text-sm text-red-500">{uploadError}</p>
+          <p className="text-xs text-red-400/80">{uploadError}</p>
         )}
       </div>
 
-      <div className="border-t pt-6">
-        <div className="flex items-start space-x-3">
+      <div className="border-t border-white/10 pt-10">
+        <div className="flex items-start space-x-4">
           <Checkbox
             id="termsAccepted"
             checked={termsAccepted}
             onCheckedChange={(checked) => setValue('termsAccepted', checked as boolean)}
           />
-          <div className="grid gap-1.5 leading-none">
+          <div className="grid gap-2 leading-none">
             <Label
               htmlFor="termsAccepted"
-              className="text-sm font-medium leading-relaxed cursor-pointer"
+              className="text-sm font-normal normal-case tracking-normal text-foreground/70 leading-relaxed cursor-pointer"
             >
-              I accept the terms and privacy policy <span className="text-red-500">*</span>
+              I accept the terms and privacy policy <span className="text-foreground/30">*</span>
             </Label>
-            <p className="text-sm text-slate-500">
-              By submitting this application, I agree to Wavelaunch Studio's{' '}
+            <p className="text-xs text-foreground/40 leading-relaxed">
+              By submitting, I agree to Wavelaunch Studio's{' '}
               <a
                 href={`${process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}/terms`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-foreground/50 hover:text-foreground/70 underline underline-offset-2"
               >
-                Terms of Service
+                Terms
               </a>{' '}
               and{' '}
               <a
                 href={`${process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}/privacy`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
+                className="text-foreground/50 hover:text-foreground/70 underline underline-offset-2"
               >
                 Privacy Policy
-              </a>
-              . I understand that my application will be reviewed and I may be contacted for
-              further discussion.
+              </a>.
             </p>
           </div>
         </div>
         {errors.termsAccepted && (
-          <p className="text-sm text-red-500 mt-2">{errors.termsAccepted.message}</p>
+          <p className="text-xs text-red-400/80 mt-3">{errors.termsAccepted.message}</p>
         )}
       </div>
 
-      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-        <p className="text-sm text-slate-700 leading-relaxed">
-          <strong>Note:</strong> Your application progress is automatically saved. You can safely
-          close this page and return later to complete your application. All your answers will be
-          preserved.
+      <div className="border-t border-white/10 pt-8">
+        <p className="text-xs text-foreground/30 leading-relaxed">
+          Your progress is automatically saved.
         </p>
       </div>
     </div>

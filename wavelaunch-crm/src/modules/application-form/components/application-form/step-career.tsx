@@ -13,68 +13,64 @@ export function StepCareerBackground({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-10">
+      <div className="space-y-3">
         <Label htmlFor="professionalMilestones">
-          Professional milestones <span className="text-red-500">*</span>
+          Professional Milestones <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="professionalMilestones"
           {...register('professionalMilestones')}
           placeholder="Key career achievements..."
           rows={3}
-          className="resize-none"
         />
         {errors.professionalMilestones && (
-          <p className="text-sm text-red-500">{errors.professionalMilestones.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.professionalMilestones.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="personalTurningPoints">
-          Personal turning points <span className="text-red-500">*</span>
+          Personal Turning Points <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="personalTurningPoints"
           {...register('personalTurningPoints')}
           placeholder="Pivotal moments..."
           rows={3}
-          className="resize-none"
         />
         {errors.personalTurningPoints && (
-          <p className="text-sm text-red-500">{errors.personalTurningPoints.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.personalTurningPoints.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="visionForVenture">
-          Vision for this venture <span className="text-red-500">*</span>
+          Vision for Venture <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="visionForVenture"
           {...register('visionForVenture')}
           placeholder="Desired impact..."
           rows={3}
-          className="resize-none"
         />
         {errors.visionForVenture && (
-          <p className="text-sm text-red-500">{errors.visionForVenture.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.visionForVenture.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="hopeToAchieve">
-          Definition of success <span className="text-red-500">*</span>
+          Definition of Success <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="hopeToAchieve"
           {...register('hopeToAchieve')}
           placeholder="Your aspirations..."
           rows={3}
-          className="resize-none"
         />
         {errors.hopeToAchieve && (
-          <p className="text-sm text-red-500">{errors.hopeToAchieve.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.hopeToAchieve.message}</p>
         )}
       </div>
     </div>

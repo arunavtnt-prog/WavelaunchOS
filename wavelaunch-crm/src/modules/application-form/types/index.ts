@@ -8,8 +8,8 @@ export interface FormStep {
 export const FORM_STEPS: FormStep[] = [
   {
     id: 1,
-    title: 'Basic Information',
-    description: 'Tell us about yourself and your background',
+    title: 'About You',
+    description: '',
     fields: ['fullName', 'email', 'instagramHandle', 'tiktokHandle', 'country', 'industryNiche', 'age'],
   },
   {

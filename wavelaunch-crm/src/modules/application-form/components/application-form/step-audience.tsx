@@ -14,96 +14,93 @@ export function StepAudienceDemographics({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-10">
+      <div className="space-y-3">
         <Label htmlFor="targetAudience">
-          Who is your target audience? <span className="text-red-500">*</span>
+          Target Audience <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="targetAudience"
           {...register('targetAudience')}
-          placeholder="Describe who you want to reach with your brand..."
+          placeholder="Who you want to reach..."
           rows={3}
-          className="resize-none"
         />
         {errors.targetAudience && (
-          <p className="text-sm text-red-500">{errors.targetAudience.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.targetAudience.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="demographicProfile">
-          Demographic profile (gender, location, interests, etc.) <span className="text-red-500">*</span>
+          Demographic Profile <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="demographicProfile"
           {...register('demographicProfile')}
-          placeholder="Provide details about your audience demographics..."
+          placeholder="Gender, location, interests..."
           rows={3}
-          className="resize-none"
         />
         {errors.demographicProfile && (
-          <p className="text-sm text-red-500">{errors.demographicProfile.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.demographicProfile.message}</p>
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-3">
           <Label htmlFor="targetDemographicAge">
-            Age of your target demographic <span className="text-red-500">*</span>
+            Target Age Range <span className="text-foreground/30">*</span>
           </Label>
           <Input
             id="targetDemographicAge"
             {...register('targetDemographicAge')}
-            placeholder="e.g., 18-35, 25-45"
+            placeholder="18-35, 25-45..."
           />
           {errors.targetDemographicAge && (
-            <p className="text-sm text-red-500">{errors.targetDemographicAge.message}</p>
+            <p className="text-xs text-red-400/80 mt-1">{errors.targetDemographicAge.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label htmlFor="audienceGenderSplit">
-            Gender split <span className="text-red-500">*</span>
+            Gender Split <span className="text-foreground/30">*</span>
           </Label>
           <Input
             id="audienceGenderSplit"
             {...register('audienceGenderSplit')}
-            placeholder="e.g., 70% female, 30% male"
+            placeholder="70% female, 30% male..."
           />
           {errors.audienceGenderSplit && (
-            <p className="text-sm text-red-500">{errors.audienceGenderSplit.message}</p>
+            <p className="text-xs text-red-400/80 mt-1">{errors.audienceGenderSplit.message}</p>
           )}
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="audienceMaritalStatus">
-          Marital status <span className="text-red-500">*</span>
+          Marital Status <span className="text-foreground/30">*</span>
         </Label>
         <Input
           id="audienceMaritalStatus"
           {...register('audienceMaritalStatus')}
-          placeholder="e.g., Mostly single, Mixed, Primarily married"
+          placeholder="Mostly single, Mixed, Primarily married..."
         />
         {errors.audienceMaritalStatus && (
-          <p className="text-sm text-red-500">{errors.audienceMaritalStatus.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.audienceMaritalStatus.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="currentChannels">
-          How does your audience currently find you? <span className="text-red-500">*</span>
+          Discovery Channels <span className="text-foreground/30">*</span>
         </Label>
         <Textarea
           id="currentChannels"
           {...register('currentChannels')}
-          placeholder="Describe the platforms, content types, or methods through which people discover you..."
+          placeholder="How your audience currently finds you..."
           rows={3}
-          className="resize-none"
         />
         {errors.currentChannels && (
-          <p className="text-sm text-red-500">{errors.currentChannels.message}</p>
+          <p className="text-xs text-red-400/80 mt-1">{errors.currentChannels.message}</p>
         )}
       </div>
     </div>

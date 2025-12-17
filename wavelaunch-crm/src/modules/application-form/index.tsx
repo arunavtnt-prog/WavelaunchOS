@@ -9,7 +9,6 @@ import { ChevronLeft } from 'lucide-react'
 
 import { ApplicationFormData, applicationSchema } from './schemas/application'
 import { FORM_STEPS } from './types'
-import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { saveFormData, loadFormData, hasSavedData } from './lib/autosave'
 
@@ -29,7 +28,6 @@ export default function ApplicationFormRoot() {
   const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [zipFile, setZipFile] = useState<File | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
@@ -44,7 +42,7 @@ export default function ApplicationFormRoot() {
     },
   })
 
-  const { handleSubmit, trigger, watch } = form
+  const { trigger, watch } = form
 
   // Load saved data on mount
   useEffect(() => {
@@ -129,17 +127,17 @@ export default function ApplicationFormRoot() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-80 hover:opacity-100 transition-opacity"
       >
-        <h1 className="font-serif text-[48px] text-foreground tracking-tight leading-none">
+        <h1 className="font-serif text-[52px] md:text-[64px] text-foreground tracking-[-0.02em] leading-[0.9]">
           Wavelaunch Studio
         </h1>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground hidden sm:flex">
-            <span className="tracking-widest uppercase opacity-40">0{currentStep + 1} / 0{FORM_STEPS.length}</span>
-            <div className="flex gap-1.5">
+          <div className="flex items-center gap-6 text-[10px] font-light text-foreground/30 hidden sm:flex">
+            <span className="tracking-[0.3em] uppercase">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
+            <div className="flex gap-2">
               {FORM_STEPS.map((_, i) => (
                 <div
                   key={i}
-                  className={`w-1 h-1 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-foreground/80' : 'bg-foreground/10'}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${i <= currentStep ? 'bg-foreground/50' : 'bg-foreground/10'}`}
                 />
               ))}
             </div>
@@ -147,12 +145,12 @@ export default function ApplicationFormRoot() {
         </div>
       </motion.div>
 
-      {/* Sleek Divider */}
+      {/* Minimal Divider */}
       <motion.div
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
-        className="w-full max-w-2xl h-px bg-black/50 dark:bg-zinc-800/50 mb-16"
+        transition={{ delay: 0.2, duration: 1, ease: "circOut" }}
+        className="w-full max-w-2xl h-px bg-foreground/10 mb-20"
       />
 
       {/* Main Form Panel */}
@@ -165,10 +163,10 @@ export default function ApplicationFormRoot() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-2xl"
         >
-          <div className="mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4 leading-tight">{currentStepData.title}</h2>
+          <div className="mb-20">
+            <h2 className="text-5xl md:text-6xl font-serif text-foreground mb-6 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
             {currentStepData.description && (
-              <p className="text-muted-foreground text-lg leading-relaxed max-w-lg font-light">{currentStepData.description}</p>
+              <p className="text-foreground/40 text-base leading-relaxed max-w-md font-light">{currentStepData.description}</p>
             )}
           </div>
 
@@ -176,24 +174,26 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-between items-center pt-16 mt-8">
-                <Button
+              <div className="flex justify-between items-center pt-20 mt-12">
+                <button
                   type="button"
                   onClick={handleBack}
                   disabled={currentStep === 0}
-                  className={`bg-white dark:bg-neutral-900 text-foreground border border-input z-10 hover:bg-accent hover:text-accent-foreground px-6 py-6 text-sm font-medium rounded transition-all shadow-sm ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`text-foreground/40 hover:text-foreground text-sm font-normal tracking-wide transition-colors ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
                 >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
+                  <span className="inline-flex items-center gap-2">
+                    <ChevronLeft className="w-4 h-4" />
+                    Back
+                  </span>
+                </button>
 
-                <Button
+                <button
                   type="button"
                   onClick={handleNext}
-                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-sm font-medium tracking-wide rounded transition-all shadow-none hover:shadow-lg active:scale-[0.98]"
+                  className="text-foreground border border-foreground/20 hover:border-foreground/50 bg-transparent px-8 py-3 text-sm font-normal tracking-widest uppercase transition-all hover:tracking-[0.2em]"
                 >
-                  {currentStep === FORM_STEPS.length - 1 ? "Complete Application" : "Continue"}
-                </Button>
+                  {currentStep === FORM_STEPS.length - 1 ? "Submit" : "Next"}
+                </button>
               </div>
             </form>
           </div>
@@ -203,7 +203,8 @@ export default function ApplicationFormRoot() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="mt-24 text-center text-[10px] text-muted-foreground/60 font-medium tracking-[0.2em] uppercase"
+        transition={{ delay: 0.5 }}
+        className="mt-32 mb-8 text-center text-[9px] text-foreground/15 font-light tracking-[0.35em] uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>
