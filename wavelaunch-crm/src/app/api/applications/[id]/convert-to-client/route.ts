@@ -62,13 +62,13 @@ export async function POST(
       // Create client from application data with safe defaults
       const client = await tx.client.create({
         data: {
-          fullName: application.fullName,
+          fullName: application.fullName || '',
           email: application.email,
-          country: application.country,
-          industryNiche: application.industryNiche,
-          age: application.age ?? 0,
-          instagramHandle: application.instagramHandle ?? '',
-          tiktokHandle: application.tiktokHandle ?? '',
+          country: application.country || '',
+          industryNiche: application.industryNiche || '',
+          age: application.age || 0,
+          instagramHandle: application.instagramHandle || '',
+          tiktokHandle: application.tiktokHandle || '',
           // Career background
           professionalMilestones: application.professionalMilestones ?? '',
           personalTurningPoints: application.personalTurningPoints ?? '',
