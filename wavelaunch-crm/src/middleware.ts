@@ -11,7 +11,9 @@ export default async function middleware(req: any) {
     pathname.startsWith('/api/auth') ||
     pathname === '/api/applications' ||           // Public application submission
     pathname.startsWith('/api/applications/submit') ||  // Alternative submit endpoint
-    pathname.startsWith('/api/applications/external')   // External API endpoint
+    pathname.startsWith('/api/applications/external') || // External API endpoint
+    pathname === '/api/public-debug' ||           // Debug endpoint
+    pathname.startsWith('/api/test-db')           // Database test endpoint
   
   if (!isPublicRoute && !pathname.startsWith('/portal/')) {
     const cookieStore = await cookies()
