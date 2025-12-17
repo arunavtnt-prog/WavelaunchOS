@@ -81,20 +81,20 @@ export async function createBackup(label?: string): Promise<JobResult> {
 }
 
 /**
- * Verify a backup file is valid SQLite database
+ * Verify a backup file is valid database
  */
 export async function verifyBackup(backupPath: string): Promise<boolean> {
   try {
     // Check file exists
     await fs.access(backupPath)
 
-    // Read first 16 bytes to check SQLite header
+    // Read first 16 bytes to check database header
     const fd = await fs.open(backupPath, 'r')
     const buffer = Buffer.alloc(16)
     await fd.read(buffer, 0, 16, 0)
     await fd.close()
 
-    // SQLite files start with "SQLite format 3\0"
+    // Database files start with "SQLite format 3\0"
     const header = buffer.toString('utf8', 0, 15)
     return header === 'SQLite format 3'
   } catch (error) {

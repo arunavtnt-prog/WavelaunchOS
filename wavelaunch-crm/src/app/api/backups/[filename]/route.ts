@@ -72,7 +72,7 @@ export async function GET(
     // Return as downloadable file
     return new NextResponse(fileBuffer, {
       headers: {
-        'Content-Type': 'application/x-sqlite3',
+        'Content-Type': 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${params.filename}"`,
       },
     })
