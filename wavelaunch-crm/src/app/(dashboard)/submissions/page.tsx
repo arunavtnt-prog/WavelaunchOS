@@ -195,7 +195,7 @@ export default function SubmissionsPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-4">
         {/* Applications List */}
         <div className="lg:col-span-1">
           <div className="space-y-4">
@@ -209,23 +209,24 @@ export default function SubmissionsPage() {
                 {applications.map((application) => (
                   <div
                     key={application.id}
-                    className={`px-3 py-2 cursor-pointer transition-colors hover:bg-accent/30 ${
+                    className={`px-3 py-3 cursor-pointer transition-colors hover:bg-accent/30 ${
                       selectedApplication?.id === application.id ? 'bg-accent/50 border-l-2 border-l-primary' : ''
                     }`}
                     onClick={() => setSelectedApplication(application)}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0 pr-3">
-                        <div className="font-medium text-sm mb-1 truncate">{application.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">
-                          {application.email} • {application.industryNiche}
-                        </div>
+                    <div className="flex flex-col space-y-2">
+                      <div className="font-medium text-sm text-foreground">{application.name || 'Unknown'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {application.email}
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground font-medium">
+                        {application.industryNiche}
+                      </div>
+                      <div className="flex items-center gap-2">
                         <span className={`px-1.5 py-0.5 rounded text-xs ${getStatusColor(application.status)}`}>
                           {application.status}
                         </span>
-                        <span>{new Date(application.createdAt).toLocaleDateString()}</span>
+                        <span className="text-xs">{new Date(application.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -241,7 +242,7 @@ export default function SubmissionsPage() {
         </div>
 
         {/* Application Details */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           {selectedApplication ? (
             <div className="bg-background border rounded-lg shadow-sm">
               <div className="border-b bg-muted/30 px-6 py-4">
