@@ -33,7 +33,7 @@ interface UserProfile {
   location?: string
   website?: string
   createdAt: string
-  lastLogin?: string
+  lastLoginAt?: string
 }
 
 export default function ProfilePage() {
@@ -200,13 +200,13 @@ export default function ProfilePage() {
                   <span className="text-muted-foreground">Member since</span>
                 </div>
                 <p>{new Date(profile.createdAt).toLocaleDateString()}</p>
-                {profile.lastLogin && (
+                {profile.lastLoginAt && (
                   <>
                     <div className="flex items-center gap-2 mt-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Last login</span>
                     </div>
-                    <p>{new Date(profile.lastLogin).toLocaleDateString()}</p>
+                    <p>{new Date(profile.lastLoginAt).toLocaleDateString()}</p>
                   </>
                 )}
               </div>

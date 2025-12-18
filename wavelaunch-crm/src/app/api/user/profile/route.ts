@@ -22,7 +22,7 @@ export async function GET() {
         location: true,
         website: true,
         createdAt: true,
-        lastLogin: true,
+        lastLoginAt: true,
       }
     })
 
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest) {
         location: true,
         website: true,
         createdAt: true,
-        lastLogin: true,
+        lastLoginAt: true,
       }
     })
 
