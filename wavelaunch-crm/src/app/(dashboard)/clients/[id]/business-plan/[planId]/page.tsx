@@ -179,70 +179,37 @@ export default function BusinessPlanEditPage() {
         body: JSON.stringify({ quality: pdfQuality }),
       })
 
-      const data = await res.json()
+      // Check if response is a PDF (direct download) or JSON (error)
+      const contentType = res.headers.get('content-type')
 
-      if (data.success) {
-        // Poll job status
-        const jobId = data.data.jobId
-        pollPDFJob(jobId)
+      if (contentType?.includes('application/pdf')) {
+        // Success - download the PDF
+        const blob = await res.blob()
+        const filename = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1]
+          || `business-plan-${pdfQuality}.pdf`
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        setShowPDFDialog(false)
       } else {
+        // Error response
+        const data = await res.json()
         setError(data.error || 'Failed to generate PDF')
-        setGeneratingPDF(false)
       }
     } catch (err) {
       console.error('Error generating PDF:', err)
       setError('Failed to generate PDF')
+    } finally {
       setGeneratingPDF(false)
     }
-  }
-
-  const pollPDFJob = async (jobId: string) => {
-    const maxAttempts = 60 // Poll for up to 5 minutes
-    let attempts = 0
-
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/jobs/${jobId}`)
-        const data = await res.json()
-
-        if (data.success) {
-          const job = data.data
-
-          if (job.status === 'COMPLETED') {
-            setGeneratingPDF(false)
-            setShowPDFDialog(false)
-
-            // Download the file
-            const result = JSON.parse(job.result)
-            const fileId = result.fileId
-
-            // Open download in new tab
-            window.open(`/api/files/${fileId}/download`, '_blank')
-            return
-          }
-
-          if (job.status === 'FAILED') {
-            setError(job.error || 'PDF generation failed')
-            setGeneratingPDF(false)
-            return
-          }
-
-          // Still processing
-          attempts++
-          if (attempts < maxAttempts) {
-            setTimeout(poll, 5000) // Poll every 5 seconds
-          } else {
-            setError('PDF generation timeout')
-            setGeneratingPDF(false)
-          }
-        }
-      } catch (err) {
-        console.error('Error polling PDF job:', err)
-        setGeneratingPDF(false)
-      }
-    }
-
-    poll()
   }
 
   const renderStatusActions = () => {
