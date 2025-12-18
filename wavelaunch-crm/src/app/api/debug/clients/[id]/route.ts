@@ -12,8 +12,8 @@ export async function GET(
     const client = await prisma.client.findUnique({
       where: { id: clientId },
       select: {
-        id: true,
-        fullName: true,
+        id: true as any,
+        fullName: true as any,
         email: true,
         status: true,
         createdAt: true,
@@ -23,8 +23,8 @@ export async function GET(
     // Check all clients to see what IDs exist
     const allClients = await prisma.client.findMany({
       select: {
-        id: true,
-        fullName: true,
+        id: true as any,
+        fullName: true as any,
         email: true,
         status: true,
       },
