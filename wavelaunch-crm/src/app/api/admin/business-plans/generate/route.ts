@@ -173,7 +173,13 @@ export async function POST(request: NextRequest) {
     const client = await prisma.client.findUnique({
       where: { id: clientId },
       include: {
-        portalUser: true,
+        portalUser: {
+          select: {
+            id: true,
+            email: true,
+            isActive: true,
+          },
+        },
       },
     })
 
