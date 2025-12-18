@@ -9,25 +9,25 @@ const generateSchema = z.object({
 
 // Helper function to generate business plan content based on client data
 function generateBusinessPlanContent(client: any): string {
-  return `# Business Plan: ${client.brandName || client.creatorName}
+  return `# Business Plan: ${client.fullName}
 
 ## Executive Summary
 
-${client.brandName || client.creatorName} is a ${client.niche} business targeting ${client.targetIndustry}. This comprehensive business plan outlines the vision, strategy, and execution plan for building a successful and sustainable business.
+${client.fullName} is a ${client.industryNiche} business. This comprehensive business plan outlines the vision, strategy, and execution plan for building a successful and sustainable business.
 
 ### Vision Statement
-${client.visionStatement}
+${client.visionForVenture}
 
-${client.goals ? `### Business Goals\n${client.goals}\n` : ''}
+${client.hopeToAchieve ? `### Business Goals\n${client.hopeToAchieve}\n` : ''}
 
 ---
 
 ## Market Analysis
 
 ### Target Industry
-**Industry:** ${client.targetIndustry}
+**Industry:** ${client.industryNiche}
 
-**Market Opportunity:** Our analysis of the ${client.targetIndustry} sector reveals significant opportunities for growth and innovation in the ${client.niche} space.
+**Market Opportunity:** Our analysis of the ${client.industryNiche} sector reveals significant opportunities for growth and innovation.
 
 ### Target Audience
 
@@ -35,7 +35,7 @@ ${client.goals ? `### Business Goals\n${client.goals}\n` : ''}
 
 **Demographics:**
 - Age Range: ${client.targetDemographicAge}
-- Details: ${client.demographics}
+- Details: ${client.demographicProfile}
 ${client.audienceGenderSplit ? `- Gender Split: ${client.audienceGenderSplit}` : ''}
 ${client.audienceMaritalStatus ? `- Marital Status: ${client.audienceMaritalStatus}` : ''}
 
@@ -43,7 +43,7 @@ ${client.audienceMaritalStatus ? `- Marital Status: ${client.audienceMaritalStat
 
 Our target audience faces the following challenges:
 
-${client.painPoints}
+${client.keyPainPoints}
 
 ---
 
@@ -53,7 +53,7 @@ ${client.painPoints}
 
 ${client.uniqueValueProps}
 
-${client.competitiveDifferentiation ? `### Competitive Advantage\n\n${client.competitiveDifferentiation}\n` : ''}
+${client.differentiation ? `### Competitive Advantage\n\n${client.differentiation}\n` : ''}
 
 ${client.emergingCompetitors ? `### Competitive Landscape\n\n**Key Competitors:** ${client.emergingCompetitors}\n` : ''}
 
@@ -62,7 +62,7 @@ ${client.emergingCompetitors ? `### Competitive Landscape\n\n**Key Competitors:*
 ## Brand Identity
 
 ### Brand Image
-${client.brandImage}
+${client.idealBrandImage}
 
 ### Brand Personality
 ${client.brandPersonality}
