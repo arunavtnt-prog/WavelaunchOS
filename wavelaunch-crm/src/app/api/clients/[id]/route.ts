@@ -76,7 +76,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: client,
+      data: client as any,
     })
   } catch (error) {
     const err = handleError(error)
