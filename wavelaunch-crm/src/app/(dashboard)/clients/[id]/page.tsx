@@ -142,9 +142,9 @@ export default function ClientDetailPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{client.name}</h1>
+          <h1 className="text-3xl font-bold">{client.fullName}</h1>
         </div>
-        {client.deletedAt ? (
+        {client.status === 'ARCHIVED' ? (
           <Button
             onClick={() => setRestoreDialogOpen(true)}
             disabled={restoring}
@@ -259,31 +259,31 @@ export default function ClientDetailPage() {
       </div>
 
       {/* Portal Access */}
-      {!client.deletedAt && (
+      {client.status !== 'ARCHIVED' && (
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
-          creatorName={client.name}
+          creatorName={client.fullName}
         />
       )}
 
       {/* Business Plan Generator - Show if onboarding complete but no business plan */}
-      {!client.deletedAt && (
+      {client.status !== 'ARCHIVED' && (
         <BusinessPlanGenerator
           clientId={client.id}
-          clientName={client.name}
+          clientName={client.fullName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
           hasCompletedOnboarding={true} // Fresh clients from applications have completed onboarding
         />
       )}
 
       {/* Onboarding Details - Show all collected information */}
-      {!client.deletedAt && (
+      {client.status !== 'ARCHIVED' && (
         <OnboardingDetails client={client} />
       )}
 
       {/* Client Messaging */}
-      {!client.deletedAt && (
+      {client.status !== 'ARCHIVED' && (
         <ClientMessaging
           clientId={client.id}
           creatorName={client.fullName}
@@ -381,7 +381,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore {client.name} and mark them as active again.
+              This will restore {client.fullName} and mark them as active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -24,11 +24,9 @@ export async function GET(
       where: { id: params.id },
       select: {
         id: true,
-        name: true,
         fullName: true,
         email: true,
         status: true,
-        deletedAt: true,
         industryNiche: true,
         visionForVenture: true,
         targetAudience: true,
@@ -45,7 +43,6 @@ export async function GET(
           orderBy: { month: 'asc' },
         },
         files: {
-          where: { deletedAt: null },
           orderBy: { uploadedAt: 'desc' },
           take: 10,
         },
