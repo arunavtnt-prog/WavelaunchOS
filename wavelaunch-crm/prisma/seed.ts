@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcryptjs'
+import { PromptTemplateType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -35,7 +36,7 @@ async function main() {
   const templates = [
     {
       name: 'Business Plan Generator',
-      type: 'BUSINESS_PLAN',
+      type: PromptTemplateType.BUSINESS_PLAN,
       content: `name: Business Plan Generator
 version: 1.0.0
 description: Comprehensive business plan template for creator brands
@@ -138,49 +139,49 @@ tags:
     },
     {
       name: 'Month 1: Foundation Excellence',
-      type: 'DELIVERABLE_M1' as const,
+      type: PromptTemplateType.DELIVERABLE_M1 as const,
       yamlPath: '/data/prompts/deliverable-m1.yaml',
       isActive: true,
     },
     {
       name: 'Month 2: Brand Readiness & Productization',
-      type: 'DELIVERABLE_M2' as const,
+      type: PromptTemplateType.DELIVERABLE_M2 as const,
       yamlPath: '/data/prompts/deliverable-m2.yaml',
       isActive: true,
     },
     {
       name: 'Month 3: Market Entry Preparation',
-      type: 'DELIVERABLE_M3' as const,
+      type: PromptTemplateType.DELIVERABLE_M3 as const,
       yamlPath: '/data/prompts/deliverable-m3.yaml',
       isActive: true,
     },
     {
       name: 'Month 4: Sales Engine & Launch Infrastructure',
-      type: 'DELIVERABLE_M4' as const,
+      type: PromptTemplateType.DELIVERABLE_M4 as const,
       yamlPath: '/data/prompts/deliverable-m4.yaml',
       isActive: true,
     },
     {
       name: 'Month 5: Pre-Launch Mastery',
-      type: 'DELIVERABLE_M5' as const,
+      type: PromptTemplateType.DELIVERABLE_M5 as const,
       yamlPath: '/data/prompts/deliverable-m5.yaml',
       isActive: true,
     },
     {
       name: 'Month 6: Soft Launch Execution',
-      type: 'DELIVERABLE_M6' as const,
+      type: PromptTemplateType.DELIVERABLE_M6 as const,
       yamlPath: '/data/prompts/deliverable-m6.yaml',
       isActive: true,
     },
     {
       name: 'Month 7: Scaling & Growth Systems',
-      type: 'DELIVERABLE_M7' as const,
+      type: PromptTemplateType.DELIVERABLE_M7 as const,
       yamlPath: '/data/prompts/deliverable-m7.yaml',
       isActive: true,
     },
     {
       name: 'Month 8: Full Launch & Market Domination',
-      type: 'DELIVERABLE_M8' as const,
+      type: PromptTemplateType.DELIVERABLE_M8 as const,
       yamlPath: '/data/prompts/deliverable-m8.yaml',
       isActive: true,
     }
