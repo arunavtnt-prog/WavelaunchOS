@@ -66,7 +66,7 @@ export function StepProductDirection({ form }: StepProps) {
         <Label>
           Product Categories <span className="text-red-500">*</span>
         </Label>
-        <div className="grid md:grid-cols-2 gap-x-10 gap-y-3">
+        <div className="grid md:grid-cols-2 gap-x-10 gap-y-3 my-5">
           {PRODUCT_CATEGORIES.map((category) => (
             <div key={category.value} className="flex items-start space-x-3">
               <Checkbox

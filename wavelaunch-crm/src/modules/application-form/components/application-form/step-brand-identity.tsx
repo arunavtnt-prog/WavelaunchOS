@@ -76,7 +76,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
         <div className="space-y-3">
           <Label htmlFor="brandPersonality">
             Brand Personality <span className="text-red-500">*</span>

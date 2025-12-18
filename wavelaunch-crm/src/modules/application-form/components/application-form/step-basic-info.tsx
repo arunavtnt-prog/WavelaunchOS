@@ -17,7 +17,7 @@ export function StepBasicInfo({ form }: StepProps) {
   return (
     <div className="space-y-7">
       {/* Name + Email Group */}
-      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
         <div className="space-y-3">
           <Label htmlFor="fullName">
             Full Name <span className="text-red-500">*</span>
@@ -49,7 +49,7 @@ export function StepBasicInfo({ form }: StepProps) {
       </div>
 
       {/* Social Handles Group */}
-      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
         <div className="space-y-3">
           <Label htmlFor="instagramHandle">Instagram</Label>
           <div className="flex">
@@ -88,7 +88,7 @@ export function StepBasicInfo({ form }: StepProps) {
       </div>
 
       {/* Country + Age Group */}
-      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
         <div className="space-y-3">
           <Label htmlFor="country">
             Country <span className="text-red-500">*</span>
