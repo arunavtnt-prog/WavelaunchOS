@@ -15,8 +15,8 @@ export function StepBrandIdentity({ form }: StepProps) {
   const { register, formState: { errors }, setValue, watch } = form
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
+    <div className="space-y-7">
+      <div className="space-y-3">
         <Label htmlFor="idealBrandImage">
           Ideal Brand Image <span className="text-red-500">*</span>
         </Label>
@@ -31,7 +31,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="inspirationBrands">
           Brands You Admire <span className="text-red-500">*</span>
         </Label>
@@ -46,7 +46,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="brandingAesthetics">
           Visual Identity <span className="text-red-500">*</span>
         </Label>
@@ -61,7 +61,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="emotionsBrandEvokes">
           Brand Emotions <span className="text-red-500">*</span>
         </Label>
@@ -76,8 +76,8 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
-        <div className="space-y-2">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-7">
+        <div className="space-y-3">
           <Label htmlFor="brandPersonality">
             Brand Personality <span className="text-red-500">*</span>
           </Label>
@@ -101,7 +101,7 @@ export function StepBrandIdentity({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label htmlFor="preferredFont">
             Font Preference <span className="text-red-500">*</span>
           </Label>

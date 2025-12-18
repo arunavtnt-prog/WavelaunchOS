@@ -126,14 +126,14 @@ export default function ApplicationFormRoot() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl mb-8 flex items-center justify-between"
+        className="w-full max-w-3xl mb-8 flex items-center justify-between"
       >
         <h1 className="font-serif text-4xl md:text-5xl text-foreground tracking-[-0.02em] leading-[0.9]">
           Wavelaunch Studio
         </h1>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-4 text-sm text-muted-foreground hidden sm:flex">
-            <span className="font-medium">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
+            <span className="font-medium">Step {String(currentStep + 1)} of {String(FORM_STEPS.length)}</span>
             <div className="flex gap-1.5">
               {FORM_STEPS.map((_, i) => (
                 <div
@@ -152,7 +152,7 @@ export default function ApplicationFormRoot() {
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: 1 }}
         transition={{ delay: 0.2, duration: 1, ease: "circOut" }}
-        className="w-full max-w-2xl h-px bg-foreground/10 mb-10"
+        className="w-full max-w-3xl h-px bg-foreground/10 mb-10"
       />
 
       {/* Main Form Panel */}
@@ -163,12 +163,12 @@ export default function ApplicationFormRoot() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-2xl"
+          className="w-full max-w-3xl"
         >
-          <div className="mb-8">
-            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
+          <div className="mb-10">
+            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
             {currentStepData.description && (
-              <p className="text-muted-foreground text-base leading-relaxed max-w-md">{currentStepData.description}</p>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-md mb-3">{currentStepData.description}</p>
             )}
           </div>
 
@@ -176,7 +176,7 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-between items-center pt-10">
+              <div className="flex justify-end items-center pt-8 mt-8">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -207,7 +207,7 @@ export default function ApplicationFormRoot() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="w-full max-w-2xl mt-8 text-center text-xs text-muted-foreground/50 font-light tracking-widest uppercase select-none"
+        className="w-full max-w-3xl mt-8 text-center text-xs text-muted-foreground/40 font-light tracking-[0.15em] uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>

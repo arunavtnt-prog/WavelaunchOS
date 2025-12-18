@@ -43,7 +43,7 @@ export function StepProductDirection({ form }: StepProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {suggestedCategories.length > 0 && (
         <div className="border-b border-input pb-6">
           <p className="text-xs font-medium text-muted-foreground mb-3">
@@ -90,7 +90,7 @@ export function StepProductDirection({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label htmlFor="otherProductIdeas">
           Other Product Ideas
         </Label>
