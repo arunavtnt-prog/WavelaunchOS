@@ -172,9 +172,6 @@ export async function POST(request: NextRequest) {
     // Get client with all onboarding data
     const client = await prisma.client.findUnique({
       where: { id: clientId },
-      include: {
-        portalUser: true,
-      },
     })
 
     if (!client) {
