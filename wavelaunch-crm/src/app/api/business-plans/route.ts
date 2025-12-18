@@ -19,12 +19,7 @@ export async function GET(request: NextRequest) {
     const plans = await prisma.businessPlan.findMany({
       where: whereClause,
       include: {
-        client: {
-          select: {
-            id: true,
-            fullName: true as any,
-          },
-        },
+        client: true,
         generatedByUser: {
           select: {
             id: true,
