@@ -13,7 +13,7 @@ export async function GET(
       where: { id: clientId },
       select: {
         id: true,
-        name: true,
+        fullName: true,
         email: true,
         status: true,
         createdAt: true,
@@ -24,7 +24,7 @@ export async function GET(
     const allClients = await prisma.client.findMany({
       select: {
         id: true,
-        name: true,
+        fullName: true,
         email: true,
         status: true,
       },
