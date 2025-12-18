@@ -165,10 +165,10 @@ export default function ApplicationFormRoot() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-3xl"
         >
-          <div className="mb-10">
-            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-2 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
             {currentStepData.description && (
-              <p className="text-muted-foreground text-base leading-relaxed max-w-md mb-3">{currentStepData.description}</p>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-md mb-2">{currentStepData.description}</p>
             )}
           </div>
 
@@ -176,7 +176,7 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-end items-center pt-8 mt-8">
+              <div className="flex justify-end items-center pt-12 mt-10">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -192,7 +192,7 @@ export default function ApplicationFormRoot() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
+                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3 rounded-lg text-sm font-semibold transition-colors inline-flex items-center gap-2"
                 >
                   {currentStep === FORM_STEPS.length - 1 ? "Submit" : "Continue"}
                   {currentStep < FORM_STEPS.length - 1 && <ChevronRight className="w-4 h-4" />}
@@ -207,7 +207,7 @@ export default function ApplicationFormRoot() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="w-full max-w-3xl mt-8 text-center text-xs text-muted-foreground/40 font-light tracking-[0.15em] uppercase select-none"
+        className="w-full max-w-3xl mt-12 text-center text-[10px] text-muted-foreground/30 font-light tracking-[0.15em] uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>

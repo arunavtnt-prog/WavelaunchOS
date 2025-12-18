@@ -53,7 +53,7 @@ export function StepBasicInfo({ form }: StepProps) {
         <div className="space-y-3">
           <Label htmlFor="instagramHandle">Instagram</Label>
           <div className="flex">
-            <div className="h-12 w-14 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm px-1">
+            <div className="h-12 w-12 flex items-center justify-center bg-slate-50 dark:bg-zinc-900 border border-r-0 border-input/50 rounded-l-xl text-slate-400 dark:text-zinc-500 text-sm px-1">
               @
             </div>
             <Input
@@ -71,7 +71,7 @@ export function StepBasicInfo({ form }: StepProps) {
         <div className="space-y-3">
           <Label htmlFor="tiktokHandle">TikTok</Label>
           <div className="flex">
-            <div className="h-12 w-14 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm px-1">
+            <div className="h-12 w-12 flex items-center justify-center bg-slate-50 dark:bg-zinc-900 border border-r-0 border-input/50 rounded-l-xl text-slate-400 dark:text-zinc-500 text-sm px-1">
               @
             </div>
             <Input
