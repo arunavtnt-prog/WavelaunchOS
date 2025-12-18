@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ModeToggle } from '@/components/mode-toggle'
 
 import { ApplicationFormData, applicationSchema } from './schemas/application'
 import { FORM_STEPS } from './types'
@@ -121,27 +122,28 @@ export default function ApplicationFormRoot() {
 
   return (
     <div className="min-h-screen bg-transparent py-16 px-4 flex flex-col items-center relative transition-colors duration-300 overflow-hidden">
-      {/* Editorial Progress Rail */}
+      {/* Header with Progress */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-80 hover:opacity-100 transition-opacity"
+        className="w-full max-w-2xl mb-8 flex items-center justify-between"
       >
-        <h1 className="font-serif text-[52px] md:text-[64px] text-foreground tracking-[-0.02em] leading-[0.9]">
+        <h1 className="font-serif text-4xl md:text-5xl text-foreground tracking-[-0.02em] leading-[0.9]">
           Wavelaunch Studio
         </h1>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-6 text-[10px] font-light text-foreground/30 hidden sm:flex">
-            <span className="tracking-[0.3em] uppercase">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
-            <div className="flex gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground hidden sm:flex">
+            <span className="font-medium">{String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}</span>
+            <div className="flex gap-1.5">
               {FORM_STEPS.map((_, i) => (
                 <div
                   key={i}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-700 ${i <= currentStep ? 'bg-foreground/50' : 'bg-foreground/10'}`}
+                  className={`w-2 h-2 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-foreground' : 'bg-foreground/20'}`}
                 />
               ))}
             </div>
           </div>
+          <ModeToggle />
         </div>
       </motion.div>
 
@@ -163,10 +165,10 @@ export default function ApplicationFormRoot() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-2xl"
         >
-          <div className="mb-20">
-            <h2 className="text-5xl md:text-6xl font-serif text-foreground mb-6 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
+          <div className="mb-12">
+            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
             {currentStepData.description && (
-              <p className="text-foreground/40 text-base leading-relaxed max-w-md font-light">{currentStepData.description}</p>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-md">{currentStepData.description}</p>
             )}
           </div>
 
@@ -174,14 +176,14 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-between items-center pt-20 mt-12">
+              <div className="flex justify-between items-center pt-16 mt-8">
                 <button
                   type="button"
                   onClick={handleBack}
                   disabled={currentStep === 0}
-                  className={`text-foreground/40 hover:text-foreground text-sm font-normal tracking-wide transition-colors ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                  className={`text-muted-foreground hover:text-foreground text-sm font-medium transition-colors ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
                 >
-                  <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5">
                     <ChevronLeft className="w-4 h-4" />
                     Back
                   </span>
@@ -190,9 +192,10 @@ export default function ApplicationFormRoot() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="text-foreground border border-foreground/20 hover:border-foreground/50 bg-transparent px-8 py-3 text-sm font-normal tracking-widest uppercase transition-all hover:tracking-[0.2em]"
+                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-3 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-2"
                 >
-                  {currentStep === FORM_STEPS.length - 1 ? "Submit" : "Next"}
+                  {currentStep === FORM_STEPS.length - 1 ? "Submit" : "Continue"}
+                  {currentStep < FORM_STEPS.length - 1 && <ChevronRight className="w-4 h-4" />}
                 </button>
               </div>
             </form>
@@ -204,7 +207,7 @@ export default function ApplicationFormRoot() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-32 mb-8 text-center text-[9px] text-foreground/15 font-light tracking-[0.35em] uppercase select-none"
+        className="mt-16 mb-8 text-center text-xs text-muted-foreground/50 font-light tracking-widest uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>

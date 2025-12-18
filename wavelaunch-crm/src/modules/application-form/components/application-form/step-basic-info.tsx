@@ -20,7 +20,7 @@ export function StepBasicInfo({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-3">
           <Label htmlFor="fullName">
-            Full Name <span className="text-foreground/30">*</span>
+            Full Name <span className="text-red-500">*</span>
           </Label>
           <Input
             id="fullName"
@@ -34,7 +34,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
         <div className="space-y-3">
           <Label htmlFor="email">
-            Email <span className="text-foreground/30">*</span>
+            Email <span className="text-red-500">*</span>
           </Label>
           <Input
             id="email"
@@ -52,25 +52,37 @@ export function StepBasicInfo({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-3">
           <Label htmlFor="instagramHandle">Instagram</Label>
-          <Input
-            id="instagramHandle"
-            {...register('instagramHandle')}
-            placeholder="@username"
-          />
+          <div className="flex">
+            <div className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm">
+              @
+            </div>
+            <Input
+              id="instagramHandle"
+              {...register('instagramHandle')}
+              placeholder="username"
+              className="rounded-l-none border-l-0"
+            />
+          </div>
           {errors.instagramHandle && (
-            <p className="text-xs text-red-400/80 mt-1">{errors.instagramHandle.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.instagramHandle.message}</p>
           )}
         </div>
 
         <div className="space-y-3">
           <Label htmlFor="tiktokHandle">TikTok</Label>
-          <Input
-            id="tiktokHandle"
-            {...register('tiktokHandle')}
-            placeholder="@username"
-          />
+          <div className="flex">
+            <div className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm">
+              @
+            </div>
+            <Input
+              id="tiktokHandle"
+              {...register('tiktokHandle')}
+              placeholder="username"
+              className="rounded-l-none border-l-0"
+            />
+          </div>
           {errors.tiktokHandle && (
-            <p className="text-xs text-red-400/80 mt-1">{errors.tiktokHandle.message}</p>
+            <p className="text-xs text-red-500 mt-1">{errors.tiktokHandle.message}</p>
           )}
         </div>
       </div>
@@ -79,7 +91,7 @@ export function StepBasicInfo({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-8">
         <div className="space-y-3">
           <Label htmlFor="country">
-            Country <span className="text-foreground/30">*</span>
+            Country <span className="text-red-500">*</span>
           </Label>
           <Select
             value={watch('country')}
@@ -103,7 +115,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
         <div className="space-y-3">
           <Label htmlFor="age">
-            Age <span className="text-foreground/30">*</span>
+            Age <span className="text-red-500">*</span>
           </Label>
           <Input
             id="age"
@@ -119,10 +131,10 @@ export function StepBasicInfo({ form }: StepProps) {
         </div>
       </div>
 
-      {/* Primary Domain */}
+      {/* Industry/Niche */}
       <div className="space-y-3">
         <Label htmlFor="industryNiche">
-          Primary Domain <span className="text-foreground/30">*</span>
+          Industry/Niche <span className="text-red-500">*</span>
         </Label>
         <Input
           id="industryNiche"

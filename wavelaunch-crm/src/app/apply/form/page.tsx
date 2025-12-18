@@ -26,7 +26,7 @@ const ApplicationFormRoot = dynamic(() => import('@/modules/application-form').t
 
 export default function ApplyFormPage() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="wavelaunch-theme">
+    <ThemeProvider defaultTheme="light" storageKey="wavelaunch-theme">
       <style jsx global>{`
         @tailwind base;
         @tailwind components;
