@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
   User, 
@@ -103,7 +102,6 @@ export default function ProfilePage() {
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
-        variant: "destructive",
       })
     } finally {
       setSaving(false)
@@ -195,7 +193,7 @@ export default function ProfilePage() {
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{profile.role}</span>
               </div>
-              <Separator />
+              <div className="border-t my-4"></div>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
