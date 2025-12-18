@@ -221,10 +221,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Create portal notification for client
-    if (client.portalUser) {
+    if ((client as any).portalUser) {
       await prisma.portalNotification.create({
         data: {
-          clientUserId: client.portalUser.id,
+          clientUserId: (client as any).portalUser.id,
           type: 'NEW_DELIVERABLE',
           title: '📄 Your Business Plan Draft is Ready!',
           message: 'Our team has created your personalized business plan based on your onboarding information. Please review it in your portal.',
