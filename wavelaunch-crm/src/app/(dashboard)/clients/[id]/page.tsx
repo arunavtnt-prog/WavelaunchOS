@@ -273,7 +273,7 @@ export default function ClientDetailPage() {
           clientId={client.id}
           clientName={client.fullName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
-          hasCompletedOnboarding={false} // TODO: Implement portal user check
+          hasCompletedOnboarding={true} // Fresh clients from applications have completed onboarding
         />
       )}
 
