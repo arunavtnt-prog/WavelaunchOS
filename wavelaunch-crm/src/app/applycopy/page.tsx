@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { ApplicationFormData, applicationSchema } from '@/modules/application-form/schemas/application'
 import { FORM_STEPS } from '@/modules/application-form/types'
 import { useForm } from 'react-hook-form'
