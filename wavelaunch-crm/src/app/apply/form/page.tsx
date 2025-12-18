@@ -104,7 +104,7 @@ export default function ApplyFormPage() {
           }
         }
       `}</style>
-      <div className={`${inter.variable} ${instrumentSerif.variable} font-sans antialiased bg-background text-foreground`}>
+      <div className={`${inter.variable} ${instrumentSerif.variable} font-sans antialiased bg-background text-foreground`} style={{ fontFamily: 'var(--font-serif), Georgia, serif' }}>
         <ApplicationFormRoot />
         <Toaster />
       </div>
