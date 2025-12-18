@@ -93,10 +93,10 @@ export function AppSidebar() {
         </div>
 
         {/* Documents Section */}
-        <div className="pt-4">
+        <div className="px-6 pt-4">
           <button
             onClick={() => setDocumentsOpen(!documentsOpen)}
-            className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            className="flex w-full items-center justify-between -mx-3 px-3 py-2 text-xs font-semibold text-sidebar-foreground/70 hover:text-sidebar-foreground"
           >
             <span>Documents</span>
             <ChevronDown
@@ -116,7 +116,7 @@ export function AppSidebar() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors -mx-3',
                       isActive
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
@@ -127,7 +127,7 @@ export function AppSidebar() {
                   </Link>
                 )
               })}
-              <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground">
+              <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground -mx-3">
                 <span className="text-xs">···</span>
                 <span>More</span>
               </button>
@@ -136,7 +136,7 @@ export function AppSidebar() {
         </div>
 
         {/* System Navigation */}
-        <div className="space-y-0.5 pt-4">
+        <div className="px-6 space-y-0.5 pt-4">
           {systemNavigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
             return (
@@ -144,7 +144,7 @@ export function AppSidebar() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors -mx-3',
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
