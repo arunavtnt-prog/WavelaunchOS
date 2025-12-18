@@ -100,7 +100,7 @@ ${client.professionalMilestones ? `### Professional Journey\n${client.profession
 
 ${client.personalTurningPoints ? `### Personal Motivation\n${client.personalTurningPoints}\n` : ''}
 
-${client.socialHandles ? `### Social Presence\n${client.socialHandles}\n` : ''}
+${client.instagramHandle || client.tiktokHandle ? `### Social Presence\n**Instagram:** ${client.instagramHandle || 'N/A'}\n**TikTok:** ${client.tiktokHandle || 'N/A'}\n` : ''}
 
 ---
 

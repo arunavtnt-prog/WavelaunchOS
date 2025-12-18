@@ -13,10 +13,9 @@ export async function GET(
       where: { id: clientId },
       select: {
         id: true,
-        fullName: true,
+        name: true,
         email: true,
         status: true,
-        deletedAt: true,
         createdAt: true,
       }
     })
@@ -25,10 +24,9 @@ export async function GET(
     const allClients = await prisma.client.findMany({
       select: {
         id: true,
-        fullName: true,
+        name: true,
         email: true,
         status: true,
-        deletedAt: true,
       },
       take: 10,
       orderBy: { createdAt: 'desc' }
