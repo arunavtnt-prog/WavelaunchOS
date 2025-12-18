@@ -34,7 +34,7 @@ const documentsNavigation = [
   { name: 'Client Files', href: '/files', icon: Folders },
   { name: 'Deliverables Hub', href: '/deliverables', icon: Calendar },
   { name: 'Prompt Templates', href: '/prompts', icon: FileCode },
-  { name: 'Campaign Analytics', href: '/analytics', icon: BarChart3 },
+  // { name: 'Campaign Analytics', href: '/analytics', icon: BarChart3 },
 ]
 
 const systemNavigation = [
