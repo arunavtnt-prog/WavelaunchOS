@@ -187,13 +187,19 @@ tags:
   ]
 
   for (const template of templates) {
+    console.log(`Processing template: ${template.name}, type: ${template.type}`)
     const existing = await prisma.promptTemplate.findFirst({
       where: { type: template.type },
     })
 
     if (!existing) {
-      await prisma.promptTemplate.create({ data: template })
-      console.log(`✅ Created template: ${template.name}`)
+      console.log(`Creating template...`)
+      try {
+        await prisma.promptTemplate.create({ data: template })
+        console.log(`✅ Created template: ${template.name}`)
+      } catch (error) {
+        console.error(`❌ Failed to create template ${template.name}:`, error)
+      }
     } else {
       console.log(`ℹ️  Template already exists: ${template.name}`)
     }
