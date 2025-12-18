@@ -25,6 +25,13 @@ export async function GET(request: NextRequest) {
             fullName: true as any,
           },
         },
+        generatedByUser: {
+          select: {
+            id: true,
+            name: true as any,
+            email: true,
+          },
+        },
       },
       orderBy: {
         generatedAt: 'desc',
