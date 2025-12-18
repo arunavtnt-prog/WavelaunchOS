@@ -19,8 +19,7 @@ import {
   JobType,
   JobStatus,
   ActivityType,
-  BackupStatus,
-  PrismaClientGetPayload,
+  BackupStatus
 } from '@prisma/client'
 
 // Re-export Prisma types
@@ -61,29 +60,19 @@ export interface JobResult<T = any> {
 }
 
 // Extended types with relations
-export type ClientWithRelations = PrismaClientGetPayload<{
-  include: {
-    businessPlans: true
-    deliverables: true
-    files: true
-    notes: true
-    activities: {
-      include: {
-        user: {
-          select: { name: true, email: true }
-        }
-      }
-    }
-    _count: {
-      select: {
-        businessPlans: true
-        deliverables: true
-        files: true
-        notes: true
-      }
-    }
+export type ClientWithRelations = Client & {
+  businessPlans: BusinessPlan[]
+  deliverables: Deliverable[]
+  files: File[]
+  notes: Note[]
+  activities: Activity[]
+  _count?: {
+    businessPlans: number
+    deliverables: number
+    files: number
+    notes: number
   }
-}>
+}
 
 export type BusinessPlanWithRelations = BusinessPlan & {
   client: Client

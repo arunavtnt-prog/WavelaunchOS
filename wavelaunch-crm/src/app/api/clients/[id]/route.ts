@@ -161,10 +161,10 @@ export async function DELETE(
       return notFoundResponse('Client')
     }
 
-    // Soft delete
+    // Soft delete by changing status to ARCHIVED
     await prisma.client.update({
       where: { id: params.id },
-      data: { deletedAt: new Date() } as any,
+      data: { status: 'ARCHIVED' },
     })
 
     // Log activity
