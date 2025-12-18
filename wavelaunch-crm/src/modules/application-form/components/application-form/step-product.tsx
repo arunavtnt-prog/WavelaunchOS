@@ -62,7 +62,7 @@ export function StepProductDirection({ form }: StepProps) {
         </div>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label>
           Product Categories <span className="text-red-500">*</span>
         </Label>
@@ -90,7 +90,7 @@ export function StepProductDirection({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label htmlFor="otherProductIdeas">
           Other Product Ideas
         </Label>

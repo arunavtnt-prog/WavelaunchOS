@@ -16,7 +16,7 @@ export function StepBrandIdentity({ form }: StepProps) {
 
   return (
     <div className="space-y-7">
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label htmlFor="idealBrandImage">
           Ideal Brand Image <span className="text-red-500">*</span>
         </Label>
@@ -31,7 +31,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label htmlFor="inspirationBrands">
           Brands You Admire <span className="text-red-500">*</span>
         </Label>
@@ -46,7 +46,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label htmlFor="brandingAesthetics">
           Visual Identity <span className="text-red-500">*</span>
         </Label>
@@ -61,7 +61,7 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 mt-8">
         <Label htmlFor="emotionsBrandEvokes">
           Brand Emotions <span className="text-red-500">*</span>
         </Label>
@@ -77,7 +77,7 @@ export function StepBrandIdentity({ form }: StepProps) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
-        <div className="space-y-3">
+        <div className="space-y-3 mt-8">
           <Label htmlFor="brandPersonality">
             Brand Personality <span className="text-red-500">*</span>
           </Label>
@@ -101,7 +101,7 @@ export function StepBrandIdentity({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-8">
           <Label htmlFor="preferredFont">
             Font Preference <span className="text-red-500">*</span>
           </Label>

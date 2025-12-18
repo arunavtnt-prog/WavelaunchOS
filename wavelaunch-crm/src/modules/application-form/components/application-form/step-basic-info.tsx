@@ -18,7 +18,7 @@ export function StepBasicInfo({ form }: StepProps) {
     <div className="space-y-7">
       {/* Name + Email Group */}
       <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="fullName">
             Full Name <span className="text-red-500">*</span>
           </Label>
@@ -32,7 +32,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="email">
             Email <span className="text-red-500">*</span>
           </Label>
@@ -50,7 +50,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
       {/* Social Handles Group */}
       <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="instagramHandle">Instagram</Label>
           <div className="flex">
             <div className="h-12 w-12 flex items-center justify-center bg-slate-50 dark:bg-zinc-900 border border-r-0 border-input/50 rounded-l-xl text-slate-400 dark:text-zinc-500 text-sm px-1">
@@ -68,7 +68,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="tiktokHandle">TikTok</Label>
           <div className="flex">
             <div className="h-12 w-12 flex items-center justify-center bg-slate-50 dark:bg-zinc-900 border border-r-0 border-input/50 rounded-l-xl text-slate-400 dark:text-zinc-500 text-sm px-1">
@@ -89,7 +89,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
       {/* Country + Age Group */}
       <div className="grid md:grid-cols-2 gap-x-10 gap-y-7 my-5">
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="country">
             Country <span className="text-red-500">*</span>
           </Label>
@@ -113,7 +113,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <Label htmlFor="age">
             Age <span className="text-red-500">*</span>
           </Label>
