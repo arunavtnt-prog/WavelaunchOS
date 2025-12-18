@@ -161,18 +161,33 @@ export function AppSidebar() {
       {/* User Section */}
       <div className="border-t border-sidebar-border p-3">
         <Link href="/profile">
-          <div className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-sidebar-accent/50 cursor-pointer">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-primary text-sm font-semibold text-sidebar-primary-foreground">
-              {session?.user?.name?.charAt(0) || 'A'}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-sidebar-foreground">
-                {session?.user?.name || 'Arunav'}
-              </span>
-              <span className="text-xs text-sidebar-foreground/70">
-                {session?.user?.email || 'admin@wavelaunch.org'}
-              </span>
-            </div>
+          <div className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-sidebar-accent/50 cursor-pointer">
+            <span className="text-xs font-medium text-sidebar-foreground">
+              Go to Profile
+            </span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-3 w-3 text-sidebar-foreground/70"
+            >
+              <path
+                d="M8 3L12 8L8 13"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M4 8H12"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         </Link>
       </div>

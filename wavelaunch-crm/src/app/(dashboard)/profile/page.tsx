@@ -7,19 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Edit3, 
-  Save, 
-  X,
-  Settings,
-  Globe,
-  Phone
-} from 'lucide-react'
+import { User, Edit3, Save, X, Settings, Shield, Calendar, Mail, Globe, Phone } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -158,21 +146,15 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 h-full">
         {/* Profile Overview */}
-        <div className="md:col-span-1">
-          <Card>
+        <div className="md:col-span-1 h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="text-center">
-              <Avatar className="h-24 w-24 mx-auto mb-4">
-                <AvatarImage src={profile.email ? `https://ui-avatars.com/api/?name=${profile.name}&background=random` : ''} />
-                <AvatarFallback className="text-2xl">
-                  {profile.name?.charAt(0)?.toUpperCase() || profile.email?.charAt(0)?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
               <CardTitle className="text-xl">{profile.name}</CardTitle>
               <CardDescription>{profile.email}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 flex-1">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">{profile.role}</span>
@@ -199,8 +181,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Details */}
-        <div className="md:col-span-2">
-          <Card>
+        <div className="md:col-span-2 h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -210,7 +192,7 @@ export default function ProfilePage() {
                 {isEditing ? 'Edit your personal information' : 'Your personal information'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 flex-1">
               {isEditing ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
