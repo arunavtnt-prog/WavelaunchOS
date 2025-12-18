@@ -9,6 +9,7 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-serif",
+  display: "swap",
 });
 
 const inter = Inter({
