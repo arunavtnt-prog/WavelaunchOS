@@ -2,9 +2,10 @@
 
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Settings, Sun, Moon, Monitor } from 'lucide-react'
+import { Settings, Sun, Moon, Monitor, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
+import { signOut } from 'next-auth/react'
 
 const getPageTitle = (pathname: string): string => {
   if (pathname.includes('/clients')) return 'Clients'
@@ -60,6 +61,10 @@ export function Header() {
           <Link href="/settings">
             <Settings className="h-4 w-4" />
           </Link>
+        </Button>
+
+        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => signOut({ callbackUrl: '/login' })}>
+          <LogOut className="h-4 w-4" />
         </Button>
       </div>
     </header>
