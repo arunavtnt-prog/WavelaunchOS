@@ -142,7 +142,7 @@ export default function ClientDetailPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{client.fullName}</h1>
+          <h1 className="text-3xl font-bold">{client.name}</h1>
         </div>
         {client.deletedAt ? (
           <Button
@@ -263,7 +263,7 @@ export default function ClientDetailPage() {
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
-          creatorName={client.fullName}
+          creatorName={client.name}
         />
       )}
 
@@ -271,7 +271,7 @@ export default function ClientDetailPage() {
       {!client.deletedAt && (
         <BusinessPlanGenerator
           clientId={client.id}
-          clientName={client.fullName}
+          clientName={client.name}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
           hasCompletedOnboarding={true} // Fresh clients from applications have completed onboarding
         />
@@ -381,7 +381,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore {client.fullName} and mark them as active again.
+              This will restore {client.name} and mark them as active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
