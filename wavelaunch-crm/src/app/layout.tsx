@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers/session-provider'
+import '@/lib/templates/registry' // Initialize templates
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
