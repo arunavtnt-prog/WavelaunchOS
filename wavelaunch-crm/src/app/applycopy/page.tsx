@@ -38,14 +38,12 @@ export default function ApplyCopyPage() {
       preferredFont: '',
       productCategories: [],
       otherProductIdeas: '',
-      zipFile: null,
     },
     mode: 'onChange',
   })
 
   const handleNext = async () => {
-    const fields = FORM_STEPS[currentStep].fields
-    const isValid = await form.trigger(fields as any[])
+    const isValid = await form.trigger()
     
     if (isValid) {
       if (currentStep < FORM_STEPS.length - 1) {
