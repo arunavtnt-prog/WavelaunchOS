@@ -13,10 +13,10 @@ export function StepBusinessGoals({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="scalingGoals">
-          Scaling Goals <span className="text-foreground/30">*</span>
+          Scaling Goals <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="scalingGoals"
@@ -29,9 +29,9 @@ export function StepBusinessGoals({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="growthStrategies">
-          Growth Strategies <span className="text-foreground/30">*</span>
+          Growth Strategies <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="growthStrategies"
@@ -44,9 +44,9 @@ export function StepBusinessGoals({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="longTermVision">
-          Long-Term Vision <span className="text-foreground/30">*</span>
+          Long-Term Vision <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="longTermVision"
@@ -59,7 +59,7 @@ export function StepBusinessGoals({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="specificDeadlines">
           Key Deadlines
         </Label>
@@ -74,7 +74,7 @@ export function StepBusinessGoals({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="additionalInfo">
           Additional Information
         </Label>

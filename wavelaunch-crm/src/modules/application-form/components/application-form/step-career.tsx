@@ -13,10 +13,10 @@ export function StepCareerBackground({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="professionalMilestones">
-          Professional Milestones <span className="text-foreground/30">*</span>
+          Professional Milestones <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="professionalMilestones"
@@ -29,9 +29,9 @@ export function StepCareerBackground({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="personalTurningPoints">
-          Personal Turning Points <span className="text-foreground/30">*</span>
+          Personal Turning Points <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="personalTurningPoints"
@@ -44,9 +44,9 @@ export function StepCareerBackground({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="visionForVenture">
-          Vision for Venture <span className="text-foreground/30">*</span>
+          Vision for Venture <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="visionForVenture"
@@ -59,9 +59,9 @@ export function StepCareerBackground({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="hopeToAchieve">
-          Definition of Success <span className="text-foreground/30">*</span>
+          Definition of Success <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="hopeToAchieve"

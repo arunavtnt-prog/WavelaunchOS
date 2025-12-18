@@ -57,13 +57,13 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
   }
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="zipFile">
           Media Kit
         </Label>
 
-        <div className="border border-white/20 p-10 text-center hover:border-white/40 transition-colors">
+        <div className="border border-input rounded-xl p-8 text-center hover:border-foreground/30 transition-colors bg-muted/20">
           {!zipFile ? (
             <label
               htmlFor="zipFile"
@@ -109,27 +109,27 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
         )}
       </div>
 
-      <div className="border-t border-white/10 pt-10">
-        <div className="flex items-start space-x-4">
+      <div className="border-t border-input pt-6">
+        <div className="flex items-start space-x-3">
           <Checkbox
             id="termsAccepted"
             checked={termsAccepted}
             onCheckedChange={(checked) => setValue('termsAccepted', checked as boolean)}
           />
-          <div className="grid gap-2 leading-none">
+          <div className="grid gap-1.5 leading-none">
             <Label
               htmlFor="termsAccepted"
-              className="text-sm font-normal normal-case tracking-normal text-foreground/70 leading-relaxed cursor-pointer"
+              className="text-sm font-normal leading-relaxed cursor-pointer"
             >
-              I accept the terms and privacy policy <span className="text-foreground/30">*</span>
+              I accept the terms and privacy policy <span className="text-red-500">*</span>
             </Label>
-            <p className="text-xs text-foreground/40 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               By submitting, I agree to Wavelaunch Studio's{' '}
               <a
                 href={`${process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}/terms`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-foreground/50 hover:text-foreground/70 underline underline-offset-2"
+                className="text-foreground/70 hover:text-foreground underline underline-offset-2"
               >
                 Terms
               </a>{' '}
@@ -138,7 +138,7 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
                 href={`${process.env.NEXT_PUBLIC_WAVELAUNCH_URL || 'https://wavelaunch.vc'}/privacy`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-foreground/50 hover:text-foreground/70 underline underline-offset-2"
+                className="text-foreground/70 hover:text-foreground underline underline-offset-2"
               >
                 Privacy Policy
               </a>.
@@ -150,8 +150,8 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
         )}
       </div>
 
-      <div className="border-t border-white/10 pt-8">
-        <p className="text-xs text-foreground/30 leading-relaxed">
+      <div className="border-t border-input pt-6">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           Your progress is automatically saved.
         </p>
       </div>

@@ -43,17 +43,17 @@ export function StepProductDirection({ form }: StepProps) {
   }
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {suggestedCategories.length > 0 && (
-        <div className="border-b border-white/10 pb-8">
-          <p className="text-xs font-normal tracking-wide uppercase text-foreground/40 mb-4">
+        <div className="border-b border-input pb-6">
+          <p className="text-xs font-medium text-muted-foreground mb-3">
             Suggested for {industryNiche}
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             {suggestedCategories.map((cat) => (
               <span
                 key={cat.value}
-                className="px-4 py-2 border border-white/20 text-foreground/70 text-sm"
+                className="px-3 py-1.5 border border-input rounded-lg text-foreground/70 text-sm bg-muted/30"
               >
                 {cat.label}
               </span>
@@ -62,11 +62,11 @@ export function StepProductDirection({ form }: StepProps) {
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <Label>
-          Product Categories <span className="text-foreground/30">*</span>
+          Product Categories <span className="text-red-500">*</span>
         </Label>
-        <div className="grid md:grid-cols-2 gap-4 mt-4">
+        <div className="grid md:grid-cols-2 gap-x-10 gap-y-3">
           {PRODUCT_CATEGORIES.map((category) => (
             <div key={category.value} className="flex items-start space-x-3">
               <Checkbox
@@ -90,7 +90,7 @@ export function StepProductDirection({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="otherProductIdeas">
           Other Product Ideas
         </Label>

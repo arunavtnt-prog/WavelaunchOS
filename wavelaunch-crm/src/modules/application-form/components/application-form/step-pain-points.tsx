@@ -13,10 +13,10 @@ export function StepPainPoints({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="keyPainPoints">
-          Key Pain Points <span className="text-foreground/30">*</span>
+          Key Pain Points <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="keyPainPoints"
@@ -29,9 +29,9 @@ export function StepPainPoints({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="brandValues">
-          Brand Values <span className="text-foreground/30">*</span>
+          Brand Values <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="brandValues"

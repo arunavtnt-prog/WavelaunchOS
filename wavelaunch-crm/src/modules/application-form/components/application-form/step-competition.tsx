@@ -13,10 +13,10 @@ export function StepCompetition({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="differentiation">
-          Differentiation Strategy <span className="text-foreground/30">*</span>
+          Differentiation Strategy <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="differentiation"
@@ -29,9 +29,9 @@ export function StepCompetition({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="uniqueValueProps">
-          Unique Value Propositions <span className="text-foreground/30">*</span>
+          Unique Value Propositions <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="uniqueValueProps"
@@ -44,9 +44,9 @@ export function StepCompetition({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="emergingCompetitors">
-          Competitors You Monitor <span className="text-foreground/30">*</span>
+          Competitors You Monitor <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="emergingCompetitors"

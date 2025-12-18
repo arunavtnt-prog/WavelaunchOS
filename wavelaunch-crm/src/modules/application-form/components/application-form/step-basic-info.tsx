@@ -15,10 +15,10 @@ export function StepBasicInfo({ form }: StepProps) {
   const { register, formState: { errors }, setValue, watch } = form
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6">
       {/* Name + Email Group */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
+        <div className="space-y-2">
           <Label htmlFor="fullName">
             Full Name <span className="text-red-500">*</span>
           </Label>
@@ -32,7 +32,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label htmlFor="email">
             Email <span className="text-red-500">*</span>
           </Label>
@@ -49,8 +49,8 @@ export function StepBasicInfo({ form }: StepProps) {
       </div>
 
       {/* Social Handles Group */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
+        <div className="space-y-2">
           <Label htmlFor="instagramHandle">Instagram</Label>
           <div className="flex">
             <div className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm">
@@ -68,7 +68,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label htmlFor="tiktokHandle">TikTok</Label>
           <div className="flex">
             <div className="h-12 w-12 flex items-center justify-center bg-slate-100 dark:bg-zinc-800 border border-r-0 border-input rounded-l-xl text-slate-500 dark:text-zinc-400 text-sm">
@@ -88,8 +88,8 @@ export function StepBasicInfo({ form }: StepProps) {
       </div>
 
       {/* Country + Age Group */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
+        <div className="space-y-2">
           <Label htmlFor="country">
             Country <span className="text-red-500">*</span>
           </Label>
@@ -113,7 +113,7 @@ export function StepBasicInfo({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label htmlFor="age">
             Age <span className="text-red-500">*</span>
           </Label>
@@ -132,7 +132,7 @@ export function StepBasicInfo({ form }: StepProps) {
       </div>
 
       {/* Industry/Niche */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="industryNiche">
           Industry/Niche <span className="text-red-500">*</span>
         </Label>

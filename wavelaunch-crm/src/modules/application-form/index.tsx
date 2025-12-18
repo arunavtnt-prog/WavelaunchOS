@@ -152,7 +152,7 @@ export default function ApplicationFormRoot() {
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: 1 }}
         transition={{ delay: 0.2, duration: 1, ease: "circOut" }}
-        className="w-full max-w-2xl h-px bg-foreground/10 mb-20"
+        className="w-full max-w-2xl h-px bg-foreground/10 mb-10"
       />
 
       {/* Main Form Panel */}
@@ -165,8 +165,8 @@ export default function ApplicationFormRoot() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-2xl"
         >
-          <div className="mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-4 leading-[1.1] tracking-[-0.02em]">{currentStepData.title}</h2>
             {currentStepData.description && (
               <p className="text-muted-foreground text-base leading-relaxed max-w-md">{currentStepData.description}</p>
             )}
@@ -176,7 +176,7 @@ export default function ApplicationFormRoot() {
             <form className="space-y-12">
               {renderStep()}
 
-              <div className="flex justify-between items-center pt-16 mt-8">
+              <div className="flex justify-between items-center pt-10">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -207,7 +207,7 @@ export default function ApplicationFormRoot() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-16 mb-8 text-center text-xs text-muted-foreground/50 font-light tracking-widest uppercase select-none"
+        className="w-full max-w-2xl mt-8 text-center text-xs text-muted-foreground/50 font-light tracking-widest uppercase select-none"
       >
         Confidential Admissions Portal
       </motion.div>

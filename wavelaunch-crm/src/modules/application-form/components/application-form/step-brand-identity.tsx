@@ -15,10 +15,10 @@ export function StepBrandIdentity({ form }: StepProps) {
   const { register, formState: { errors }, setValue, watch } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="idealBrandImage">
-          Ideal Brand Image <span className="text-foreground/30">*</span>
+          Ideal Brand Image <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="idealBrandImage"
@@ -31,9 +31,9 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="inspirationBrands">
-          Brands You Admire <span className="text-foreground/30">*</span>
+          Brands You Admire <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="inspirationBrands"
@@ -46,9 +46,9 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="brandingAesthetics">
-          Visual Identity <span className="text-foreground/30">*</span>
+          Visual Identity <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="brandingAesthetics"
@@ -61,9 +61,9 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="emotionsBrandEvokes">
-          Brand Emotions <span className="text-foreground/30">*</span>
+          Brand Emotions <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="emotionsBrandEvokes"
@@ -76,10 +76,10 @@ export function StepBrandIdentity({ form }: StepProps) {
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
+        <div className="space-y-2">
           <Label htmlFor="brandPersonality">
-            Brand Personality <span className="text-foreground/30">*</span>
+            Brand Personality <span className="text-red-500">*</span>
           </Label>
           <Select
             value={watch('brandPersonality')}
@@ -101,9 +101,9 @@ export function StepBrandIdentity({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label htmlFor="preferredFont">
-            Font Preference <span className="text-foreground/30">*</span>
+            Font Preference <span className="text-red-500">*</span>
           </Label>
           <Select
             value={watch('preferredFont')}

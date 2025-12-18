@@ -14,10 +14,10 @@ export function StepAudienceDemographics({ form }: StepProps) {
   const { register, formState: { errors } } = form
 
   return (
-    <div className="space-y-10">
-      <div className="space-y-3">
+    <div className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="targetAudience">
-          Target Audience <span className="text-foreground/30">*</span>
+          Target Audience <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="targetAudience"
@@ -30,9 +30,9 @@ export function StepAudienceDemographics({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="demographicProfile">
-          Demographic Profile <span className="text-foreground/30">*</span>
+          Demographic Profile <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="demographicProfile"
@@ -45,10 +45,10 @@ export function StepAudienceDemographics({ form }: StepProps) {
         )}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="space-y-3">
+      <div className="grid md:grid-cols-2 gap-x-10 gap-y-6">
+        <div className="space-y-2">
           <Label htmlFor="targetDemographicAge">
-            Target Age Range <span className="text-foreground/30">*</span>
+            Target Age Range <span className="text-red-500">*</span>
           </Label>
           <Input
             id="targetDemographicAge"
@@ -60,9 +60,9 @@ export function StepAudienceDemographics({ form }: StepProps) {
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label htmlFor="audienceGenderSplit">
-            Gender Split <span className="text-foreground/30">*</span>
+            Gender Split <span className="text-red-500">*</span>
           </Label>
           <Input
             id="audienceGenderSplit"
@@ -75,9 +75,9 @@ export function StepAudienceDemographics({ form }: StepProps) {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="audienceMaritalStatus">
-          Marital Status <span className="text-foreground/30">*</span>
+          Marital Status <span className="text-red-500">*</span>
         </Label>
         <Input
           id="audienceMaritalStatus"
@@ -89,9 +89,9 @@ export function StepAudienceDemographics({ form }: StepProps) {
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Label htmlFor="currentChannels">
-          Discovery Channels <span className="text-foreground/30">*</span>
+          Discovery Channels <span className="text-red-500">*</span>
         </Label>
         <Textarea
           id="currentChannels"
