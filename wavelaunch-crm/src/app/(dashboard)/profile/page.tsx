@@ -28,10 +28,6 @@ interface UserProfile {
   name: string
   email: string
   role: string
-  bio?: string
-  phone?: string
-  location?: string
-  website?: string
   createdAt: string
   lastLoginAt?: string
 }
@@ -45,10 +41,6 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false)
   const [editForm, setEditForm] = useState({
     name: '',
-    bio: '',
-    phone: '',
-    location: '',
-    website: ''
   })
 
   useEffect(() => {
@@ -63,10 +55,6 @@ export default function ProfilePage() {
         setProfile(data)
         setEditForm({
           name: data.name || '',
-          bio: data.bio || '',
-          phone: data.phone || '',
-          location: data.location || '',
-          website: data.website || ''
         })
       }
     } catch (error) {
@@ -112,10 +100,6 @@ export default function ProfilePage() {
     if (profile) {
       setEditForm({
         name: profile.name || '',
-        bio: profile.bio || '',
-        phone: profile.phone || '',
-        location: profile.location || '',
-        website: profile.website || ''
       })
     }
     setIsEditing(false)
@@ -248,42 +232,8 @@ export default function ProfilePage() {
                     />
                     <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={editForm.phone}
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                      placeholder="Enter your phone number"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={editForm.location}
-                      onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                      placeholder="City, Country"
-                    />
-                  </div>
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={editForm.website}
-                      onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={editForm.bio}
-                      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                      placeholder="Tell us about yourself..."
-                      rows={4}
-                    />
+                    <p className="text-sm text-muted-foreground">Additional profile fields coming soon.</p>
                   </div>
                 </div>
               ) : (
@@ -300,42 +250,9 @@ export default function ProfilePage() {
                         <p>{profile.email}</p>
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Phone</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <p>{profile.phone || 'Not set'}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-muted-foreground">Location</Label>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
-                        <p>{profile.location || 'Not set'}</p>
-                      </div>
-                    </div>
-                    {profile.website && (
-                      <div className="md:col-span-2">
-                        <Label className="text-sm font-medium text-muted-foreground">Website</Label>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                          <a 
-                            href={profile.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {profile.website}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                    {profile.bio && (
-                      <div className="md:col-span-2">
-                        <Label className="text-sm font-medium text-muted-foreground">Bio</Label>
-                        <p className="mt-1 text-sm leading-relaxed">{profile.bio}</p>
-                      </div>
-                    )}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Additional profile fields coming soon.
                   </div>
                 </div>
               )}

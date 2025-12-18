@@ -17,10 +17,6 @@ export async function GET() {
         name: true,
         email: true,
         role: true,
-        bio: true,
-        phone: true,
-        location: true,
-        website: true,
         createdAt: true,
         lastLoginAt: true,
       }
@@ -52,20 +48,12 @@ export async function PUT(request: NextRequest) {
       where: { email: session.user.email },
       data: {
         name: name || undefined,
-        bio: bio || undefined,
-        phone: phone || undefined,
-        location: location || undefined,
-        website: website || undefined,
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
-        bio: true,
-        phone: true,
-        location: true,
-        website: true,
         createdAt: true,
         lastLoginAt: true,
       }
