@@ -142,9 +142,9 @@ export default function ClientDetailPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{client.fullName}</h1>
+          <h1 className="text-3xl font-bold">{(client as any).fullName}</h1>
         </div>
-        {client.status === 'ARCHIVED' ? (
+        {(client as any).status === 'ARCHIVED' ? (
           <Button
             onClick={() => setRestoreDialogOpen(true)}
             disabled={restoring}
@@ -240,21 +240,21 @@ export default function ClientDetailPage() {
 
           <div>
             <p className="text-sm font-medium text-muted-foreground">Industry</p>
-            <p className="mt-1">{client.industryNiche}</p>
+            <p className="mt-1">{(client as any).industryNiche}</p>
           </div>
 
                   </div>
 
         <div>
           <p className="text-sm font-medium text-muted-foreground">Vision</p>
-          <p className="mt-1 text-sm">{client.visionForVenture}</p>
+          <p className="mt-1 text-sm">{(client as any).visionForVenture}</p>
         </div>
 
         <div>
           <p className="text-sm font-medium text-muted-foreground">
             Target Audience
           </p>
-          <p className="mt-1 text-sm">{client.targetAudience}</p>
+          <p className="mt-1 text-sm">{(client as any).targetAudience}</p>
         </div>
       </div>
 
@@ -263,7 +263,7 @@ export default function ClientDetailPage() {
         <PortalUserCard
           clientId={client.id}
           clientEmail={client.email}
-          creatorName={client.fullName}
+          creatorName={(client as any).fullName}
         />
       )}
 
@@ -271,7 +271,7 @@ export default function ClientDetailPage() {
       {client.status !== 'ARCHIVED' && (
         <BusinessPlanGenerator
           clientId={client.id}
-          clientName={client.fullName}
+          clientName={(client as any).fullName}
           hasBusinessPlan={(client._count?.businessPlans || 0) > 0}
           hasCompletedOnboarding={true} // Fresh clients from applications have completed onboarding
         />
@@ -286,7 +286,7 @@ export default function ClientDetailPage() {
       {client.status !== 'ARCHIVED' && (
         <ClientMessaging
           clientId={client.id}
-          creatorName={client.fullName}
+          creatorName={(client as any).fullName}
         />
       )}
 
@@ -381,7 +381,7 @@ export default function ClientDetailPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Restore Client?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will restore {client.fullName} and mark them as active again.
+              This will restore {(client as any).fullName} and mark them as active again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
