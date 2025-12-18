@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client'
 import { hash } from 'bcryptjs'
-import { PromptTemplateType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
