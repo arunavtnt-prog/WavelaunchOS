@@ -22,7 +22,21 @@ export async function GET(
 
     const client = await prisma.client.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        fullName: true,
+        email: true,
+        status: true,
+        deletedAt: true,
+        industryNiche: true,
+        visionForVenture: true,
+        targetAudience: true,
+        country: true,
+        age: true,
+        onboardedAt: true,
+        createdAt: true,
+        updatedAt: true,
         businessPlans: {
           orderBy: { version: 'desc' },
           take: 5,
