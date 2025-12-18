@@ -127,12 +127,12 @@ tags:
   - creator-brand
   - comprehensive
   - strategic`,
-      variables: [
+      variables: JSON.stringify([
         'client_name', 'brand_name', 'niche', 'industry', 'target_audience', 'age', 'country',
         'vision_for_venture', 'hope_to_achieve', 'professional_milestones', 'personal_turning_points',
         'current_channels', 'key_pain_points', 'brand_values', 'target_demographic_age',
         'audience_gender_split', 'audience_marital_status', 'demographic_profile'
-      ],
+      ]),
       isActive: true,
       isDefault: true,
     },
