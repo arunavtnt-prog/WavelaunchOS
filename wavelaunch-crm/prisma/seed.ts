@@ -36,7 +36,7 @@ async function main() {
   const templates = [
     {
       name: 'Business Plan Generator',
-      type: PromptTemplateType.BUSINESS_PLAN,
+      type: 'BUSINESS_PLAN',
       content: `name: Business Plan Generator
 version: 1.0.0
 description: Comprehensive business plan template for creator brands
