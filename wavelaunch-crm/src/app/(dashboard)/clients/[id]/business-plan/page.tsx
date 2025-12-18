@@ -91,14 +91,18 @@ export default function BusinessPlanListPage() {
       setLoading(true)
 
       // Fetch client
-      const clientRes = await fetch(`/api/clients/${clientId}`)
+      const clientRes = await fetch(`/api/clients/${clientId}`, {
+        credentials: 'include',
+      })
       const clientData = await clientRes.json()
       if (clientData.success) {
         setClient(clientData.data)
       }
 
       // Fetch business plans
-      const plansRes = await fetch(`/api/business-plans?clientId=${clientId}`)
+      const plansRes = await fetch(`/api/business-plans?clientId=${clientId}`, {
+        credentials: 'include',
+      })
       const plansData = await plansRes.json()
       if (plansData.success) {
         setBusinessPlans(plansData.data)
