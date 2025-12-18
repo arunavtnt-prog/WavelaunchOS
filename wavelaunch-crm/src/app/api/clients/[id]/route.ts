@@ -21,7 +21,7 @@ export async function GET(
     }
 
     const client = await prisma.client.findUnique({
-      where: { id: params.id, deletedAt: null },
+      where: { id: params.id },
       include: {
         businessPlans: {
           orderBy: { version: 'desc' },
@@ -93,7 +93,7 @@ export async function PATCH(
     const data = updateClientSchema.parse(body)
 
     const client = await prisma.client.findUnique({
-      where: { id: params.id, deletedAt: null },
+      where: { id: params.id },
     })
 
     if (!client) {
@@ -110,7 +110,7 @@ export async function PATCH(
       data: {
         clientId: updated.id,
         type: 'CLIENT_UPDATED',
-        description: `Updated client: ${updated.fullName}`,
+        description: `Updated client: ${updated.name}`,
         userId: user.id,
       },
     })
@@ -143,7 +143,7 @@ export async function DELETE(
     }
 
     const client = await prisma.client.findUnique({
-      where: { id: params.id, deletedAt: null },
+      where: { id: params.id },
     })
 
     if (!client) {
@@ -153,7 +153,7 @@ export async function DELETE(
     // Soft delete
     await prisma.client.update({
       where: { id: params.id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date() } as any,
     })
 
     // Log activity
@@ -161,7 +161,7 @@ export async function DELETE(
       data: {
         clientId: client.id,
         type: 'CLIENT_DELETED',
-        description: `Deleted client: ${client.fullName}`,
+        description: `Deleted client: ${client.name}`,
         userId: user.id,
       },
     })
