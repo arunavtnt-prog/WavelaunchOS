@@ -37,8 +37,7 @@ type BusinessPlan = {
 
 type Client = {
   id: string
-  creatorName: string
-  brandName: string | null
+  fullName: string
   email: string
 }
 
@@ -117,7 +116,7 @@ export default function BusinessPlanListPage() {
       setGenerating(true)
       setError(null)
 
-      const res = await fetch('/api/business-plans/generate', {
+      const res = await fetch('/api/admin/business-plans/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clientId }),
@@ -216,7 +215,7 @@ export default function BusinessPlanListPage() {
           </Link>
           <span>/</span>
           <Link href={`/clients/${clientId}`} className="hover:text-foreground">
-            {client?.creatorName}
+            {client?.fullName}
           </Link>
           <span>/</span>
           <span className="text-foreground">Business Plans</span>
@@ -225,7 +224,7 @@ export default function BusinessPlanListPage() {
           <div>
             <h1 className="text-3xl font-bold">Business Plans</h1>
             <p className="text-muted-foreground mt-1">
-              {client?.brandName || client?.creatorName}
+              {client?.fullName}
             </p>
           </div>
           <div className="flex gap-2">
