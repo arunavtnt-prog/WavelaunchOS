@@ -184,13 +184,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if client has completed onboarding
-    if (!client.portalUser?.completedOnboarding) {
-      return NextResponse.json(
-        { success: false, error: 'Client has not completed onboarding yet' },
-        { status: 400 }
-      )
-    }
+    // Admins can generate business plans for any client, regardless of portal user status
+    // This allows generating plans for fresh clients converted from applications
 
     // Check if business plan already exists
     const existingPlan = await prisma.businessPlan.findFirst({
