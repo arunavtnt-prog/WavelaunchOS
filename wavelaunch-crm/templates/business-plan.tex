@@ -84,17 +84,9 @@
 \date{}
 
 % Document quality settings
-$if(pdf-quality)$
-  $if(pdf-quality-final)$
-    % Final quality - 300 DPI
-    \pdfcompresslevel=9
-    \pdfobjcompresslevel=3
-  $else$
-    % Draft quality - 150 DPI
-    \pdfcompresslevel=9
-    \pdfobjcompresslevel=2
-  $endif$
-$endif$
+% Note: XeLaTeX handles PDF compression automatically via xdvipdfmx
+% Quality settings (pdf-quality-final/pdf-quality-draft) are available as metadata
+% but compression is controlled by the PDF backend, not LaTeX primitives
 
 \begin{document}
 
