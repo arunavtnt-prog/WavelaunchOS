@@ -1,0 +1,91 @@
+name: Business Plan Generator
+version: 1.0.0
+description: Comprehensive business plan template for creator brands
+type: BUSINESS_PLAN
+
+systemPrompt: |
+  You are an expert business consultant specializing in creator brands and digital businesses. 
+  You create comprehensive, actionable business plans that help creators turn their passion into 
+  sustainable businesses. Your plans are strategic, practical, and tailored to each creator's 
+  unique niche and audience.
+
+userPrompt: |
+  Generate a comprehensive business plan for the following creator:
+
+  ## Creator Information
+  **Name:** {{client_name}}
+  **Brand:** {{brand_name}}
+  **Niche:** {{niche}}
+  **Industry:** {{industry}}
+  **Target Audience:** {{target_audience}}
+  **Age:** {{age}}
+  **Country:** {{country}}
+
+  ## Vision & Goals
+  **Vision for Venture:** {{vision_for_venture}}
+  **Hope to Achieve:** {{hope_to_achieve}}
+
+  ## Professional Background
+  **Professional Milestones:** {{professional_milestones}}
+  **Personal Turning Points:** {{personal_turning_points}}
+
+  ## Market Understanding
+  **Current Channels:** {{current_channels}}
+  **Key Pain Points:** {{key_pain_points}}
+  **Brand Values:** {{brand_values}}
+
+  ## Demographics
+  **Target Demographic Age:** {{target_demographic_age}}
+  **Audience Gender Split:** {{audience_gender_split}}
+  **Audience Marital Status:** {{audience_marital_status}}
+  **Demographic Profile:** {{demographic_profile}}
+
+  ## Requirements:
+  1. Create a professional business plan with the following sections:
+     - Executive Summary
+     - Business Description & Mission
+     - Market Analysis
+     - Target Audience Deep Dive
+     - Competitive Analysis
+     - Products & Services
+     - Marketing & Sales Strategy
+     - Operations Plan
+     - Management Team
+     - Financial Projections (3-5 years)
+     - Risk Assessment
+     - Implementation Timeline
+
+  2. Include specific, actionable recommendations
+  3. Provide realistic financial projections based on the creator's niche
+  4. Consider their current resources and constraints
+  5. Focus on scalable, sustainable growth strategies
+  6. Include content creation strategies relevant to their niche
+  7. Address monetization strategies specific to creator businesses
+
+  Format the response in professional business plan format with clear headings, bullet points, and tables where appropriate. Use a confident, expert tone while remaining encouraging and practical.
+
+variables:
+  - client_name
+  - brand_name
+  - niche
+  - industry
+  - target_audience
+  - age
+  - country
+  - vision_for_venture
+  - hope_to_achieve
+  - professional_milestones
+  - personal_turning_points
+  - current_channels
+  - key_pain_points
+  - brand_values
+  - target_demographic_age
+  - audience_gender_split
+  - audience_marital_status
+  - demographic_profile
+
+tags:
+  - business-plan
+  - creator-brand
+  - comprehensive
+  - strategic

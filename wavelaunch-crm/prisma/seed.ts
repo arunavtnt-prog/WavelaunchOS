@@ -36,75 +36,170 @@ async function main() {
     {
       name: 'Business Plan Generator',
       type: 'BUSINESS_PLAN',
-      yamlPath: '/data/prompts/business-plan.yaml',
+      content: `name: Business Plan Generator
+version: 1.0.0
+description: Comprehensive business plan template for creator brands
+type: BUSINESS_PLAN
+
+systemPrompt: |
+  You are an expert business consultant specializing in creator brands and digital businesses. 
+  You create comprehensive, actionable business plans that help creators turn their passion into 
+  sustainable businesses. Your plans are strategic, practical, and tailored to each creator's 
+  unique niche and audience.
+
+userPrompt: |
+  Generate a comprehensive business plan for the following creator:
+
+  ## Creator Information
+  **Name:** {{client_name}}
+  **Brand:** {{brand_name}}
+  **Niche:** {{niche}}
+  **Industry:** {{industry}}
+  **Target Audience:** {{target_audience}}
+  **Age:** {{age}}
+  **Country:** {{country}}
+
+  ## Vision & Goals
+  **Vision for Venture:** {{vision_for_venture}}
+  **Hope to Achieve:** {{hope_to_achieve}}
+
+  ## Professional Background
+  **Professional Milestones:** {{professional_milestones}}
+  **Personal Turning Points:** {{personal_turning_points}}
+
+  ## Market Understanding
+  **Current Channels:** {{current_channels}}
+  **Key Pain Points:** {{key_pain_points}}
+  **Brand Values:** {{brand_values}}
+
+  ## Demographics
+  **Target Demographic Age:** {{target_demographic_age}}
+  **Audience Gender Split:** {{audience_gender_split}}
+  **Audience Marital Status:** {{audience_marital_status}}
+  **Demographic Profile:** {{demographic_profile}}
+
+  ## Requirements:
+  1. Create a professional business plan with the following sections:
+     - Executive Summary
+     - Business Description & Mission
+     - Market Analysis
+     - Target Audience Deep Dive
+     - Competitive Analysis
+     - Products & Services
+     - Marketing & Sales Strategy
+     - Operations Plan
+     - Management Team
+     - Financial Projections (3-5 years)
+     - Risk Assessment
+     - Implementation Timeline
+
+  2. Include specific, actionable recommendations
+  3. Provide realistic financial projections based on the creator's niche
+  4. Consider their current resources and constraints
+  5. Focus on scalable, sustainable growth strategies
+  6. Include content creation strategies relevant to their niche
+  7. Address monetization strategies specific to creator businesses
+
+  Format the response in professional business plan format with clear headings, bullet points, and tables where appropriate. Use a confident, expert tone while remaining encouraging and practical.
+
+variables:
+  - client_name
+  - brand_name
+  - niche
+  - industry
+  - target_audience
+  - age
+  - country
+  - vision_for_venture
+  - hope_to_achieve
+  - professional_milestones
+  - personal_turning_points
+  - current_channels
+  - key_pain_points
+  - brand_values
+  - target_demographic_age
+  - audience_gender_split
+  - audience_marital_status
+  - demographic_profile
+
+tags:
+  - business-plan
+  - creator-brand
+  - comprehensive
+  - strategic`,
+      variables: [
+        'client_name', 'brand_name', 'niche', 'industry', 'target_audience', 'age', 'country',
+        'vision_for_venture', 'hope_to_achieve', 'professional_milestones', 'personal_turning_points',
+        'current_channels', 'key_pain_points', 'brand_values', 'target_demographic_age',
+        'audience_gender_split', 'audience_marital_status', 'demographic_profile'
+      ],
       isActive: true,
+      isDefault: true,
     },
     {
       name: 'Month 1: Foundation Excellence',
-      type: 'DELIVERABLE_M1',
+      type: 'DELIVERABLE_M1' as const,
       yamlPath: '/data/prompts/deliverable-m1.yaml',
       isActive: true,
     },
     {
       name: 'Month 2: Brand Readiness & Productization',
-      type: 'DELIVERABLE_M2',
+      type: 'DELIVERABLE_M2' as const,
       yamlPath: '/data/prompts/deliverable-m2.yaml',
       isActive: true,
     },
     {
       name: 'Month 3: Market Entry Preparation',
-      type: 'DELIVERABLE_M3',
+      type: 'DELIVERABLE_M3' as const,
       yamlPath: '/data/prompts/deliverable-m3.yaml',
       isActive: true,
     },
     {
       name: 'Month 4: Sales Engine & Launch Infrastructure',
-      type: 'DELIVERABLE_M4',
+      type: 'DELIVERABLE_M4' as const,
       yamlPath: '/data/prompts/deliverable-m4.yaml',
       isActive: true,
     },
     {
       name: 'Month 5: Pre-Launch Mastery',
-      type: 'DELIVERABLE_M5',
+      type: 'DELIVERABLE_M5' as const,
       yamlPath: '/data/prompts/deliverable-m5.yaml',
       isActive: true,
     },
     {
       name: 'Month 6: Soft Launch Execution',
-      type: 'DELIVERABLE_M6',
+      type: 'DELIVERABLE_M6' as const,
       yamlPath: '/data/prompts/deliverable-m6.yaml',
       isActive: true,
     },
     {
       name: 'Month 7: Scaling & Growth Systems',
-      type: 'DELIVERABLE_M7',
+      type: 'DELIVERABLE_M7' as const,
       yamlPath: '/data/prompts/deliverable-m7.yaml',
       isActive: true,
     },
     {
       name: 'Month 8: Full Launch & Market Domination',
-      type: 'DELIVERABLE_M8',
+      type: 'DELIVERABLE_M8' as const,
       yamlPath: '/data/prompts/deliverable-m8.yaml',
       isActive: true,
-    },
+    }
   ]
 
   for (const template of templates) {
     const existing = await prisma.promptTemplate.findFirst({
-      where: { type: template.type as any },
+      where: { type: template.type },
     })
 
     if (!existing) {
-      await prisma.promptTemplate.create({
-        data: template as any,
-      })
+      await prisma.promptTemplate.create({ data: template })
       console.log(`✅ Created template: ${template.name}`)
     } else {
       console.log(`ℹ️  Template already exists: ${template.name}`)
     }
   }
 
-  // Create sample clients with portal users for testing
+  // Create sample clients with portal users for testing (unchanged section)
   const sampleClients = [
     {
       creatorName: 'Sarah Johnson',
@@ -144,7 +239,6 @@ async function main() {
     })
 
     if (!existingClient) {
-      // Create client
       const client = await prisma.client.create({
         data: {
           creatorName: clientData.creatorName,
@@ -156,7 +250,6 @@ async function main() {
         },
       })
 
-      // Create portal user for this client
       const portalPasswordHash = await hash(clientData.portalPassword, 12)
 
       await prisma.clientPortalUser.create({

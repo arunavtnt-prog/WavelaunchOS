@@ -18,7 +18,6 @@ import { Queue, Worker, Job, QueueEvents } from 'bullmq'
 import { JobType, JobStatus } from '@prisma/client'
 import { getRedis, isRedisAvailable } from '@/lib/redis/client'
 import { prisma } from '@/lib/db'
-import { generateBusinessPlan } from '@/lib/ai/generate-business-plan'
 import { logInfo, logError, logDebug } from '@/lib/logging/logger'
 
 export type JobPayload = {
@@ -463,6 +462,7 @@ class BullMQJobQueue {
   }
 
   private async generateBusinessPlan(payload: any): Promise<JobResult> {
+    const { generateBusinessPlan } = await import('@/lib/ai/generate-business-plan')
     return generateBusinessPlan(payload.clientId, payload.userId)
   }
 
