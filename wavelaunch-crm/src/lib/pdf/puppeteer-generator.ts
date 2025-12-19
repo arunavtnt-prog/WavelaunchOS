@@ -59,9 +59,9 @@ async function getChromiumExecutable(): Promise<string> {
     throw new Error('Chrome not found locally. Please install Google Chrome for development.')
   }
 
-  // Production (Vercel) - download minimal Chromium
+  // Production (Vercel) - download minimal Chromium from official Sparticuz releases
   return await chromium.executablePath(
-    'https://github.com/nicepkg/puppeteer-core-chromium/releases/download/v143.0.0-chromium-min/chromium-v143.0.0-pack.tar'
+    'https://github.com/Sparticuz/chromium/releases/download/v143.0.0/chromium-v143.0.0-pack.x64.tar'
   )
 }
 
