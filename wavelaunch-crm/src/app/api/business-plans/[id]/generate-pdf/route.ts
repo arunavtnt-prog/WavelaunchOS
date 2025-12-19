@@ -5,6 +5,9 @@ import { handleError } from '@/lib/utils/errors'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { marked } from 'marked'
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import * as os from 'os'
 
 // Increase function timeout for PDF generation (Vercel)
 export const maxDuration = 60
@@ -13,7 +16,8 @@ const generatePDFSchema = z.object({
   quality: z.enum(['draft', 'final']).default('final'),
 })
 
-// POST /api/business-plans/[id]/generate-pdf - Generate PDF directly (serverless-compatible)
+// POST /api/business-plans/[id]/generate-pdf - Generate PDF directly
+// Priority: 1. Pandoc+XeLaTeX (Docker), 2. Puppeteer (Serverless), 3. HTML fallback
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -45,7 +49,62 @@ export async function POST(
     const body = await request.json()
     const { quality } = generatePDFSchema.parse(body)
 
-    // Dynamic import to avoid bundling issues on Vercel
+    const timestamp = format(new Date(), 'yyyyMMdd-HHmmss')
+    const filename = `business-plan-v${businessPlan.version}-${quality}-${timestamp}.pdf`
+
+    // Method 1: Try Pandoc + XeLaTeX (best quality, works in Docker)
+    try {
+      const { generatePDF: generatePDFPandoc, checkPDFDependencies } = await import('@/lib/pdf/generator')
+      const deps = await checkPDFDependencies()
+
+      if (deps.pandocInstalled && deps.xelatexInstalled) {
+        console.log('Using Pandoc + XeLaTeX for PDF generation')
+
+        // Create temp output path
+        const tempDir = os.tmpdir()
+        const outputPath = path.join(tempDir, filename)
+
+        const result = await generatePDFPandoc({
+          content: businessPlan.contentMarkdown,
+          metadata: {
+            clientName: businessPlan.client.fullName,
+            brandName: businessPlan.client.fullName || undefined,
+            industry: businessPlan.client.industryNiche || undefined,
+            version: businessPlan.version,
+            date: format(businessPlan.createdAt, 'MMMM dd, yyyy'),
+            type: 'business_plan',
+          },
+          quality,
+          outputPath,
+          options: {
+            includeTOC: true,
+            includePageNumbers: true,
+          },
+        })
+
+        if (result.success) {
+          // Read the generated PDF
+          const pdfBuffer = await fs.readFile(outputPath)
+
+          // Clean up temp file
+          await fs.unlink(outputPath).catch(() => {})
+
+          return new NextResponse(pdfBuffer, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `attachment; filename="${filename}"`,
+              'Content-Length': result.fileSize.toString(),
+            },
+          })
+        }
+
+        console.log('Pandoc generation failed, falling back to Puppeteer:', result.error)
+      }
+    } catch (pandocError: any) {
+      console.log('Pandoc not available, trying Puppeteer:', pandocError.message)
+    }
+
+    // Method 2: Try Puppeteer (serverless-compatible)
     let result
     try {
       const { generatePDF } = await import('@/lib/pdf/puppeteer-generator')
@@ -54,21 +113,32 @@ export async function POST(
         metadata: {
           clientName: businessPlan.client.fullName,
           brandName: businessPlan.client.fullName || undefined,
-          industry: businessPlan.client.industryNiche,
+          industry: businessPlan.client.industryNiche || undefined,
           version: businessPlan.version,
           date: format(businessPlan.createdAt, 'MMMM dd, yyyy'),
         },
         quality,
       })
+
+      if (result.success) {
+        return new NextResponse(new Uint8Array(result.pdfBuffer), {
+          headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="${filename}"`,
+            'Content-Length': result.fileSize.toString(),
+          },
+        })
+      }
     } catch (puppeteerError: any) {
       console.error('Puppeteer import/execution error:', puppeteerError)
+    }
 
-      // Fallback: Return HTML version if Puppeteer fails
-      const htmlContent = marked.parse(businessPlan.contentMarkdown) as string
-      const timestamp = format(new Date(), 'yyyyMMdd-HHmmss')
-      const filename = `business-plan-v${businessPlan.version}-${quality}-${timestamp}.html`
+    // Method 3: HTML fallback (last resort)
+    console.log('Both Pandoc and Puppeteer failed, returning HTML fallback')
+    const htmlContent = marked.parse(businessPlan.contentMarkdown) as string
+    const htmlFilename = `business-plan-v${businessPlan.version}-${quality}-${timestamp}.html`
 
-      const fullHtml = `<!DOCTYPE html>
+    const fullHtml = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
@@ -109,31 +179,10 @@ export async function POST(
 </body>
 </html>`
 
-      return new NextResponse(fullHtml, {
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Content-Disposition': `attachment; filename="${filename}"`,
-        },
-      })
-    }
-
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: result.error || 'PDF generation failed' },
-        { status: 500 }
-      )
-    }
-
-    // Generate filename
-    const timestamp = format(new Date(), 'yyyyMMdd-HHmmss')
-    const filename = `business-plan-v${businessPlan.version}-${quality}-${timestamp}.pdf`
-
-    // Return PDF as downloadable file
-    return new NextResponse(new Uint8Array(result.pdfBuffer), {
+    return new NextResponse(fullHtml, {
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': result.fileSize.toString(),
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${htmlFilename}"`,
       },
     })
   } catch (error) {
