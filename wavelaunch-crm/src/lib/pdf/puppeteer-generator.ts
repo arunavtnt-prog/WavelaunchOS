@@ -88,7 +88,75 @@ async function getBrowser(): Promise<Browser> {
 }
 
 /**
- * Generate HTML from markdown with professional styling
+ * Extract headings from HTML content for Table of Contents
+ */
+function extractHeadings(htmlContent: string): { level: number; text: string; id: string }[] {
+  const headings: { level: number; text: string; id: string }[] = []
+  const headingRegex = /<h([1-2])(?:[^>]*)>(.*?)<\/h\1>/gi
+  let match
+
+  while ((match = headingRegex.exec(htmlContent)) !== null) {
+    const level = parseInt(match[1])
+    const text = match[2].replace(/<[^>]*>/g, '').trim() // Strip inner HTML tags
+    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    headings.push({ level, text, id })
+  }
+
+  return headings
+}
+
+/**
+ * Add IDs to headings in HTML content for TOC linking
+ */
+function addHeadingIds(htmlContent: string): string {
+  return htmlContent.replace(/<h([1-2])(?:[^>]*)>(.*?)<\/h\1>/gi, (match, level, text) => {
+    const cleanText = text.replace(/<[^>]*>/g, '').trim()
+    const id = cleanText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+    return `<h${level} id="${id}">${text}</h${level}>`
+  })
+}
+
+/**
+ * Generate Table of Contents HTML
+ */
+function generateTOC(headings: { level: number; text: string; id: string }[]): string {
+  if (headings.length === 0) return ''
+
+  // Assign section numbers
+  let h1Count = 0
+  let h2Count = 0
+
+  const tocItems = headings.map(h => {
+    let number = ''
+    if (h.level === 1) {
+      h1Count++
+      h2Count = 0
+      number = `${h1Count}`
+    } else if (h.level === 2) {
+      h2Count++
+      number = `${h1Count}.${h2Count}`
+    }
+    return { ...h, number }
+  })
+
+  return `
+    <div class="toc">
+      <h2 class="toc-title">Contents</h2>
+      <div class="toc-list">
+        ${tocItems.map(h => `
+          <div class="toc-item toc-level-${h.level}">
+            <span class="toc-number">${h.number}</span>
+            <span class="toc-text">${h.text}</span>
+            <span class="toc-dots"></span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `
+}
+
+/**
+ * Generate HTML from markdown with professional styling (matches LaTeX design)
  */
 function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'], quality: PDFQuality): string {
   // Configure marked for better rendering
@@ -97,7 +165,11 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
     breaks: true,
   })
 
-  const htmlContent = marked.parse(content) as string
+  let htmlContent = marked.parse(content) as string
+  const headings = extractHeadings(htmlContent)
+  htmlContent = addHeadingIds(htmlContent)
+  const tocHtml = generateTOC(headings)
+
   const date = metadata.date || format(new Date(), 'MMMM dd, yyyy')
   const brandName = metadata.brandName || metadata.clientName
   const isDraft = quality === 'draft'
@@ -109,12 +181,9 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${brandName} - Business Plan</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
     :root {
       --primary: #3b82f6;
       --secondary: #6366f1;
-      --accent: #a855f7;
       --dark: #0f172a;
       --light: #94a3b8;
       --text: #1e293b;
@@ -130,29 +199,15 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
     @page {
       size: letter;
       margin: 1in;
-      @top-left {
-        content: "${metadata.clientName}";
-        font-size: 10px;
-        color: var(--light);
-      }
-      @top-right {
-        content: "Business Plan";
-        font-size: 10px;
-        color: var(--light);
-      }
-      @bottom-center {
-        content: counter(page);
-        font-size: 10px;
-        color: var(--light);
-      }
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: Georgia, 'Times New Roman', 'DejaVu Serif', serif;
       font-size: 11pt;
       line-height: 1.6;
       color: var(--text);
       background: var(--background);
+      counter-reset: section;
     }
 
     /* Cover Page */
@@ -165,40 +220,28 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
       text-align: center;
       page-break-after: always;
       position: relative;
+      padding: 40px;
     }
 
-    .cover-page::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
-    }
-
-    .cover-page::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    .cover-rule {
+      width: 100%;
+      height: 2px;
+      background: var(--primary);
+      margin: 16px 0;
     }
 
     .cover-title {
-      font-size: 36pt;
+      font-size: 32pt;
       font-weight: 700;
       color: var(--primary);
-      margin-bottom: 8px;
+      margin: 8px 0;
     }
 
     .cover-subtitle {
-      font-size: 18pt;
-      font-weight: 500;
+      font-size: 16pt;
+      font-weight: 400;
       color: var(--dark);
-      margin-bottom: 48px;
+      margin-bottom: 32px;
     }
 
     .cover-meta {
@@ -206,21 +249,20 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
       text-align: left;
     }
 
-    .cover-meta-item {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 8px;
+    .cover-meta-table {
+      border-collapse: collapse;
+    }
+
+    .cover-meta-table td {
+      padding: 4px 12px 4px 0;
+      border: none;
       font-size: 11pt;
+      background: transparent;
     }
 
-    .cover-meta-label {
-      font-weight: 600;
+    .cover-meta-table td:first-child {
+      font-weight: 700;
       color: var(--dark);
-      min-width: 100px;
-    }
-
-    .cover-meta-value {
-      color: var(--text);
     }
 
     .cover-footer {
@@ -250,14 +292,16 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
     /* Table of Contents */
     .toc {
       page-break-after: always;
+      padding: 0;
     }
 
-    .toc h2 {
+    .toc-title {
       color: var(--primary);
       font-size: 18pt;
+      font-weight: 700;
       margin-bottom: 24px;
-      border-bottom: 2px solid var(--primary);
       padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary);
     }
 
     .toc-list {
@@ -266,70 +310,120 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
 
     .toc-item {
       display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dotted var(--light);
+      align-items: baseline;
+      padding: 6px 0;
+      font-size: 11pt;
     }
 
-    .toc-item a {
+    .toc-level-2 {
+      padding-left: 24px;
+    }
+
+    .toc-number {
+      min-width: 32px;
+      color: var(--dark);
+    }
+
+    .toc-text {
       color: var(--text);
-      text-decoration: none;
     }
 
-    /* Content Styling */
+    .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted var(--light);
+      margin: 0 8px;
+      min-width: 20px;
+    }
+
+    /* Content Styling with Section Numbering */
     .content {
       position: relative;
     }
 
+    .content h1 {
+      counter-increment: section;
+      counter-reset: subsection subsubsection;
+    }
+
+    .content h1::before {
+      content: counter(section) " ";
+      color: var(--primary);
+    }
+
+    .content h2 {
+      counter-increment: subsection;
+      counter-reset: subsubsection;
+    }
+
+    .content h2::before {
+      content: counter(section) "." counter(subsection) " ";
+      color: var(--secondary);
+    }
+
+    .content h3 {
+      counter-increment: subsubsection;
+    }
+
+    .content h3::before {
+      content: counter(section) "." counter(subsection) "." counter(subsubsection) " ";
+      color: var(--dark);
+    }
+
     h1 {
-      font-size: 24pt;
+      font-size: 18pt;
       font-weight: 700;
       color: var(--primary);
-      margin: 32px 0 16px 0;
+      margin: 28px 0 14px 0;
       page-break-after: avoid;
+      page-break-before: always;
+    }
+
+    h1:first-of-type {
+      page-break-before: avoid;
     }
 
     h2 {
-      font-size: 18pt;
-      font-weight: 600;
+      font-size: 14pt;
+      font-weight: 700;
       color: var(--secondary);
-      margin: 24px 0 12px 0;
+      margin: 22px 0 10px 0;
       page-break-after: avoid;
-      border-bottom: 1px solid var(--secondary);
-      padding-bottom: 4px;
+      padding-bottom: 2px;
+      border-bottom: 0.5px solid var(--secondary);
     }
 
     h3 {
-      font-size: 14pt;
-      font-weight: 600;
+      font-size: 12pt;
+      font-weight: 700;
       color: var(--dark);
-      margin: 20px 0 10px 0;
+      margin: 18px 0 8px 0;
       page-break-after: avoid;
     }
 
     h4, h5, h6 {
-      font-size: 12pt;
-      font-weight: 600;
+      font-size: 11pt;
+      font-weight: 700;
       color: var(--text);
-      margin: 16px 0 8px 0;
+      margin: 14px 0 6px 0;
     }
 
     p {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       text-align: justify;
+      text-justify: inter-word;
     }
 
     ul, ol {
-      margin: 12px 0;
+      margin: 10px 0;
       padding-left: 24px;
     }
 
     li {
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     strong {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--dark);
     }
 
@@ -338,53 +432,52 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
     }
 
     blockquote {
-      border-left: 4px solid var(--primary);
-      margin: 16px 0;
-      padding: 12px 20px;
+      border-left: 3px solid var(--primary);
+      margin: 14px 0;
+      padding: 10px 16px;
       background: #f8fafc;
       font-style: italic;
     }
 
     code {
       background: #f1f5f9;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: 'Menlo', 'Monaco', monospace;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-family: 'Courier New', Courier, monospace;
       font-size: 10pt;
     }
 
     pre {
-      background: #1e293b;
-      color: #e2e8f0;
-      padding: 16px;
-      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 12px;
       overflow-x: auto;
-      margin: 16px 0;
+      margin: 14px 0;
+      font-size: 9pt;
     }
 
     pre code {
       background: none;
       padding: 0;
-      color: inherit;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 16px 0;
+      margin: 14px 0;
       font-size: 10pt;
     }
 
     th, td {
       border: 1px solid #e2e8f0;
-      padding: 10px 12px;
+      padding: 8px 10px;
       text-align: left;
     }
 
     th {
       background: var(--primary);
       color: white;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     tr:nth-child(even) {
@@ -393,26 +486,13 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
 
     hr {
       border: none;
-      border-top: 2px solid #e2e8f0;
-      margin: 32px 0;
+      border-top: 1px solid #e2e8f0;
+      margin: 24px 0;
     }
 
     a {
       color: var(--primary);
       text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    /* Page breaks */
-    h1 {
-      page-break-before: always;
-    }
-
-    h1:first-of-type {
-      page-break-before: avoid;
     }
 
     /* Prevent orphans and widows */
@@ -435,38 +515,42 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
 
   <!-- Cover Page -->
   <div class="cover-page">
+    <div class="cover-rule"></div>
     <h1 class="cover-title">${brandName}</h1>
     <p class="cover-subtitle">Business Plan</p>
+    <div class="cover-rule"></div>
 
     <div class="cover-meta">
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Client:</span>
-        <span class="cover-meta-value">${metadata.clientName}</span>
-      </div>
-      ${metadata.brandName ? `
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Brand:</span>
-        <span class="cover-meta-value">${metadata.brandName}</span>
-      </div>
-      ` : ''}
-      ${metadata.industry ? `
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Industry:</span>
-        <span class="cover-meta-value">${metadata.industry}</span>
-      </div>
-      ` : ''}
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Prepared by:</span>
-        <span class="cover-meta-value">Wavelaunch Studio</span>
-      </div>
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Date:</span>
-        <span class="cover-meta-value">${date}</span>
-      </div>
-      <div class="cover-meta-item">
-        <span class="cover-meta-label">Version:</span>
-        <span class="cover-meta-value">v${metadata.version}</span>
-      </div>
+      <table class="cover-meta-table">
+        <tr>
+          <td>Client:</td>
+          <td>${metadata.clientName}</td>
+        </tr>
+        ${metadata.brandName ? `
+        <tr>
+          <td>Brand:</td>
+          <td>${metadata.brandName}</td>
+        </tr>
+        ` : ''}
+        ${metadata.industry ? `
+        <tr>
+          <td>Industry:</td>
+          <td>${metadata.industry}</td>
+        </tr>
+        ` : ''}
+        <tr>
+          <td>Prepared by:</td>
+          <td>Wavelaunch Studio</td>
+        </tr>
+        <tr>
+          <td>Date:</td>
+          <td>${date}</td>
+        </tr>
+        <tr>
+          <td>Version:</td>
+          <td>v${metadata.version}</td>
+        </tr>
+      </table>
     </div>
 
     <div class="cover-footer">
@@ -474,6 +558,9 @@ function generateHTML(content: string, metadata: PDFGenerationOptions['metadata'
       wavelaunch.studio
     </div>
   </div>
+
+  <!-- Table of Contents -->
+  ${tocHtml}
 
   <!-- Content -->
   <div class="content">
@@ -516,13 +603,13 @@ export async function generatePDF(options: PDFGenerationOptions): Promise<PDFGen
       },
       displayHeaderFooter: true,
       headerTemplate: `
-        <div style="font-size: 10px; color: #94a3b8; width: 100%; padding: 0 1in; display: flex; justify-content: space-between;">
+        <div style="font-family: Georgia, serif; font-size: 9px; color: #94a3b8; width: 100%; padding: 0 0.5in; display: flex; justify-content: space-between; border-bottom: 0.5px solid #3b82f6; padding-bottom: 4px; font-style: italic;">
           <span>${metadata.clientName}</span>
           <span>Business Plan</span>
         </div>
       `,
       footerTemplate: `
-        <div style="font-size: 10px; color: #94a3b8; width: 100%; text-align: center;">
+        <div style="font-family: Georgia, serif; font-size: 9px; color: #94a3b8; width: 100%; text-align: center;">
           <span class="pageNumber"></span>
         </div>
       `,
