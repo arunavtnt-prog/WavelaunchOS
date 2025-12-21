@@ -40,8 +40,7 @@ By the end of this month, you will have:
 - Market research insights
 - Foundation for product development
       `.trim(),
-      order: 1,
-      required: true
+      order: 1
     },
     {
       id: 'brand-identity',
@@ -73,8 +72,7 @@ Your unique position in the {{target_industry}} market:
 ## Brand Story
 {{brand_story_framework}}
       `.trim(),
-      order: 2,
-      required: true
+      order: 2
     },
     {
       id: 'target-audience',
@@ -111,8 +109,7 @@ Your unique position in the {{target_industry}} market:
 ## Audience Engagement Strategy
 {{engagement_strategy}}
       `.trim(),
-      order: 3,
-      required: true
+      order: 3
     },
     {
       id: 'action-items',
@@ -145,39 +142,38 @@ Your unique position in the {{target_industry}} market:
 - {{metric.name}}: {{metric.target}}
 {% endfor %}
       `.trim(),
-      order: 4,
-      required: true
+      order: 4
     }
   ],
   variables: [
-    { name: 'client_name', type: 'string' },
-    { name: 'niche', type: 'string' },
-    { name: 'brand_personality', type: 'string' },
-    { name: 'brand_voice_guidelines', type: 'string' },
-    { name: 'color_palette', type: 'string' },
-    { name: 'typography_choices', type: 'string' },
-    { name: 'logo_guidelines', type: 'string' },
-    { name: 'brand_values', type: 'string' },
-    { name: 'competitive_positioning', type: 'string' },
-    { name: 'brand_story_framework', type: 'string' },
-    { name: 'target_demographic_age', type: 'string' },
-    { name: 'target_location', type: 'string' },
-    { name: 'target_income', type: 'string' },
-    { name: 'target_education', type: 'string' },
-    { name: 'target_interests', type: 'string' },
-    { name: 'target_values', type: 'string' },
-    { name: 'target_lifestyle', type: 'string' },
-    { name: 'key_pain_points', type: 'string' },
-    { name: 'audience_research_complete', type: 'boolean' },
-    { name: 'survey_responses', type: 'string' },
-    { name: 'interview_count', type: 'string' },
-    { name: 'confidence_score', type: 'string' },
-    { name: 'engagement_strategy', type: 'string' },
-    { name: 'week1_actions', type: 'string' },
-    { name: 'foundation_tasks', type: 'string' },
-    { name: 'legal_tasks', type: 'string' },
-    { name: 'month2_prep', type: 'string' },
-    { name: 'success_metrics', type: 'string' }
+    { name: 'client_name', type: 'string', required: true },
+    { name: 'niche', type: 'string', required: true },
+    { name: 'brand_personality', type: 'string', required: true },
+    { name: 'brand_voice_guidelines', type: 'string', required: false },
+    { name: 'color_palette', type: 'string', required: false },
+    { name: 'typography_choices', type: 'string', required: false },
+    { name: 'logo_guidelines', type: 'string', required: false },
+    { name: 'brand_values', type: 'string', required: true },
+    { name: 'competitive_positioning', type: 'string', required: true },
+    { name: 'brand_story_framework', type: 'string', required: true },
+    { name: 'target_demographic_age', type: 'string', required: false },
+    { name: 'target_location', type: 'string', required: false },
+    { name: 'target_income', type: 'string', required: false },
+    { name: 'target_education', type: 'string', required: false },
+    { name: 'target_interests', type: 'string', required: false },
+    { name: 'target_values', type: 'string', required: false },
+    { name: 'target_lifestyle', type: 'string', required: false },
+    { name: 'key_pain_points', type: 'string', required: true },
+    { name: 'audience_research_complete', type: 'boolean', required: false },
+    { name: 'survey_responses', type: 'string', required: false },
+    { name: 'interview_count', type: 'string', required: false },
+    { name: 'confidence_score', type: 'string', required: false },
+    { name: 'engagement_strategy', type: 'string', required: false },
+    { name: 'week1_actions', type: 'string', required: false },
+    { name: 'foundation_tasks', type: 'string', required: false },
+    { name: 'legal_tasks', type: 'string', required: false },
+    { name: 'month2_prep', type: 'string', required: false },
+    { name: 'success_metrics', type: 'string', required: false }
   ],
   metadata: {
     author: 'Wavelaunch Studio',

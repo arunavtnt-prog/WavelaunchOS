@@ -42,24 +42,23 @@ const standardBusinessPlanTemplate: DocumentTemplate = {
 {% if funding_needed %}
 Total funding required: $\${{funding_amount}}
 {% endif %}`,
-      order: 1,
-      required: true
+      order: 1
     }
   ],
   variables: [
-    { name: 'client_name', type: 'string' },
-    { name: 'niche', type: 'string' },
-    { name: 'target_audience', type: 'string' },
-    { name: 'vision_statement', type: 'string' },
-    { name: 'target_industry', type: 'string' },
-    { name: 'unique_value_props', type: 'string' },
-    { name: 'brand_personality', type: 'string' },
-    { name: 'has_revenue_projections', type: 'boolean' },
-    { name: 'year1_revenue', type: 'string' },
-    { name: 'year1_profit', type: 'string' },
-    { name: 'break_even_months', type: 'string' },
-    { name: 'funding_needed', type: 'boolean' },
-    { name: 'funding_amount', type: 'string' }
+    { name: 'client_name', type: 'string', required: true },
+    { name: 'niche', type: 'string', required: true },
+    { name: 'target_audience', type: 'string', required: true },
+    { name: 'vision_statement', type: 'string', required: true },
+    { name: 'target_industry', type: 'string', required: true },
+    { name: 'unique_value_props', type: 'string', required: true },
+    { name: 'brand_personality', type: 'string', required: true },
+    { name: 'has_revenue_projections', type: 'boolean', required: false },
+    { name: 'year1_revenue', type: 'string', required: false },
+    { name: 'year1_profit', type: 'string', required: false },
+    { name: 'break_even_months', type: 'string', required: false },
+    { name: 'funding_needed', type: 'boolean', required: false },
+    { name: 'funding_amount', type: 'string', required: false }
   ],
   metadata: {
     author: 'Wavelaunch Studio',
