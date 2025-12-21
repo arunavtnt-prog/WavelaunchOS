@@ -1,91 +1,93 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 
-export default function D26IntroPage() {
-    const router = useRouter()
+export default function ApplyIntroPage() {
+  return (
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Left Panel - Content (Dark Mode with subtle gradient) */}
+      <div className="w-full lg:w-1/2 bg-gradient-to-br from-black via-black to-[#0a0a0a] flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-16 lg:py-0 min-h-[60vh] lg:min-h-screen relative">
+        {/* Subtle vignette overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none" />
 
-    return (
-        <div className="flex flex-col lg:flex-row min-h-screen bg-[#FDFBF7] font-sans">
-            {/* Left Column: Intro Panel (Replicating Reference Design Style) */}
-            <div className="w-full lg:w-[50%] p-12 lg:p-20 flex flex-col justify-center relative">
-                <div className="max-w-md mx-auto w-full">
-                    {/* Header / Logo Area */}
-                    <div className="mb-16">
-                        <span className="font-sans text-sm font-bold tracking-[0.2em] uppercase text-gray-900">Wavelaunch Studio.</span>
-                    </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="max-w-md mx-auto lg:mx-0 relative z-10"
+        >
+          {/* Brand with orange accent */}
+          <div className="flex items-center gap-3 mb-14">
+            <span className="w-2 h-2 rounded-full bg-[#f97316]" />
+            <p className="text-xs tracking-[0.25em] uppercase font-medium text-white/90">
+              WAVELAUNCH STUDIO
+            </p>
+          </div>
 
-                    <div>
-                        {/* Headline */}
-                        <h1 className="font-serif text-5xl md:text-[72px] text-gray-900 mb-4 tracking-tight leading-none">
-                            Start your D26<br />Application?
-                        </h1>
+          {/* Heading */}
+          <h1 className="font-serif text-[64px] leading-[1.08] text-white mb-8 whitespace-nowrap">
+            D26 Application.
+          </h1>
 
-                        {/* Sub-headline */}
-                        <p className="text-gray-400 text-sm mb-12 tracking-wide font-medium">
-                            Each application is reviewed individually and deliberately.
-                        </p>
+          {/* Subtitle */}
+          <p className="text-zinc-400 mb-6">
+            Each application is reviewed individually and deliberately.
+          </p>
 
-                        {/* Form Replacement Content */}
-                        <div className="space-y-8">
-                            {/* Editorial Copy */}
-                            <div className="prose prose-stone">
-                                <p className="text-gray-600 text-base leading-relaxed font-light">
-                                    Most accelerators want a deck and a dream. We want to understand who you are, what you've built, and whether we're the right partners to scale it.
-                                </p>
-                            </div>
+          {/* Body */}
+          <p className="text-zinc-300 text-base leading-relaxed mb-12">
+            We&apos;re not looking for pitch decks or polished business plans—we want to understand who you are, what you&apos;ve built so far, and whether we&apos;re the right partners to help you scale it into a real company.
+          </p>
 
-                            {/* CTA */}
-                            <div className="pt-4">
-                                <Button
-                                    onClick={() => router.push('/apply')}
-                                    className="w-full bg-[#1A1A1A] text-white hover:bg-black text-sm font-medium tracking-widest uppercase py-6 h-auto rounded-none transition-all active:scale-[0.98]"
-                                >
-                                    Start Application
-                                </Button>
-                            </div>
+          {/* Buttons */}
+          <div className="space-y-3">
+            <Link href="/apply" className="block">
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-4 bg-white text-black text-xs tracking-[0.2em] uppercase font-medium rounded-[3px] hover:bg-zinc-100 transition-all duration-200"
+              >
+                START APPLICATION
+              </motion.button>
+            </Link>
+            <a href="https://studio.wavelaunch.org" className="block">
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-4 bg-transparent border border-zinc-700 text-zinc-300 text-xs tracking-[0.2em] uppercase font-medium rounded-[3px] hover:border-zinc-500 hover:text-white transition-all duration-200"
+              >
+                RETURN TO STUDIO
+              </motion.button>
+            </a>
+          </div>
 
-                            {/* "Google Sign In" Style Alternative Action */}
-                            <Button
-                                variant="outline"
-                                onClick={() => window.location.href = 'https://studio.wavelaunch.org'}
-                                className="w-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-black text-sm font-medium tracking-widest uppercase py-6 h-auto rounded-none flex items-center justify-center gap-3"
-                            >
-                                Return to Studio
-                            </Button>
-                        </div>
+          {/* Footer */}
+          <p className="text-center text-xs text-zinc-600 mt-12">
+            Already have an account?{' '}
+            <a
+              href="https://login.wavelaunch.org.org"
+              className="text-zinc-500 hover:text-white transition-colors duration-200"
+            >
+              Log in
+            </a>
+          </p>
+        </motion.div>
+      </div>
 
-                        {/* Footer */}
-                        <div className="mt-16 text-center">
-                            <p className="text-xs text-gray-400 tracking-wide">
-                                Already have an account? <span className="text-gray-900 font-medium cursor-pointer hover:underline">Log in</span>
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            {/* Right Column: Visual (Replicating Reference Style) */}
-            <div className="hidden lg:block w-full lg:w-[50%] relative bg-black overflow-hidden h-screen">
-                <Image
-                    src="/d26_right_bg.png"
-                    alt="D26 Aesthetic"
-                    fill
-                    className="object-cover opacity-90"
-                    priority
-                />
-
-                {/* Overlays - Removed as they are baked into the image */}
-                {/* Mirror effect overlay to ensure it blends nicely if needed, otherwise clean image */}
-                <div className="absolute inset-0 z-10 pointer-events-none"></div>
-
-                {/* Glitch Overlay Effect - Kept for atmosphere, but reduced intensity */}
-                <div className="absolute top-[20%] left-[-10%] w-[120%] h-[20%] bg-white/5 blur-3xl mix-blend-overlay rotate-12 pointer-events-none opacity-50"></div>
-            </div>
-        </div >
-    )
+      {/* Right Panel - Hero Image */}
+      <div className="w-full lg:w-1/2 h-[40vh] lg:h-auto lg:min-h-screen relative overflow-hidden">
+        <Image
+          src="/apply-hero.png"
+          alt="Creator"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Subtle edge gradient for seamless blend */}
+        <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-black/20 to-transparent pointer-events-none" />
+      </div>
+    </div>
+  )
 }

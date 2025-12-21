@@ -43,7 +43,7 @@ export default function ApplyIntroPage() {
 
           {/* Buttons */}
           <div className="space-y-3">
-            <Link href="/apply/form" className="block">
+            <Link href="/apply" className="block">
               <motion.button
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
