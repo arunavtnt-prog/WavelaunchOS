@@ -85,9 +85,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy Prisma schema
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Copy prompt templates
-COPY --from=builder --chown=nextjs:nodejs /app/prompts ./prompts
-
 # Copy LaTeX templates for PDF generation
 COPY --from=builder --chown=nextjs:nodejs /app/templates ./templates
 

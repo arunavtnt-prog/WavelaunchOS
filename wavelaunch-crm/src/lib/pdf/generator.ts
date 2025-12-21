@@ -1,10 +1,37 @@
-import { exec } from 'child_process'
+import { spawn, exec } from 'child_process'
 import { promisify } from 'util'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import { format } from 'date-fns'
 
 const execAsync = promisify(exec)
+
+/**
+ * Execute pandoc with spawn for proper argument handling
+ */
+function spawnPandoc(args: string[]): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn('pandoc', args, { timeout: 180000 })
+
+    let stdout = ''
+    let stderr = ''
+
+    proc.stdout.on('data', (data) => { stdout += data })
+    proc.stderr.on('data', (data) => { stderr += data })
+
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr })
+      } else {
+        reject(new Error(`Pandoc exited with code ${code}: ${stderr}`))
+      }
+    })
+
+    proc.on('error', (err) => {
+      reject(err)
+    })
+  })
+}
 
 export type PDFQuality = 'draft' | 'final'
 export type PDFType = 'business_plan' | 'deliverable' | 'report'
@@ -82,11 +109,8 @@ export async function generatePDF(
       pdfOptions
     })
 
-    // Execute Pandoc
-    const { stdout, stderr } = await execAsync(pandocCommand, {
-      timeout: 180000, // 3 minutes timeout for complex documents
-      maxBuffer: 20 * 1024 * 1024, // 20MB buffer
-    })
+    // Execute Pandoc using spawn for proper argument handling
+    const { stdout, stderr } = await spawnPandoc(pandocCommand)
 
     // Check if PDF was created
     const stats = await fs.stat(outputPath)
@@ -184,7 +208,8 @@ function getTemplatePath(type?: PDFType, templateName?: string): string {
 }
 
 /**
- * Build enhanced Pandoc command
+ * Build enhanced Pandoc command arguments array
+ * Returns array for use with spawn (not exec) for proper argument handling
  */
 function buildPandocCommand(params: {
   markdownPath: string
@@ -193,49 +218,48 @@ function buildPandocCommand(params: {
   outputPath: string
   quality: PDFQuality
   pdfOptions: PDFGenerationOptions['options']
-}): string {
+}): string[] {
   const { markdownPath, yamlPath, templatePath, outputPath, quality, pdfOptions } = params
 
-  const commands = [
-    'pandoc',
-    `"${markdownPath}"`,
-    `--metadata-file="${yamlPath}"`,
-    `--template="${templatePath}"`,
+  const args: string[] = [
+    markdownPath,
+    '--metadata-file=' + yamlPath,
+    '--template=' + templatePath,
     '--pdf-engine=xelatex',
   ]
 
   // Add table of contents
   if (pdfOptions?.includeTOC !== false) {
-    commands.push('--toc', '--toc-depth=3')
+    args.push('--toc', '--toc-depth=3')
   }
 
   // Add section numbering
-  commands.push('--number-sections')
+  args.push('--number-sections')
 
   // Add geometry
-  commands.push('-V geometry:margin=1in')
+  args.push('-V', 'geometry:margin=1in')
 
   // Add quality settings
   if (quality === 'draft') {
-    commands.push('-V pdf-quality-draft=true')
+    args.push('-V', 'pdf-quality-draft=true')
   } else {
-    commands.push('-V pdf-quality-final=true')
+    args.push('-V', 'pdf-quality-final=true')
   }
 
   // Add page numbers
   if (pdfOptions?.includePageNumbers !== false) {
-    commands.push('-V page-numbers=true')
+    args.push('-V', 'page-numbers=true')
   }
 
   // Add watermark if specified
   if (pdfOptions?.includeWatermark) {
-    commands.push('-V watermark=draft')
+    args.push('-V', 'watermark=draft')
   }
 
   // Output path
-  commands.push(`--output="${outputPath}"`)
+  args.push('--output=' + outputPath)
 
-  return commands.join(' ')
+  return args
 }
 
 /**
