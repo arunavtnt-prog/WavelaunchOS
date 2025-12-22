@@ -16,10 +16,10 @@ export interface ApplicationEmailData {
   fullName: string
   email: string
   applicationId: string
-  industryNiche: string
+  industryNiche?: string
   instagramHandle?: string
   tiktokHandle?: string
-  country: string
+  country?: string
 }
 
 export async function sendApplicationConfirmation(data: ApplicationEmailData) {
