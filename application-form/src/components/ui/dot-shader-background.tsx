@@ -123,19 +123,19 @@ function Scene() {
                 return {
                     dotColor: '#FFFFFF',
                     bgColor: '#000000', // Changed to pure black for better blend
-                    dotOpacity: 0.15 // Increased for visibility
+                    dotOpacity: 0.004 // Reduced by 90% from original for ultra-subtle luxury design
                 }
             case 'light':
                 return {
                     dotColor: '#000000',
                     bgColor: '#FFFFFF',
-                    dotOpacity: 0.15
+                    dotOpacity: 0.004
                 }
             default:
                 return {
                     dotColor: '#FFFFFF',
                     bgColor: '#000000',
-                    dotOpacity: 0.15
+                    dotOpacity: 0.004
                 }
         }
     }

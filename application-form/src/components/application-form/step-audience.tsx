@@ -17,7 +17,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="targetAudience">
-          Who is your target audience? <span className="text-red-500">*</span>
+          Who is your target audience?
         </Label>
         <Textarea
           id="targetAudience"
@@ -33,7 +33,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="demographicProfile">
-          Demographic profile (gender, location, interests, etc.) <span className="text-red-500">*</span>
+          Demographic profile (gender, location, interests, etc.)
         </Label>
         <Textarea
           id="demographicProfile"
@@ -50,7 +50,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="targetDemographicAge">
-            Age of your target demographic <span className="text-red-500">*</span>
+            Age of your target demographic
           </Label>
           <Input
             id="targetDemographicAge"
@@ -64,7 +64,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
 
         <div className="space-y-2">
           <Label htmlFor="audienceGenderSplit">
-            Gender split <span className="text-red-500">*</span>
+            Gender split
           </Label>
           <Input
             id="audienceGenderSplit"
@@ -79,7 +79,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="audienceMaritalStatus">
-          Marital status <span className="text-red-500">*</span>
+          Marital status
         </Label>
         <Input
           id="audienceMaritalStatus"
@@ -93,7 +93,7 @@ export function StepAudienceDemographics({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="currentChannels">
-          How does your audience currently find you? <span className="text-red-500">*</span>
+          How does your audience currently find you?
         </Label>
         <Textarea
           id="currentChannels"

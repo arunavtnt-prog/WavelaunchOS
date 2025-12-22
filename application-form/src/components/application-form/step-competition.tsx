@@ -16,7 +16,7 @@ export function StepCompetition({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="differentiation">
-          How do you plan to differentiate your venture? <span className="text-red-500">*</span>
+          How do you plan to differentiate your venture?
         </Label>
         <Textarea
           id="differentiation"
@@ -32,7 +32,7 @@ export function StepCompetition({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="uniqueValueProps">
-          Your unique value propositions (USPs) <span className="text-red-500">*</span>
+          Your unique value propositions (USPs)
         </Label>
         <Textarea
           id="uniqueValueProps"
@@ -51,7 +51,7 @@ export function StepCompetition({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="emergingCompetitors">
-          Emerging/disruptive competitors you monitor <span className="text-red-500">*</span>
+          Emerging/disruptive competitors you monitor
         </Label>
         <Textarea
           id="emergingCompetitors"

@@ -16,7 +16,7 @@ export function StepCareerBackground({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="professionalMilestones">
-          Professional milestones <span className="text-red-500">*</span>
+          Professional milestones
         </Label>
         <Textarea
           id="professionalMilestones"
@@ -32,7 +32,7 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="personalTurningPoints">
-          Personal turning points <span className="text-red-500">*</span>
+          Personal turning points
         </Label>
         <Textarea
           id="personalTurningPoints"
@@ -48,7 +48,7 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="visionForVenture">
-          Vision for this venture <span className="text-red-500">*</span>
+          Vision for this venture
         </Label>
         <Textarea
           id="visionForVenture"
@@ -64,7 +64,7 @@ export function StepCareerBackground({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="hopeToAchieve">
-          Definition of success <span className="text-red-500">*</span>
+          Definition of success
         </Label>
         <Textarea
           id="hopeToAchieve"

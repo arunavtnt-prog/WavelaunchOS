@@ -23,7 +23,6 @@ import { StepProductDirection } from '@/components/application-form/step-product
 import { StepBusinessGoals } from '@/components/application-form/step-business-goals'
 import { StepLogistics } from '@/components/application-form/step-logistics'
 
-import { ModeToggle } from '@/components/mode-toggle'
 import { DotScreenShader } from '@/components/ui/dot-shader-background'
 
 export default function ApplicationPage() {
@@ -115,39 +114,6 @@ export default function ApplicationPage() {
       {/* Dot Shader Background */}
       <DotScreenShader />
 
-      {/* Editorial Progress Rail */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl mb-8 flex items-center justify-between opacity-80 hover:opacity-100 transition-opacity"
-      >
-        <h1 className="font-serif text-[48px] text-foreground tracking-tight leading-none">
-          Wavelaunch Studio
-        </h1>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground hidden sm:flex">
-            <span className="tracking-widest uppercase opacity-40">0{currentStep + 1} / 0{FORM_STEPS.length}</span>
-            <div className="flex gap-1.5">
-              {FORM_STEPS.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-1 h-1 rounded-full transition-all duration-500 ${i <= currentStep ? 'bg-foreground/80' : 'bg-foreground/10'}`}
-                />
-              ))}
-            </div>
-          </div>
-          <ModeToggle />
-        </div>
-      </motion.div>
-
-      {/* Sleek Divider */}
-      <motion.div
-        initial={{ scaleX: 0, opacity: 0 }}
-        animate={{ scaleX: 1, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8, ease: "circOut" }}
-        className="w-full max-w-2xl h-px bg-black/50 dark:bg-zinc-800/50 mb-16"
-      />
-
       {/* Main Form Panel */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -158,37 +124,82 @@ export default function ApplicationPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="w-full max-w-2xl"
         >
-          <div className="mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4 leading-tight">{currentStepData.title}</h2>
-            {currentStepData.description && (
-              <p className="text-muted-foreground text-lg leading-relaxed max-w-lg font-light">{currentStepData.description}</p>
-            )}
-          </div>
-
-          <div className="relative">
-            <form className="space-y-12">
-              {renderStep()}
-
-              <div className="flex justify-between items-center pt-16 mt-8">
-                <Button
-                  type="button"
-                  onClick={handleBack}
-                  disabled={currentStep === 0}
-                  className={`bg-white dark:bg-neutral-900 text-foreground border border-input z-10 hover:bg-accent hover:text-accent-foreground px-6 py-6 text-sm font-medium rounded transition-all shadow-sm ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+          {/* Form Container */}
+          <div className="bg-gradient-to-b from-[#0E0E0E]/5 to-[#0E0E0E]/6 border border-white/4 rounded-2xl p-12 md:p-14 backdrop-blur-sm">
+            {/* Brand and Progress in header */}
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="font-[HelveticaNeue-Medium] font-normal text-[22px] text-white/50 tracking-normal leading-none">
+                Wavelaunch Studio<span className="text-[16px] align-super">+</span>
+              </h1>
+              
+              {/* Progress indicator inside card */}
+              <div className="flex items-center gap-8 hidden sm:flex">
+                {/* Editorial Progress Line */}
+                <div className="relative w-32 h-px bg-white/10">
+                  <motion.div 
+                    className="absolute top-0 left-0 h-px bg-gradient-to-r from-white/40 via-white/70 to-white/40"
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${((currentStep + 1) / FORM_STEPS.length) * 100}%` }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                  {/* Decorative endpoint */}
+                  <motion.div 
+                    className="absolute top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/60"
+                    initial={{ left: "0%" }}
+                    animate={{ left: `${((currentStep + 1) / FORM_STEPS.length) * 100}%` }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                    style={{ marginLeft: "-3px" }}
+                  />
+                </div>
+                
+                {/* Serif Numerals */}
+                <motion.div 
+                  className="font-serif text-[15px] tracking-[0.05em] text-white/60 font-light"
+                  key={currentStep}
+                  initial={{ opacity: 0.4, y: 2 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
                 >
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Back
-                </Button>
-
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  className="bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-sm font-medium tracking-wide rounded transition-all shadow-none hover:shadow-lg active:scale-[0.98]"
-                >
-                  {currentStep === FORM_STEPS.length - 1 ? "Complete Application" : "Continue"}
-                </Button>
+                  {String(currentStep + 1).padStart(2, '0')} / {String(FORM_STEPS.length).padStart(2, '0')}
+                </motion.div>
               </div>
-            </form>
+            </div>
+            
+            {/* Brand Divider */}
+            <div className="mb-8 h-px bg-white/6"></div>
+            
+            <div className="mb-8">
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4 leading-tight">{currentStepData.title}</h2>
+              {currentStepData.description && (
+                <p className="text-muted-foreground text-lg leading-relaxed max-w-lg font-light">{currentStepData.description}</p>
+              )}
+            </div>
+
+            <div className="relative">
+              <form className="space-y-12">
+                {renderStep()}
+
+                <div className="flex justify-between items-center pt-16 mt-8">
+                  <Button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={currentStep === 0}
+                    className={`bg-white dark:bg-neutral-900 text-foreground border border-input z-10 hover:bg-accent hover:text-accent-foreground px-6 py-6 text-sm font-medium rounded transition-all shadow-sm ${currentStep === 0 ? 'opacity-0 pointer-events-none' : ''}`}
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-sm font-medium tracking-wide rounded transition-all shadow-none hover:shadow-lg active:scale-[0.98]"
+                  >
+                    {currentStep === FORM_STEPS.length - 1 ? "Complete Application" : "Continue"}
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         </motion.div>
       </AnimatePresence>

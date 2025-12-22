@@ -6,49 +6,49 @@ export const applicationSchema = z.object({
   email: z.string().email('Invalid email address'),
   instagramHandle: z.string().optional(),
   tiktokHandle: z.string().optional(),
-  country: z.string().min(2, 'Please select a country'),
-  industryNiche: z.string().min(2, 'Please enter your industry/niche'),
-  age: z.number().min(18, 'You must be at least 18 years old').max(100, 'Invalid age'),
+  country: z.string().optional(),
+  industryNiche: z.string().optional(),
+  age: z.number().optional(),
 
   // Career Background
-  professionalMilestones: z.string().min(10, 'Please provide more details (at least 10 characters)'),
-  personalTurningPoints: z.string().min(10, 'Please provide more details (at least 10 characters)'),
-  visionForVenture: z.string().min(10, 'Please provide more details (at least 10 characters)'),
-  hopeToAchieve: z.string().min(10, 'Please provide more details (at least 10 characters)'),
+  professionalMilestones: z.string().optional(),
+  personalTurningPoints: z.string().optional(),
+  visionForVenture: z.string().optional(),
+  hopeToAchieve: z.string().optional(),
 
   // Audience & Demographics
-  targetAudience: z.string().min(10, 'Please describe your target audience'),
-  demographicProfile: z.string().min(10, 'Please describe demographic profile'),
-  targetDemographicAge: z.string().min(1, 'Please specify age range'),
-  audienceGenderSplit: z.string().min(1, 'Please specify gender split'),
-  audienceMaritalStatus: z.string().min(1, 'Please specify marital status'),
-  currentChannels: z.string().min(10, 'Please describe how your audience finds you'),
+  targetAudience: z.string().optional(),
+  demographicProfile: z.string().optional(),
+  targetDemographicAge: z.string().optional(),
+  audienceGenderSplit: z.string().optional(),
+  audienceMaritalStatus: z.string().optional(),
+  currentChannels: z.string().optional(),
 
   // Audience Pain Points & Needs
-  keyPainPoints: z.string().min(10, 'Please describe key pain points'),
-  brandValues: z.string().min(10, 'Please describe brand values'),
+  keyPainPoints: z.string().optional(),
+  brandValues: z.string().optional(),
 
   // Competition & Market Understanding
-  differentiation: z.string().min(10, 'Please describe how you plan to differentiate'),
-  uniqueValueProps: z.string().min(10, 'Please describe your unique value propositions'),
-  emergingCompetitors: z.string().min(5, 'Please list competitors you monitor'),
+  differentiation: z.string().optional(),
+  uniqueValueProps: z.string().optional(),
+  emergingCompetitors: z.string().optional(),
 
   // Brand Identity Preferences
-  idealBrandImage: z.string().min(10, 'Please describe your ideal brand image'),
-  inspirationBrands: z.string().min(5, 'Please list influencers/brands you admire'),
-  brandingAesthetics: z.string().min(10, 'Please describe branding aesthetics'),
-  emotionsBrandEvokes: z.string().min(5, 'Please list emotions/adjectives'),
-  brandPersonality: z.string().min(3, 'Please select brand personality'),
-  preferredFont: z.string().min(2, 'Please select a font preference'),
+  idealBrandImage: z.string().optional(),
+  inspirationBrands: z.string().optional(),
+  brandingAesthetics: z.string().optional(),
+  emotionsBrandEvokes: z.string().optional(),
+  brandPersonality: z.string().optional(),
+  preferredFont: z.string().optional(),
 
   // Product Direction
-  productCategories: z.array(z.string()).min(1, 'Please select at least one product category'),
+  productCategories: z.array(z.string()).optional(),
   otherProductIdeas: z.string().optional(),
 
   // Business Goals
-  scalingGoals: z.string().min(10, 'Please describe your scaling goals'),
-  growthStrategies: z.string().min(10, 'Please describe growth strategies'),
-  longTermVision: z.string().min(10, 'Please describe your long-term vision'),
+  scalingGoals: z.string().optional(),
+  growthStrategies: z.string().optional(),
+  longTermVision: z.string().optional(),
   specificDeadlines: z.string().optional(),
   additionalInfo: z.string().optional(),
 

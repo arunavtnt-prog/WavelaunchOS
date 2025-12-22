@@ -64,7 +64,7 @@ export function StepProductDirection({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label>
-          Product categories you're interested in <span className="text-red-500">*</span>
+          Product categories you're interested in
         </Label>
         <div className="grid md:grid-cols-2 gap-4 mt-3">
           {PRODUCT_CATEGORIES.map((category) => (

@@ -16,7 +16,7 @@ export function StepBusinessGoals({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="scalingGoals">
-          Personal goals for scaling <span className="text-red-500">*</span>
+          Personal goals for scaling
         </Label>
         <Textarea
           id="scalingGoals"
@@ -32,7 +32,7 @@ export function StepBusinessGoals({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="growthStrategies">
-          Strategies/channels you want to explore <span className="text-red-500">*</span>
+          Strategies/channels you want to explore
         </Label>
         <Textarea
           id="growthStrategies"
@@ -51,7 +51,7 @@ export function StepBusinessGoals({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="longTermVision">
-          Long-term vision for your brand <span className="text-red-500">*</span>
+          Long-term vision for your brand
         </Label>
         <Textarea
           id="longTermVision"

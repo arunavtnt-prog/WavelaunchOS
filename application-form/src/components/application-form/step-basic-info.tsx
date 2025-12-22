@@ -19,7 +19,7 @@ export function StepBasicInfo({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="fullName">
-            Full Name <span className="text-red-500">*</span>
+            Full Name <span className="text-[10px] text-white/40 ml-1">*</span>
           </Label>
           <Input
             id="fullName"
@@ -33,7 +33,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
         <div className="space-y-2">
           <Label htmlFor="email">
-            Email <span className="text-red-500">*</span>
+            Email <span className="text-[10px] text-white/40 ml-1">*</span>
           </Label>
           <Input
             id="email"
@@ -88,7 +88,7 @@ export function StepBasicInfo({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="country">
-            Country <span className="text-red-500">*</span>
+            Country
           </Label>
           <Select
             value={watch('country')}
@@ -112,7 +112,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
         <div className="space-y-2">
           <Label htmlFor="age">
-            Age <span className="text-red-500">*</span>
+            Age
           </Label>
           <Input
             id="age"
@@ -130,7 +130,7 @@ export function StepBasicInfo({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="industryNiche">
-          Industry/Niche <span className="text-red-500">*</span>
+          Industry/Niche
         </Label>
         <Input
           id="industryNiche"

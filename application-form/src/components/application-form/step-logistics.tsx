@@ -129,7 +129,7 @@ export function StepLogistics({ form, zipFile, setZipFile }: StepProps) {
               htmlFor="termsAccepted"
               className="text-sm font-medium leading-relaxed cursor-pointer"
             >
-              I accept the terms and privacy policy <span className="text-red-500">*</span>
+              I accept the terms and privacy policy
             </Label>
             <p className="text-sm text-slate-500">
               By submitting this application, I agree to Wavelaunch Studio's{' '}

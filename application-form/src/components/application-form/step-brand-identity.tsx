@@ -18,7 +18,7 @@ export function StepBrandIdentity({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="idealBrandImage">
-          Ideal brand image <span className="text-red-500">*</span>
+          Ideal brand image
         </Label>
         <Textarea
           id="idealBrandImage"
@@ -34,7 +34,7 @@ export function StepBrandIdentity({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="inspirationBrands">
-          Influencers or brands you admire <span className="text-red-500">*</span>
+          Influencers or brands you admire
         </Label>
         <Textarea
           id="inspirationBrands"
@@ -50,7 +50,7 @@ export function StepBrandIdentity({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="brandingAesthetics">
-          Branding aesthetics / visual identity / tone of voice <span className="text-red-500">*</span>
+          Branding aesthetics / visual identity / tone of voice
         </Label>
         <Textarea
           id="brandingAesthetics"
@@ -66,7 +66,7 @@ export function StepBrandIdentity({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="emotionsBrandEvokes">
-          Emotions or adjectives your brand should evoke <span className="text-red-500">*</span>
+          Emotions or adjectives your brand should evoke
         </Label>
         <Textarea
           id="emotionsBrandEvokes"
@@ -83,7 +83,7 @@ export function StepBrandIdentity({ form }: StepProps) {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="brandPersonality">
-            Brand personality <span className="text-red-500">*</span>
+            Brand personality
           </Label>
           <Select
             value={watch('brandPersonality')}
@@ -107,7 +107,7 @@ export function StepBrandIdentity({ form }: StepProps) {
 
         <div className="space-y-2">
           <Label htmlFor="preferredFont">
-            Font preference <span className="text-red-500">*</span>
+            Font preference
           </Label>
           <Select
             value={watch('preferredFont')}

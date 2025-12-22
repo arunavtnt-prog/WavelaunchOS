@@ -16,7 +16,7 @@ export function StepPainPoints({ form }: StepProps) {
     <div className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="keyPainPoints">
-          Key needs and pain points you want to address <span className="text-red-500">*</span>
+          Key needs and pain points you want to address
         </Label>
         <Textarea
           id="keyPainPoints"
@@ -35,7 +35,7 @@ export function StepPainPoints({ form }: StepProps) {
 
       <div className="space-y-2">
         <Label htmlFor="brandValues">
-          Values or principles your brand must embody <span className="text-red-500">*</span>
+          Values or principles your brand must embody
         </Label>
         <Textarea
           id="brandValues"
