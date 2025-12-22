@@ -20,6 +20,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Wavelaunch Studio",
   description: "D2C Accelerator Application",
+  icons: {
+    icon: "/favicon.jpg",
+    shortcut: "/favicon.jpg",
+    apple: "/favicon.jpg",
+  },
 };
 
 import { ThemeProvider } from "@/components/theme-provider"
