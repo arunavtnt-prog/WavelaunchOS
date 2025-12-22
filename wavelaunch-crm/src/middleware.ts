@@ -22,13 +22,27 @@ export async function middleware(request: NextRequest) {
   // Check if user is authenticated
   const token = await getToken({ 
     req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === 'production'
   })
+  
+  // Debug logging (remove in production)
+  console.log('Middleware - Path:', pathname)
+  console.log('Middleware - Token exists:', !!token)
+  console.log('Middleware - IsPublicPath:', isPublicPath)
   
   if (!token && !isPublicPath) {
     // Redirect to login if not authenticated and not on public path
+    console.log('Middleware - Redirecting to login')
     const loginUrl = new URL('/login', request.url)
     return NextResponse.redirect(loginUrl)
+  }
+
+  // Additional check: if user is authenticated but trying to access portal routes, redirect to admin dashboard
+  if (token && pathname.startsWith('/portal/')) {
+    console.log('Middleware - Authenticated user accessing portal, redirecting to admin dashboard')
+    const dashboardUrl = new URL('/dashboard', request.url)
+    return NextResponse.redirect(dashboardUrl)
   }
 
   return NextResponse.next()

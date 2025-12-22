@@ -41,6 +41,7 @@ export const authConfig: NextAuthConfig = {
             role: user.role,
           }
         } catch (error) {
+          console.error('Auth error:', error)
           return null
         }
       },
@@ -49,6 +50,7 @@ export const authConfig: NextAuthConfig = {
   basePath: '/api/auth',
   pages: {
     signIn: '/login',
+    error: '/login',
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -64,6 +66,13 @@ export const authConfig: NextAuthConfig = {
         session.user.role = token.role as Role
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
   },
   session: {
