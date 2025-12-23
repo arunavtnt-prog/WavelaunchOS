@@ -30,9 +30,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Handle portal routes (they have their own token-based auth system)
+  // Handle portal routes
   if (pathname.startsWith('/portal/')) {
-    // We still allow access to the portal routes here; they must handle their own session/token checks
+    const portalPublicPaths = ['/portal/login', '/portal/forgot-password', '/portal/reset-password', '/portal/invite/']
+    const isPortalPublic = portalPublicPaths.some(p => pathname.startsWith(p))
+
+    if (isPortalPublic) {
+      return NextResponse.next()
+    }
+
+    // Protection for other portal routes is handled within the app (layout/pages)
+    // as it uses a separate session system (portal-token cookie)
     return NextResponse.next()
   }
 

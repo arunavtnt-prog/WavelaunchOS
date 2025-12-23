@@ -7,21 +7,13 @@ export default async function PortalLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Check if this is a public portal page
-  const publicPages = ['/portal/login', '/portal/forgot-password', '/portal/reset-password']
-
-  // For public pages, render without auth check
-  // This is a simplified check - in production, you'd use middleware
-  const isPublicPage = false // Will be determined by middleware
-
   // Get session
   const session = await getPortalSession()
 
-  // If no session and not a public page, redirect to login
-  if (!session && !isPublicPage) {
-    // This layout won't apply to login pages due to their own layout
-    redirect('/portal/login')
-  }
+  // Protection logic:
+  // Instead of a global redirect here which can cause loops,
+  // we let the middleware or individual pages handle redirections.
+
 
   // Get user data if we have a session
   let userData = null
