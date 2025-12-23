@@ -27,9 +27,12 @@ export default function ApplyIntroPage() {
           </div>
 
           {/* Heading */}
-          <h1 className="font-sans font-medium text-[52px] leading-[55px] text-white mb-8 whitespace-nowrap" style={{ fontFamily: '"Inter Display", "Inter Display Placeholder", sans-serif' }}>
-            Apply to Wavelaunch Studio.
-          </h1>
+          <div className="mb-8 overflow-visible">
+            <h1 className="font-sans font-medium text-[30px] leading-tight text-white whitespace-nowrap" style={{ fontFamily: '"Inter Display", "Inter Display Placeholder", sans-serif' }}>
+              Apply to Wavelaunch Studio.
+            </h1>
+            <div className="h-px w-full bg-white opacity-30 mt-4" />
+          </div>
 
           {/* Subtitle */}
           <p className="text-zinc-400 mb-6">
