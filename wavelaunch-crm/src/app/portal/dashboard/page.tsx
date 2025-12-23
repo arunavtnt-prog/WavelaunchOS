@@ -82,12 +82,12 @@ export default async function PortalDashboardPage() {
   const dashboardContent = (
     <div className="container mx-auto p-6 space-y-6">
       {/* Welcome Section */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
+      <div className="space-y-4">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground flex items-center gap-3">
           Welcome back, {client.fullName}!
-          {portalUser.completedOnboarding && <Sparkles className="h-6 w-6 text-yellow-500" />}
+          {portalUser.completedOnboarding && <Sparkles className="h-8 w-8 text-yellow-500 animate-pulse" />}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-xl text-muted-foreground max-w-2xl">
           Here's an overview of your journey with Wavelaunch
         </p>
       </div>
