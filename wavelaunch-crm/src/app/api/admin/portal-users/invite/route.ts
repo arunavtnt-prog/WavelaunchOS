@@ -102,7 +102,9 @@ export async function POST(request: NextRequest) {
     })
 
     // Construct invite URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://login.wavelaunch.org'
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? 'https://login.wavelaunch.org'
+      : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
     const inviteUrl = `${baseUrl}/portal/invite/${inviteToken}`
 
     return NextResponse.json({
@@ -187,7 +189,9 @@ export async function PATCH(request: NextRequest) {
     })
 
     // Construct invite URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://login.wavelaunch.org'
+    const baseUrl = process.env.NODE_ENV === 'production'
+      ? 'https://login.wavelaunch.org'
+      : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
     const inviteUrl = `${baseUrl}/portal/invite/${inviteToken}`
 
     return NextResponse.json({

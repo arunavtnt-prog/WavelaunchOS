@@ -25,7 +25,11 @@ export async function middleware(request: NextRequest) {
 
   // Skip authentication for allowed public API routes
   const publicApiPaths = ['/api/health']
-  const isPublicApi = publicApiPaths.includes(pathname) || pathname.startsWith('/api/auth/') || pathname === '/api/applications'
+  const isPublicApi =
+    publicApiPaths.includes(pathname) ||
+    pathname.startsWith('/api/auth/') ||
+    pathname === '/api/applications' ||
+    pathname.startsWith('/api/portal/invite/')
   if (isPublicApi) {
     return NextResponse.next()
   }
