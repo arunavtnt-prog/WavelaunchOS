@@ -184,6 +184,8 @@ export async function GET(request: NextRequest) {
           invitedAt: portalUser.invitedAt,
           activatedAt: portalUser.activatedAt,
           lastLoginAt: portalUser.lastLoginAt,
+          inviteToken: portalUser.inviteToken,
+          inviteTokenExpiry: portalUser.inviteTokenExpiry,
           client: portalUser.client,
           preferences: {
             notifyNewDeliverable: portalUser.notifyNewDeliverable,
