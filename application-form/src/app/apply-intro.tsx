@@ -23,7 +23,7 @@ export default function ApplyIntroPage() {
           <div className="mb-8 overflow-visible">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
-              <h1 className="text-[30px] leading-tight text-white whitespace-nowrap" style={{ fontFamily: 'HelveticaNeue-Medium, "Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 400 }}>
+              <h1 className="text-[26px] leading-tight text-white whitespace-nowrap" style={{ fontFamily: 'HelveticaNeue-Medium, "Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 400 }}>
                 Apply to Wavelaunch Studio
               </h1>
             </div>
