@@ -79,7 +79,7 @@ export default function ApplyIntroPage() {
       {/* Right Panel - Hero Image */}
       <div className="w-full lg:w-1/2 h-[40vh] lg:h-auto lg:min-h-screen relative overflow-hidden">
         <Image
-          src="/apply-hero.png"
+          src="/bg-apply.png"
           alt="Creator"
           fill
           className="object-cover"
