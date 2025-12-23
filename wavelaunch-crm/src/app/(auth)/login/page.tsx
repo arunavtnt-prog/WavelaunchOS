@@ -21,7 +21,7 @@ export default function LoginPage() {
       </div>
       <div className="relative block bg-gray-100 min-h-screen">
         <img
-          src="/bg-apply.png"
+          src="/bg-login.png"
           alt="WavelaunchOS Background"
           className="absolute inset-0 h-full w-full object-cover"
         />
