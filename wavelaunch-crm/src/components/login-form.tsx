@@ -54,7 +54,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       <FieldGroup>
         <div className="flex flex-col items-start gap-1 text-left mb-6">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#f97316]" />
+            <div className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
             <h1
               className="font-bold"
               style={{
