@@ -7,7 +7,7 @@ import path from 'path'
 // CORS configuration
 const ALLOWED_ORIGINS = [
   'https://apply.wavelaunch.org',
-  'https://penguin-wavelaunch-os.vercel.app',
+  'https://login.wavelaunch.org',
   'http://localhost:3000',
   'http://localhost:3001',
 ]
@@ -41,9 +41,9 @@ async function pushToGoogleSheets(application: any) {
     // 1. Google Service Account credentials
     // 2. Google Sheets API enabled
     // 3. Sheet ID and authentication
-    
+
     console.log('Google Sheets integration placeholder - application ID:', application.id)
-    
+
     // Example implementation (when ready):
     // const { GoogleSpreadsheet } = require('google-spreadsheet')
     // const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID)
@@ -63,7 +63,7 @@ async function pushToGoogleSheets(application: any) {
     //   'Submitted At': new Date().toISOString(),
     //   ...other fields
     // })
-    
+
   } catch (error) {
     console.error('Google Sheets sync error:', error)
     // Don't throw - this is async and non-blocking
@@ -355,13 +355,13 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined
     })
-    
+
     // Return more detailed error in development
     const isDevelopment = process.env.NODE_ENV === 'development'
     return NextResponse.json(
-      { 
-        success: false, 
-        error: isDevelopment 
+      {
+        success: false,
+        error: isDevelopment
           ? `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`
           : 'Failed to submit application. Please try again.',
         ...(isDevelopment && { details: String(error) })

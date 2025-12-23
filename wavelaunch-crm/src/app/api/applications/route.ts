@@ -8,7 +8,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_CORS_ORIGINS
   ? process.env.ALLOWED_CORS_ORIGINS.split(',').map(s => s.trim())
   : [
     'https://apply.wavelaunch.org',
-    'https://penguin-wavelaunch-os.vercel.app',
+    'https://login.wavelaunch.org',
     'http://localhost:3000',
     'http://localhost:3001',
   ]

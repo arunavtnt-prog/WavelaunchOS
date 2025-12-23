@@ -43,11 +43,11 @@ export default function ReviewPage() {
     try {
       // Check if this is admin mode (from URL parameter or session)
       const urlParams = new URLSearchParams(window.location.search)
-      const isAdminMode = urlParams.get('mode') === 'admin' || 
-                        window.location.pathname.startsWith('/admin')
+      const isAdminMode = urlParams.get('mode') === 'admin' ||
+        window.location.pathname.startsWith('/admin')
 
       // Submit to working CRM for both public and admin
-      const response = await fetch(process.env.NEXT_PUBLIC_CRM_API_URL || 'https://penguin-wavelaunch-os.vercel.app/api/applications', {
+      const response = await fetch(process.env.NEXT_PUBLIC_CRM_API_URL || 'https://login.wavelaunch.org/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
