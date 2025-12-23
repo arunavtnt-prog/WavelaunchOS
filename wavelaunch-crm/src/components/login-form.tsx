@@ -107,8 +107,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         </Field>
         <FieldSeparator>Or go back to</FieldSeparator>
         <Field>
-          <Button variant="outline" type="button" className="w-full">
-            Wavelaunch Studio
+          <Button variant="outline" type="button" className="w-full" asChild>
+            <a href="https://studio.wavelaunch.org/">Wavelaunch Studio</a>
           </Button>
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}

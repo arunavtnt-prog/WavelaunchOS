@@ -5,13 +5,10 @@ export default function LoginPage() {
   return (
     <div className="grid h-screen lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium text-xl">
+        <div className="flex justify-center md:justify-start">
+          <a href="/" className="flex items-center gap-2 font-medium text-xl">
             Wavelaunch Studio⁺
           </a>
-          <div className="ml-auto">
-            <ThemeToggle />
-          </div>
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
@@ -23,7 +20,7 @@ export default function LoginPage() {
         <img
           src="/bg-login.png"
           alt="WavelaunchOS Background"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-contain"
         />
       </div>
     </div>
