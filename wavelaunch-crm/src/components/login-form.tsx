@@ -79,7 +79,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           <Input
             id="email"
             type="email"
-            placeholder="admin@wavelaunch.studio"
+            placeholder="user@wavelaunch.org"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -110,12 +110,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           <Button variant="outline" type="button" className="w-full" asChild>
             <a href="https://studio.wavelaunch.org/">Wavelaunch Studio</a>
           </Button>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
-            <a href="#" className="underline underline-offset-4">
-              Sign up
-            </a>
-          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>
