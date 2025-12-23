@@ -285,15 +285,20 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
   }
 
   const copyInviteLink = () => {
-    const link = inviteUrl || (portalUser?.inviteToken ? `${window.location.origin}/portal/invite/${portalUser.inviteToken}` : null)
-
-    if (link) {
-      navigator.clipboard.writeText(link)
+    if (!inviteUrl) {
       toast({
-        title: 'Copied',
-        description: 'Invite link copied to clipboard',
+        title: 'Invite link unavailable',
+        description: 'Please regenerate the link to copy it.',
+        variant: 'destructive',
       })
+      return
     }
+
+    navigator.clipboard.writeText(inviteUrl)
+    toast({
+      title: 'Copied',
+      description: 'Invite link copied to clipboard',
+    })
   }
 
   const isInviteExpired = () => {
@@ -477,7 +482,7 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
   if (portalUser && !portalUser.activatedAt) {
     const hasInviteToken = Boolean(portalUser.inviteToken)
     const expired = isInviteExpired()
-    const inviteLink = inviteUrl || (portalUser.inviteToken ? `${window.location.origin}/portal/invite/${portalUser.inviteToken}` : null)
+    const inviteLink = inviteUrl
 
     return (
       <Card>
@@ -582,6 +587,7 @@ export function PortalUserCard({ clientId, clientEmail, creatorName }: PortalUse
                 <Button
                   variant="outline"
                   onClick={copyInviteLink}
+                  disabled={!inviteLink}
                 >
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Invite Link
