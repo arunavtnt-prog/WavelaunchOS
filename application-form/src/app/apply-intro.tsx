@@ -18,13 +18,6 @@ export default function ApplyIntroPage() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="max-w-md mx-auto lg:mx-0 relative z-10"
         >
-          {/* Brand with orange accent */}
-          <div className="flex items-center gap-3 mb-14">
-            <span className="w-2 h-2 rounded-full bg-[#f97316]" />
-            <p className="text-xs tracking-[0.25em] uppercase font-medium text-white/90">
-              WAVELAUNCH STUDIO
-            </p>
-          </div>
 
           {/* Heading */}
           <div className="mb-8 overflow-visible">
