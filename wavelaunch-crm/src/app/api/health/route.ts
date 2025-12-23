@@ -13,13 +13,14 @@ export async function GET() {
       database: 'connected',
     })
   } catch (error) {
+    const isDevelopment = process.env.NODE_ENV === 'development'
     return NextResponse.json(
       {
         success: false,
         status: 'unhealthy',
         timestamp: new Date().toISOString(),
         database: 'disconnected',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        ...(isDevelopment && { error: error instanceof Error ? error.message : 'Unknown error' }),
       },
       { status: 500 }
     )

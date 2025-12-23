@@ -4,12 +4,15 @@ import { prisma } from '@/lib/db'
 import { z } from 'zod'
 
 // CORS configuration
-const ALLOWED_ORIGINS = [
-  'https://apply.wavelaunch.org',
-  'https://penguin-wavelaunch-os.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:3001',
-]
+const ALLOWED_ORIGINS = process.env.ALLOWED_CORS_ORIGINS
+  ? process.env.ALLOWED_CORS_ORIGINS.split(',').map(s => s.trim())
+  : [
+    'https://apply.wavelaunch.org',
+    'https://penguin-wavelaunch-os.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ]
+
 
 function getCorsHeaders(origin: string | null) {
   const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin)
@@ -239,7 +242,7 @@ export async function POST(request: NextRequest) {
         emotionsBrandEvokes: validatedData.emotionsBrandEvokes || null,
         brandPersonality: validatedData.brandPersonality,
         preferredFont: validatedData.preferredFont || null,
-        productCategories: Array.isArray(validatedData.productCategories) 
+        productCategories: Array.isArray(validatedData.productCategories)
           ? JSON.stringify(validatedData.productCategories)
           : '[]',
         otherProductIdeas: validatedData.otherProductIdeas || null,
@@ -274,13 +277,13 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined
     })
-    
+
     // Return more detailed error in development
     const isDevelopment = process.env.NODE_ENV === 'development'
     return NextResponse.json(
-      { 
-        success: false, 
-        error: isDevelopment 
+      {
+        success: false,
+        error: isDevelopment
           ? `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`
           : 'Failed to submit application. Please try again.',
         ...(isDevelopment && { details: String(error) })
