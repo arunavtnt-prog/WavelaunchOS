@@ -52,7 +52,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
   return (
     <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
       <FieldGroup>
-        <div className="flex flex-col items-center gap-1 text-center">
+        <div className="flex flex-col items-start gap-1 text-left mb-6">
           <h1
             className="font-bold"
             style={{
@@ -63,7 +63,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           >
             WavelaunchOS
           </h1>
-          <p className="text-muted-foreground text-sm text-balance">Access your workspace</p>
+          <p className="text-muted-foreground text-sm">Access your workspace</p>
+          <div className="h-px w-full bg-foreground opacity-30 mt-4" />
         </div>
         {error && (
           <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive text-center">
@@ -72,13 +73,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
         )}
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input 
-            id="email" 
-            type="email" 
-            placeholder="admin@wavelaunch.studio" 
+          <Input
+            id="email"
+            type="email"
+            placeholder="admin@wavelaunch.studio"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required 
+            required
             disabled={loading}
           />
         </Field>
@@ -86,13 +87,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
           </div>
-          <Input 
-            id="password" 
-            type="password" 
+          <Input
+            id="password"
+            type="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required 
+            required
             disabled={loading}
           />
         </Field>
