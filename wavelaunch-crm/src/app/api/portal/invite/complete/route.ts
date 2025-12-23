@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors[0].message,
+          error: (validation.error as any).errors[0].message,
         },
         { status: 400 }
       )
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if client data is already populated (e.g., from an application)
+    // If it is, we can skip onboarding
+    const shouldSkipOnboarding = !!portalUser.client.industryNiche
+
     // Hash password with 12 rounds (consistent with portal-auth)
     const passwordHash = await bcrypt.hash(password, 12)
 
@@ -94,6 +98,8 @@ export async function POST(request: NextRequest) {
           emailVerified: true, // Auto-verify since they came from invite
           inviteToken: null, // Clear token so it can't be reused
           inviteTokenExpiry: null,
+          completedOnboarding: shouldSkipOnboarding,
+          onboardingCompletedAt: shouldSkipOnboarding ? new Date() : null,
         },
       })
 
@@ -102,7 +108,7 @@ export async function POST(request: NextRequest) {
         data: {
           clientId: portalUser.clientId,
           type: 'CLIENT_CREATED',
-          description: `Client activated portal account: ${portalUser.email}`,
+          description: `Client activated portal account: ${portalUser.email}${shouldSkipOnboarding ? ' (Onboarding skipped - data pre-filled)' : ''}`,
         },
       })
 
@@ -121,9 +127,10 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Account activated successfully',
       data: {
-        redirectTo: '/portal/onboarding', // Redirect to onboarding
+        redirectTo: shouldSkipOnboarding ? '/portal/dashboard' : '/portal/onboarding',
       },
     })
+
 
     // Set session cookie
     response.cookies.set('portal-session', sessionToken, {

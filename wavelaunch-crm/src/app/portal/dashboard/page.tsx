@@ -33,6 +33,8 @@ export default async function PortalDashboardPage() {
   const client = portalUser.client
 
   // Check if should show first-time welcome
+  // We show it if they HAVE completed onboarding (either via form or skip)
+  // and the client-side component (FirstTimeWelcome) handles the one-time display via localStorage.
   const showWelcome = portalUser.completedOnboarding === true
 
   // Get client's deliverables
@@ -103,7 +105,7 @@ export default async function PortalDashboardPage() {
                   Your Business Plan is Being Created
                 </CardTitle>
                 <CardDescription>
-                  Our team is reviewing your onboarding information
+                  Our team is crafting your plan based on your business profile
                 </CardDescription>
               </div>
             </div>
@@ -113,7 +115,7 @@ export default async function PortalDashboardPage() {
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div className="flex-1 space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Based on the comprehensive information you provided during onboarding, our team is crafting a personalized business plan tailored specifically to {client.fullName || 'your brand'}.
+                  Based on the comprehensive information in your profile, our team is crafting a personalized business plan tailored specifically to {client.fullName || 'your brand'}.
                 </p>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -170,8 +172,8 @@ export default async function PortalDashboardPage() {
                     latestBusinessPlan.status === 'APPROVED'
                       ? 'default'
                       : latestBusinessPlan.status === 'DELIVERED'
-                      ? 'secondary'
-                      : 'outline'
+                        ? 'secondary'
+                        : 'outline'
                   }
                 >
                   {latestBusinessPlan.status}
@@ -208,9 +210,9 @@ export default async function PortalDashboardPage() {
             <div className="text-2xl font-bold">
               {client.onboardedAt
                 ? new Date(client.onboardedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })
+                  month: 'short',
+                  year: 'numeric',
+                })
                 : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">Onboarding date</p>
@@ -252,8 +254,8 @@ export default async function PortalDashboardPage() {
                       item.status === 'DELIVERED' || item.status === 'APPROVED'
                         ? 'default'
                         : item.status === 'IN_PROGRESS'
-                        ? 'secondary'
-                        : 'outline'
+                          ? 'secondary'
+                          : 'outline'
                     }
                     className="text-xs"
                   >
