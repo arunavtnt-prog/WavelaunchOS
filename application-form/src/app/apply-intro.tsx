@@ -21,9 +21,12 @@ export default function ApplyIntroPage() {
 
           {/* Heading */}
           <div className="mb-8 overflow-visible">
-            <h1 className="font-sans font-medium text-[30px] leading-tight text-white whitespace-nowrap" style={{ fontFamily: '"Inter Display", "Inter Display Placeholder", sans-serif' }}>
-              Apply to Wavelaunch Studio.
-            </h1>
+            <div className="flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-[#f97316]" />
+              <h1 className="text-[30px] leading-tight text-white whitespace-nowrap" style={{ fontFamily: 'HelveticaNeue-Medium, "Helvetica Neue", Helvetica, Arial, sans-serif', fontWeight: 400 }}>
+                Apply to Wavelaunch Studio
+              </h1>
+            </div>
             <div className="h-px w-full bg-white opacity-30 mt-4" />
           </div>
 
