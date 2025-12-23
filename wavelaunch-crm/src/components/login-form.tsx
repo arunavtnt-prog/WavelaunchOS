@@ -53,20 +53,20 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-start gap-1 text-left mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-[#f97316] shrink-0" />
-            <h1
-              className="font-bold"
-              style={{
-                fontFamily: "HelveticaNeue-Medium, Helvetica Neue, Helvetica, Arial, sans-serif",
-                fontWeight: 400,
-                fontSize: "32px",
-              }}
-            >
-              WavelaunchOS
-            </h1>
+          <h1
+            className="font-bold"
+            style={{
+              fontFamily: "HelveticaNeue-Medium, Helvetica Neue, Helvetica, Arial, sans-serif",
+              fontWeight: 400,
+              fontSize: "32px",
+            }}
+          >
+            WavelaunchOS
+          </h1>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#f97316] shrink-0" />
+            <p className="text-muted-foreground text-sm">Access your workspace</p>
           </div>
-          <p className="text-muted-foreground text-sm">Access your workspace</p>
           <div className="h-px w-full bg-foreground opacity-30 mt-4" />
         </div>
         {error && (
