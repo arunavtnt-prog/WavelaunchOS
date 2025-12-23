@@ -16,7 +16,7 @@ export default function ApplyIntroPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="max-w-md mx-auto lg:mx-0 relative z-10"
+          className="max-w-md mx-auto relative z-10 w-full"
         >
 
           {/* Heading */}
@@ -82,6 +82,7 @@ export default function ApplyIntroPage() {
           alt="Creator"
           fill
           className="object-cover"
+          quality={100}
           priority
         />
         {/* Subtle edge gradient for seamless blend */}

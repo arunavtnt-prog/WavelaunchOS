@@ -20,7 +20,7 @@ export default function LoginPage() {
         <img
           src="/bg-login.png"
           alt="WavelaunchOS Background"
-          className="absolute inset-0 h-full w-full object-contain"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     </div>
