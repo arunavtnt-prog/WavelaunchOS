@@ -5,21 +5,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Users, 
-  Calendar, 
-  Mail, 
-  Globe, 
-  Instagram, 
-  Music, 
-  Target, 
+import {
+  Users,
+  Calendar,
+  Mail,
+  Globe,
+  Instagram,
+  Music,
+  Target,
   Lightbulb,
   CheckCircle,
   Clock,
   XCircle,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  Download
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface Application {
   id: string
@@ -78,6 +90,8 @@ export default function SubmissionsPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     fetchApplications()
@@ -106,7 +120,7 @@ export default function SubmissionsPage() {
         },
         body: JSON.stringify({ status, reviewNotes }),
       })
-      
+
       if (response.ok) {
         fetchApplications()
         if (selectedApplication?.id === applicationId) {
@@ -127,11 +141,11 @@ export default function SubmissionsPage() {
           'Content-Type': 'application/json',
         },
       })
-      
+
       console.log('Response status:', response.status)
       const data = await response.json()
       console.log('Response data:', data)
-      
+
       if (response.ok) {
         if (data.success) {
           // Update application status to show it's been converted
@@ -150,6 +164,53 @@ export default function SubmissionsPage() {
     } catch (error) {
       console.error('Failed to convert application to client:', error)
       alert('Failed to convert application to client. Check console for details.')
+    }
+  }
+
+  const deleteApplication = async (applicationId: string) => {
+    try {
+      setDeleting(true)
+      const response = await fetch(`/api/applications/${applicationId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSelectedApplication(null)
+        fetchApplications()
+        alert('Application deleted successfully')
+      } else {
+        alert(`Error: ${data.error || 'Failed to delete application'}`)
+      }
+    } catch (error) {
+      console.error('Failed to delete application:', error)
+      alert('Failed to delete application')
+    } finally {
+      setDeleting(false)
+      setDeleteDialogOpen(false)
+    }
+  }
+
+  const exportToCSV = async () => {
+    try {
+      const response = await fetch('/api/applications/export')
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `submissions-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      } else {
+        alert('Failed to export CSV')
+      }
+    } catch (error) {
+      console.error('Failed to export CSV:', error)
+      alert('Failed to export CSV')
     }
   }
 
@@ -179,7 +240,6 @@ export default function SubmissionsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">D26 Application Review</h1>
           <p className="text-muted-foreground">Loading applications...</p>
         </div>
       </div>
@@ -189,7 +249,6 @@ export default function SubmissionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">D26 Application Review</h1>
         <p className="text-muted-foreground">
           Cohort intake and evaluation
         </p>
@@ -199,9 +258,15 @@ export default function SubmissionsPage() {
         {/* Applications List */}
         <div className="lg:col-span-1">
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              <h2 className="text-lg font-semibold">Applications ({applications.length})</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                <h2 className="text-lg font-semibold">Applications ({applications.length})</h2>
+              </div>
+              <Button variant="outline" size="sm" onClick={exportToCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
             </div>
             <p className="text-sm text-muted-foreground">Click to review details</p>
             <div className="h-[600px] overflow-y-auto border rounded-lg bg-background">
@@ -209,9 +274,8 @@ export default function SubmissionsPage() {
                 {applications.map((application) => (
                   <div
                     key={application.id}
-                    className={`px-3 py-3 cursor-pointer transition-colors hover:bg-accent/30 ${
-                      selectedApplication?.id === application.id ? 'bg-accent/50 border-l-2 border-l-primary' : ''
-                    }`}
+                    className={`px-3 py-3 cursor-pointer transition-colors hover:bg-accent/30 ${selectedApplication?.id === application.id ? 'bg-accent/50 border-l-2 border-l-primary' : ''
+                      }`}
                     onClick={() => setSelectedApplication(application)}
                   >
                     <div className="flex flex-col space-y-2">
@@ -470,26 +534,26 @@ export default function SubmissionsPage() {
                   </TabsContent>
                 </Tabs>
 
-                        <hr className="my-4" />
+                <hr className="my-4" />
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   {selectedApplication.status === 'PENDING' && (
                     <>
-                      <Button 
+                      <Button
                         onClick={() => updateApplicationStatus(selectedApplication.id, 'REVIEWED')}
                         variant="outline"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Mark as Reviewed
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => updateApplicationStatus(selectedApplication.id, 'APPROVED')}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Approve
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => updateApplicationStatus(selectedApplication.id, 'REJECTED')}
                         variant="destructive"
                       >
@@ -500,13 +564,13 @@ export default function SubmissionsPage() {
                   )}
                   {selectedApplication.status === 'REVIEWED' && (
                     <>
-                      <Button 
+                      <Button
                         onClick={() => updateApplicationStatus(selectedApplication.id, 'APPROVED')}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Approve
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => updateApplicationStatus(selectedApplication.id, 'REJECTED')}
                         variant="destructive"
                       >
@@ -516,7 +580,7 @@ export default function SubmissionsPage() {
                     </>
                   )}
                   {selectedApplication.status === 'APPROVED' && (
-                    <Button 
+                    <Button
                       onClick={() => convertToClient(selectedApplication)}
                       className="bg-green-600 hover:bg-green-700"
                     >
@@ -524,19 +588,51 @@ export default function SubmissionsPage() {
                       Convert to Client
                     </Button>
                   )}
+                  {/* Delete button - always visible */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Application?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the application from {selectedApplication?.fullName}.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => selectedApplication && deleteApplication(selectedApplication.id)}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? 'Deleting...' : 'Delete Application'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           ) : (
-            <div className="bg-background border rounded-lg shadow-sm">
-              <div className="flex items-center justify-center h-[600px]">
-                <div className="text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-medium mb-2">No Application Selected</h3>
-                  <p className="text-sm">Select an application from the list to review details</p>
-                </div>
+          <div className="bg-background border rounded-lg shadow-sm">
+            <div className="flex items-center justify-center h-[600px]">
+              <div className="text-center text-muted-foreground">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="font-medium mb-2">No Application Selected</h3>
+                <p className="text-sm">Select an application from the list to review details</p>
               </div>
             </div>
+          </div>
           )}
         </div>
       </div>
