@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
-import { Search, Plus, Users, Archive, ChevronDown } from 'lucide-react'
+import { Search, Plus, Users, Archive, ChevronDown, Trash2 } from 'lucide-react'
 import type { Client } from '@prisma/client'
 
 export default function ClientsPage() {
@@ -38,6 +38,8 @@ export default function ClientsPage() {
   const [bulkStatus, setBulkStatus] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE')
   const [bulkArchiving, setBulkArchiving] = useState(false)
   const [bulkUpdating, setBulkUpdating] = useState(false)
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   useEffect(() => {
     fetchClients()
@@ -155,11 +157,54 @@ export default function ClientsPage() {
     }
   }
 
+  const handleBulkDelete = async () => {
+    try {
+      setBulkDeleting(true)
+      let successCount = 0
+      let errorCount = 0
+
+      for (const clientId of selectedClients) {
+        const res = await fetch(`/api/clients/${clientId}/delete`, {
+          method: 'POST',
+        })
+        const data = await res.json()
+        if (data.success) {
+          successCount++
+        } else {
+          errorCount++
+        }
+      }
+
+      if (successCount > 0) {
+        toast({
+          title: 'Clients deleted',
+          description: `${successCount} client(s) permanently deleted${errorCount > 0 ? `, ${errorCount} failed` : ''}`,
+        })
+        setSelectedClients(new Set())
+        fetchClients()
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to delete clients',
+          variant: 'destructive',
+        })
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete clients',
+        variant: 'destructive',
+      })
+    } finally {
+      setBulkDeleting(false)
+      setBulkDeleteDialogOpen(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Clients</h1>
           <p className="text-muted-foreground">
             {total}/100 clients
           </p>
@@ -245,6 +290,15 @@ export default function ClientsPage() {
                 <Archive className="mr-2 h-4 w-4" />
                 Archive Selected
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBulkDeleteDialogOpen(true)}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Permanently
+              </Button>
             </div>
           </div>
         </div>
@@ -287,9 +341,8 @@ export default function ClientsPage() {
           {clients.map((client) => (
             <div
               key={client.id}
-              className={`rounded-lg border bg-card p-6 transition-all ${
-                selectedClients.has(client.id) ? 'ring-2 ring-primary' : ''
-              }`}
+              className={`rounded-lg border bg-card p-6 transition-all ${selectedClients.has(client.id) ? 'ring-2 ring-primary' : ''
+                }`}
             >
               <div className="flex items-start gap-3">
                 <Checkbox
@@ -306,11 +359,10 @@ export default function ClientsPage() {
                         </h3>
                       </div>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs ${
-                          client.status === 'ACTIVE'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`rounded-full px-2 py-1 text-xs ${client.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {client.status}
                       </span>
@@ -366,6 +418,29 @@ export default function ClientsPage() {
             <AlertDialogCancel disabled={bulkUpdating}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkStatusUpdate} disabled={bulkUpdating}>
               {bulkUpdating ? 'Updating...' : 'Update Status'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Permanently Delete {selectedClients.size} Client(s)?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the selected clients and all their associated data
+              (business plans, deliverables, files, notes). This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {bulkDeleting ? 'Deleting...' : 'Delete Permanently'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

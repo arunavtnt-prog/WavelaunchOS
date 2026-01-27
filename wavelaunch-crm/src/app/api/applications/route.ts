@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
+import { emailService } from '@/lib/email/service'
 
 // CORS configuration
 const ALLOWED_ORIGINS = process.env.ALLOWED_CORS_ORIGINS
@@ -269,6 +270,35 @@ export async function POST(request: NextRequest) {
     })
 
     console.log(`New application submitted: ${application.id} - ${application.email}`)
+
+    // Send email notification to admin
+    try {
+      await emailService.send({
+        to: 'arunavtnt@gmail.com',
+        subject: `New Application Submission: ${application.fullName}`,
+        html: `
+          <h2>New Application Received</h2>
+          <p>A new application has been submitted to Wavelaunch Studio.</p>
+          <hr />
+          <h3>Applicant Details:</h3>
+          <ul>
+            <li><strong>Name:</strong> ${application.fullName}</li>
+            <li><strong>Email:</strong> ${application.email}</li>
+            <li><strong>Industry:</strong> ${application.industryNiche}</li>
+            <li><strong>Country:</strong> ${application.country}</li>
+            <li><strong>Instagram:</strong> ${application.instagramHandle || 'N/A'}</li>
+            <li><strong>TikTok:</strong> ${application.tiktokHandle || 'N/A'}</li>
+          </ul>
+          <hr />
+          <p>View the full application in the <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/submissions">Wavelaunch CRM</a>.</p>
+          <p><em>Submitted on: ${new Date().toLocaleString()}</em></p>
+        `,
+      })
+      console.log('Admin notification email sent successfully')
+    } catch (emailError) {
+      console.error('Failed to send admin notification email:', emailError)
+      // Don't fail the submission if email fails
+    }
 
     return NextResponse.json(
       {
