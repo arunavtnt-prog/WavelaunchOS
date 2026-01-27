@@ -38,6 +38,8 @@ export default function ReviewPage() {
   }
 
   const handleSubmit = async () => {
+    if (!formData) return
+
     setIsSubmitting(true)
 
     try {
@@ -45,6 +47,30 @@ export default function ReviewPage() {
       const urlParams = new URLSearchParams(window.location.search)
       const isAdminMode = urlParams.get('mode') === 'admin' ||
         window.location.pathname.startsWith('/admin')
+
+      // Upload file first if present
+      let fileMetadata = null
+      if (formData.zipFile) {
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', formData.zipFile)
+
+        const uploadResponse = await fetch(process.env.NEXT_PUBLIC_UPLOAD_API_URL || 'https://login.wavelaunch.org/api/upload', {
+          method: 'POST',
+          body: formDataUpload,
+        })
+
+        const uploadResult = await uploadResponse.json()
+
+        if (uploadResult.success) {
+          fileMetadata = {
+            zipFilePath: uploadResult.data.filepath,
+            zipFileName: uploadResult.data.filename,
+            zipFileSize: uploadResult.data.filesize,
+          }
+        } else {
+          throw new Error(uploadResult.error || 'File upload failed')
+        }
+      }
 
       // Submit to working CRM for both public and admin
       const response = await fetch(process.env.NEXT_PUBLIC_CRM_API_URL || 'https://login.wavelaunch.org/api/applications', {
@@ -55,6 +81,7 @@ export default function ReviewPage() {
         },
         body: JSON.stringify({
           ...formData,
+          ...fileMetadata,
           source: isAdminMode ? 'admin' : 'public',
           submittedAt: new Date().toISOString(),
         }),
@@ -86,7 +113,7 @@ export default function ReviewPage() {
     } catch (error) {
       toast({
         title: 'Submission Error',
-        description: 'An error occurred. Please try again.',
+        description: error instanceof Error ? error.message : 'An error occurred. Please try again.',
         variant: 'destructive',
       })
     } finally {

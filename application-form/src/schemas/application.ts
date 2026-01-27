@@ -56,6 +56,14 @@ export const applicationSchema = z.object({
   termsAccepted: z.boolean().refine(val => val === true, {
     message: 'You must accept the terms and privacy policy',
   }),
+
+  // File metadata (optional, populated after upload)
+  zipFilePath: z.string().optional(),
+  zipFileName: z.string().optional(),
+  zipFileSize: z.number().optional(),
+
+  // File object (for upload)
+  zipFile: z.any().optional(),
 })
 
 export type ApplicationFormData = z.infer<typeof applicationSchema>

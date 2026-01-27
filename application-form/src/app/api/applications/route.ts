@@ -62,6 +62,10 @@ export async function POST(request: NextRequest) {
         additionalInfo: data.additionalInfo || null,
         termsAccepted: data.termsAccepted,
         status: 'PENDING',
+        // File metadata
+        zipFilePath: data.zipFilePath || null,
+        zipFileName: data.zipFileName || null,
+        zipFileSize: data.zipFileSize || null,
       },
     })
 

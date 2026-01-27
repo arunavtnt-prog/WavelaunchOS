@@ -18,7 +18,8 @@ import {
   Clock,
   XCircle,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Download
 } from 'lucide-react'
 
 interface Application {
@@ -66,7 +67,9 @@ interface Application {
   specificDeadlines: string
   additionalInfo: string
   // File upload
-  zipFile?: string
+  zipFilePath?: string
+  zipFileName?: string
+  zipFileSize?: number
   // Status
   status: string
   createdAt: string
@@ -460,10 +463,22 @@ export default function SubmissionsPage() {
                         <h4 className="font-semibold text-base mb-3">Additional Information</h4>
                         <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.additionalInfo}</p>
                       </div>
-                      {selectedApplication.zipFile && (
+                      {selectedApplication.zipFilePath && (
                         <div>
                           <h4 className="font-semibold text-base mb-3">Submitted File</h4>
-                          <p className="text-sm leading-relaxed text-muted-foreground">{selectedApplication.zipFile}</p>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              onClick={() => window.open(`https://login.wavelaunch.org/api/files/${selectedApplication.id}`, '_blank')}
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download File
+                            </Button>
+                            <span className="text-sm text-muted-foreground">
+                              {selectedApplication.zipFileName} ({Math.round((selectedApplication.zipFileSize || 0) / 1024 / 1024)} MB)
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>
