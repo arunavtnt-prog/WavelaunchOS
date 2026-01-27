@@ -33,8 +33,7 @@ export async function POST(request: NextRequest) {
     // Generate a unique application ID for this upload
     const applicationId = randomUUID()
     
-    // For now - just return metadata without actually saving the file
-    // This tests if the API endpoint works
+    // For testing - just return metadata without saving file
     const timestamp = Date.now()
     const filename = `${timestamp}-${file.name}`
     const filepath = `data/applications/${applicationId}/${filename}`
