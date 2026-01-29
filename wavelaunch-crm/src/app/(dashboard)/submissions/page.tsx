@@ -20,7 +20,9 @@ import {
   Eye,
   ArrowRight,
   Trash2,
-  Download
+  Download,
+  Copy,
+  Check
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -92,6 +94,7 @@ export default function SubmissionsPage() {
   const [loading, setLoading] = useState(true)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     fetchApplications()
@@ -211,6 +214,55 @@ export default function SubmissionsPage() {
     } catch (error) {
       console.error('Failed to export CSV:', error)
       alert('Failed to export CSV')
+    }
+  }
+
+  const copyAnswers = async (application: Application) => {
+    const answers = [
+      application.fullName,
+      application.email,
+      application.instagramHandle || '',
+      application.tiktokHandle || '',
+      application.country,
+      application.industryNiche,
+      application.age.toString(),
+      application.professionalMilestones,
+      application.personalTurningPoints,
+      application.visionForVenture,
+      application.hopeToAchieve,
+      application.targetAudience,
+      application.demographicProfile,
+      application.targetDemographicAge,
+      application.audienceGenderSplit || '',
+      application.audienceMaritalStatus || '',
+      application.currentChannels,
+      application.keyPainPoints,
+      application.brandValues,
+      application.differentiation,
+      application.uniqueValueProps,
+      application.emergingCompetitors || '',
+      application.idealBrandImage,
+      application.inspirationBrands || '',
+      application.brandingAesthetics,
+      application.emotionsBrandEvokes || '',
+      application.brandPersonality,
+      application.preferredFont || '',
+      application.productCategories,
+      application.otherProductIdeas || '',
+      application.scalingGoals,
+      application.growthStrategies || '',
+      application.longTermVision,
+      application.specificDeadlines || '',
+      application.additionalInfo || ''
+    ].join('\n')
+
+    try {
+      await navigator.clipboard.writeText(answers)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      console.error('Failed to copy answers:', error)
+      alert('Failed to copy answers to clipboard')
     }
   }
 
@@ -589,6 +641,24 @@ export default function SubmissionsPage() {
                         Convert to Client
                       </Button>
                     )}
+                    {/* Copy Answers button - always visible */}
+                    <Button
+                      variant="outline"
+                      onClick={() => copyAnswers(selectedApplication)}
+                      className={copied ? 'text-green-600 border-green-600' : ''}
+                    >
+                      {copied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copy Answers
+                        </>
+                      )}
+                    </Button>
                     {/* Delete button - always visible */}
                     <Button
                       variant="outline"
