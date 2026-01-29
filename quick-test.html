@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick File Upload Test</title>
+</head>
+<body>
+    <h1>Quick File Upload Test</h1>
+    
+    <form id="testForm">
+        <h2>Step 1: Upload File</h2>
+        <input type="file" id="fileInput" accept=".zip" required>
+        <br><br>
+        
+        <h2>Step 2: Submit Application</h2>
+        <button type="button" onclick="testUpload()">Upload & Submit</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const result = document.getElementById('result');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a ZIP file');
+                return;
+            }
+            
+            try {
+                // Step 1: Upload file
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                result.innerHTML = 'Uploading file...';
+                const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const uploadResult = await uploadResponse.json();
+                
+                if (!uploadResult.success) {
+                    throw new Error(uploadResult.error);
+                }
+                
+                result.innerHTML = 'File uploaded! Submitting application...';
+                
+                // Step 2: Submit application with file metadata
+                const applicationData = {
+                    fullName: "Test User",
+                    email: `test-${Date.now()}@example.com`,
+                    country: "United States",
+                    industryNiche: "Technology",
+                    age: 25,
+                    professionalMilestones: "Test professional milestones",
+                    personalTurningPoints: "Test personal turning points",
+                    visionForVenture: "Test vision for venture",
+                    hopeToAchieve: "Test hope to achieve",
+                    targetAudience: "Test target audience",
+                    demographicProfile: "Test demographic profile",
+                    targetDemographicAge: "25-35",
+                    audienceGenderSplit: "50/50",
+                    currentChannels: "Test current channels",
+                    keyPainPoints: "Test key pain points",
+                    brandValues: "Test brand values",
+                    differentiation: "Test differentiation",
+                    uniqueValueProps: "Test unique value props",
+                    idealBrandImage: "Test ideal brand image",
+                    brandingAesthetics: "Test branding aesthetics",
+                    brandPersonality: "Test brand personality",
+                    productCategories: ["test1", "test2"],
+                    scalingGoals: "Test scaling goals",
+                    longTermVision: "Test long term vision",
+                    termsAccepted: true,
+                    // File metadata
+                    zipFilePath: uploadResult.data.filepath,
+                    zipFileName: uploadResult.data.filename,
+                    zipFileSize: uploadResult.data.filesize
+                };
+                
+                const submitResponse = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(applicationData)
+                });
+                
+                const submitResult = await submitResponse.json();
+                
+                if (submitResult.success) {
+                    result.innerHTML = `
+                        <h3>✅ Success!</h3>
+                        <p>File uploaded and application submitted.</p>
+                        <p>Application ID: ${submitResult.data.id}</p>
+                        <p>Check the admin dashboard to see the uploaded file.</p>
+                    `;
+                } else {
+                    throw new Error(submitResult.error);
+                }
+                
+            } catch (error) {
+                result.innerHTML = `<h3>❌ Error</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

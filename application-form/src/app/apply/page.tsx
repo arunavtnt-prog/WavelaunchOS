@@ -29,7 +29,6 @@ export default function ApplicationPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
-  const [zipFile, setZipFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<ApplicationFormData>({
@@ -102,7 +101,7 @@ export default function ApplicationPage() {
       case 5: return <StepBrandIdentity form={form} />
       case 6: return <StepProductDirection form={form} />
       case 7: return <StepBusinessGoals form={form} />
-      case 8: return <StepLogistics form={form} zipFile={zipFile} setZipFile={setZipFile} />
+      case 8: return <StepLogistics form={form} />
       default: return null
     }
   }

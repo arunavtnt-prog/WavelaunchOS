@@ -38,6 +38,8 @@ export default function ReviewPage() {
   }
 
   const handleSubmit = async () => {
+    if (!formData) return
+
     setIsSubmitting(true)
 
     try {
@@ -86,7 +88,7 @@ export default function ReviewPage() {
     } catch (error) {
       toast({
         title: 'Submission Error',
-        description: 'An error occurred. Please try again.',
+        description: error instanceof Error ? error.message : 'An error occurred. Please try again.',
         variant: 'destructive',
       })
     } finally {

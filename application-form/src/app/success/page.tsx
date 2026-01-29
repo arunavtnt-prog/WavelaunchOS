@@ -98,7 +98,7 @@ export default function SuccessPage() {
           >
             <Button
               size="lg"
-              onClick={() => window.open('/d26-overview.pdf', '_blank')}
+              onClick={() => window.open('https://studio.wavelaunch.org/documentation', '_blank')}
               className="bg-primary text-primary-foreground px-8 py-6 text-lg"
             >
               Download the D26 Overview

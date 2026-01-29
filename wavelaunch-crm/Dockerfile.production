@@ -12,12 +12,13 @@ RUN apt-get update && apt-get install -y \
     openssl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
+# Copy package files and prisma schema
 COPY package.json pnpm-lock.yaml ./
+COPY prisma ./prisma/
 
-# Install pnpm and dependencies
+# Install pnpm and dependencies (skip postinstall to avoid prisma generate before schema is available)
 RUN corepack enable pnpm && \
-    pnpm install --frozen-lockfile --prod=false
+    pnpm install --frozen-lockfile --prod=false --ignore-scripts
 
 # =================================================================
 # Stage 2: Builder

@@ -39,7 +39,8 @@ export async function OPTIONS(request: NextRequest) {
 // Validation schema for public application submission
 const applicationSchema = z.object({
   // Basic Information
-  name: z.string().min(1, 'Full name is required'),
+  fullName: z.string().min(1, 'Full name is required'),
+  name: z.string().optional(), // Alternative field name
   email: z.string().email('Invalid email format'),
   instagramHandle: z.string().optional().default(''),
   tiktokHandle: z.string().optional().default(''),
@@ -101,6 +102,11 @@ const applicationSchema = z.object({
     z.boolean(),
     z.string().transform(val => val === 'true'),
   ]).default(false),
+
+  // File metadata (optional)
+  zipFilePath: z.string().optional(),
+  zipFileName: z.string().optional(),
+  zipFileSize: z.number().optional(),
 })
 
 // GET /api/applications - Get all applications (admin only)
@@ -176,13 +182,15 @@ export async function POST(request: NextRequest) {
     // Normalize field names (support both 'name' and 'fullName')
     if (data.fullName && !data.name) {
       data.name = data.fullName
+    } else if (data.name && !data.fullName) {
+      data.fullName = data.name
     }
 
     // Validate the data
     const validationResult = applicationSchema.safeParse(data)
     if (!validationResult.success) {
-      const errorMessages = validationResult.error.errors
-        .map(e => `${e.path.join('.')}: ${e.message}`)
+      const errorMessages = validationResult.error.issues
+        .map((e: any) => `${e.path.join('.')}: ${e.message}`)
         .join(', ')
       return NextResponse.json(
         { success: false, error: `Validation failed: ${errorMessages}` },
@@ -215,7 +223,7 @@ export async function POST(request: NextRequest) {
     // Create the application in the database
     const application = await prisma.application.create({
       data: {
-        fullName: validatedData.name,
+        fullName: validatedData.fullName || validatedData.name || '',
         email: validatedData.email,
         instagramHandle: validatedData.instagramHandle || null,
         tiktokHandle: validatedData.tiktokHandle || null,
@@ -254,6 +262,10 @@ export async function POST(request: NextRequest) {
         additionalInfo: validatedData.additionalInfo || null,
         termsAccepted: true,
         status: 'PENDING',
+        // File metadata
+        zipFilePath: validatedData.zipFilePath || null,
+        zipFileName: validatedData.zipFileName || null,
+        zipFileSize: validatedData.zipFileSize || null,
       },
     })
 
