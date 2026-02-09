@@ -123,7 +123,7 @@ export default function BusinessPlanListPage() {
       const res = await fetch('/api/admin/business-plans/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientId }),
+        body: JSON.stringify({ clientId, force: true }),
       })
 
       const data = await res.json()

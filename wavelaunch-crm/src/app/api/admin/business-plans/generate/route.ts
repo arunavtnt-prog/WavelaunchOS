@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const generateSchema = z.object({
   clientId: z.string().min(1, 'Client ID is required'),
+  force: z.boolean().optional().default(false),
 })
 
 // Helper function to generate business plan content based on client data
@@ -167,7 +168,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { clientId } = validation.data
+    const { clientId, force } = validation.data
 
     // Get client with all onboarding data
     const client = await prisma.client.findUnique({
@@ -194,16 +195,22 @@ export async function POST(request: NextRequest) {
     // This allows generating plans for fresh clients converted from applications
 
     // Check if business plan already exists
-    const existingPlan = await prisma.businessPlan.findFirst({
+    const existingPlans = await prisma.businessPlan.findMany({
       where: { clientId },
+      select: { version: true },
     })
 
-    if (existingPlan) {
+    if (existingPlans.length > 0 && !force) {
       return NextResponse.json(
         { success: false, error: 'Business plan already exists for this client' },
         { status: 400 }
       )
     }
+
+    // Calculate next version number
+    const nextVersion = existingPlans.length > 0
+      ? Math.max(...existingPlans.map(p => p.version)) + 1
+      : 1
 
     // Generate business plan content
     const contentMarkdown = generateBusinessPlanContent(client)
@@ -212,7 +219,7 @@ export async function POST(request: NextRequest) {
     const businessPlan = await prisma.businessPlan.create({
       data: {
         clientId,
-        version: 1,
+        version: nextVersion,
         status: 'DRAFT',
         contentMarkdown,
         generatedBy: session.user?.id || '',
