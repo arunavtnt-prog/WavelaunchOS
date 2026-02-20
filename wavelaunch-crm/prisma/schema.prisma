@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Role enum for auth (used by next-auth)
+enum Role {
+  ADMIN
+  USER
+  CLIENT
+}
+
 // Vision Form Applications (from apply.wavelaunch.org)
 model Application {
   id                     String    @id @default(cuid())
