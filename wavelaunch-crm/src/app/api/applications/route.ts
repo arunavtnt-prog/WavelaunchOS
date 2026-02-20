@@ -308,15 +308,12 @@ export async function POST(request: NextRequest) {
       name: error instanceof Error ? error.name : undefined
     })
 
-    // Return more detailed error in development
-    const isDevelopment = process.env.NODE_ENV === 'development'
+    // Return detailed error for debugging (temporary)
     return NextResponse.json(
       {
         success: false,
-        error: isDevelopment
-          ? `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`
-          : 'Failed to submit application. Please try again.',
-        ...(isDevelopment && { details: String(error) })
+        error: `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        details: error instanceof Error ? error.stack : String(error)
       },
       { status: 500, headers: corsHeaders }
     )
