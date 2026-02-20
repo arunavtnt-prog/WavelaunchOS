@@ -97,25 +97,14 @@ const emptyToUndefined = (value: string | null | undefined): string | undefined 
       country: emptyToUndefined(application.country),
     })
 
-
-    // Create activity log entry (optional, for tracking)
-    await prisma.activity.create({
-      data: {
-        type: 'APPLICATION_SUBMITTED',
-        description: `New application submitted by ${application.fullName}`,
-        metadata: JSON.stringify({
-          applicationId: application.id,
-          email: application.email,
-          industryNiche: application.industryNiche,
-        }),
-      },
-    })
-
     // Sync to Google Sheets (Non-blocking)
     syncToGoogleSheets(application).catch(console.error)
 
     // Sync to CRM backend (Non-blocking)
     syncToCRM(application).catch(console.error)
+
+    // Sync to workflow-dashboard webhook (Non-blocking)
+    syncToWorkflowDashboard(application).catch(console.error)
 
     return NextResponse.json({
       success: true,
@@ -181,6 +170,27 @@ async function syncToCRM(data: any) {
     console.log('CRM sync successful:', result)
   } catch (error) {
     console.error('Failed to sync to CRM:', error)
+    // Do not throw, so we don't fail the submission
+  }
+}
+
+async function syncToWorkflowDashboard(data: any) {
+  const webhookUrl = process.env.WORKFLOW_DASHBOARD_WEBHOOK_URL
+  if (!webhookUrl) return
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(process.env.WORKFLOW_DASHBOARD_WEBHOOK_SECRET
+          ? { 'x-webhook-secret': process.env.WORKFLOW_DASHBOARD_WEBHOOK_SECRET }
+          : {}),
+      },
+      body: JSON.stringify(data),
+    })
+  } catch (error) {
+    console.error('Failed to sync to workflow-dashboard:', error)
     // Do not throw, so we don't fail the submission
   }
 }
