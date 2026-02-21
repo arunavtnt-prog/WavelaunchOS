@@ -308,12 +308,13 @@ export async function POST(request: NextRequest) {
       name: error instanceof Error ? error.name : undefined
     })
 
-    // Return detailed error for debugging (temporary)
+    // Return detailed error for debugging (temporary - REMOVE IN PRODUCTION)
     return NextResponse.json(
       {
         success: false,
-        error: `Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        details: error instanceof Error ? error.stack : String(error)
+        error: `[DEPLOY-ID:7ede986] Failed to submit application: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        details: error instanceof Error ? error.stack : String(error),
+        deployId: '7ede986'
       },
       { status: 500, headers: corsHeaders }
     )
