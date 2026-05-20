@@ -1,0 +1,27 @@
+{
+  "name": "instantly-reply-automation",
+  "version": "1.0.0",
+  "description": "Automated email reply system for Wavelaunch Studio Instantly campaigns",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "tsx --env-file=.env src/index.ts",
+    "gui": "tsx --env-file=.env gui/server.ts",
+    "test": "tsx --env-file=.env src/test.ts",
+    "analyze-only": "tsx --env-file=.env src/index.ts --analyze-only",
+    "single": "tsx --env-file=.env src/single-reply.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "openai": "^4.28.4",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.28",
+    "@types/ws": "^8.5.9",
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

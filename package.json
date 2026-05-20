@@ -1,0 +1,19 @@
+{
+  "name": "wavelaunchos",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:crm": "pnpm --dir apps/crm dev",
+    "dev:apply": "pnpm --dir apps/apply dev",
+    "dev:workflow": "pnpm --dir apps/workflow-dashboard dev",
+    "dev:blueprint": "pnpm --dir apps/blueprint-engine dev",
+    "dev:replies": "pnpm --dir apps/instantly-reply-automation gui",
+    "build:crm": "pnpm --dir apps/crm build",
+    "build:apply": "pnpm --dir apps/apply build",
+    "build:workflow": "pnpm --dir apps/workflow-dashboard build",
+    "lint:crm": "pnpm --dir apps/crm lint",
+    "lint:apply": "pnpm --dir apps/apply lint",
+    "test:crm": "pnpm --dir apps/crm test"
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instantly Reply Automation</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Simple check that JavaScript is working
+    document.documentElement.classList.add('js-enabled');
+    console.log('JavaScript inline check - DOM ready');
+  </script>
+</head>
+<body class="loading">
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1 class="logo">
+          <span class="logo-icon">⚡</span>
+          Instantly Reply Automation
+        </h1>
+        <div class="status-indicator" id="connectionStatus">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <nav class="nav">
+          <button class="nav-item active" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            Dashboard
+          </button>
+          <button class="nav-item" data-tab="config">
+            <span class="nav-icon">⚙️</span>
+            Configuration
+          </button>
+          <button class="nav-item" data-tab="test">
+            <span class="nav-icon">🧪</span>
+            Test Email
+          </button>
+          <button class="nav-item" data-tab="logs">
+            <span class="nav-icon">📝</span>
+            Logs
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Dashboard Tab -->
+        <section id="dashboard-tab" class="tab active">
+          <div class="card">
+            <h2 class="card-title">Quick Actions</h2>
+            <div class="actions">
+              <button class="btn btn-primary" id="refreshBtn">
+                <span>🔄</span> Refresh Emails
+              </button>
+              <button class="btn btn-success" id="runDryRunBtn">
+                <span>👀</span> Run (Dry Run)
+              </button>
+              <button class="btn btn-warning" id="runAutoSendBtn">
+                <span>🚀</span> Run (Auto-Send)
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Unread Emails</h2>
+            <div id="emailsContainer" class="emails-list">
+              <p class="empty-state">Click "Refresh Emails" to load</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Recent Results</h2>
+            <div id="resultsContainer" class="results-list">
+              <p class="empty-state">No results yet</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Configuration Tab -->
+        <section id="config-tab" class="tab">
+          <div class="card">
+            <h2 class="card-title">API Configuration</h2>
+            <form id="configForm" class="form">
+              <div class="form-group">
+                <label for="instantlyApiKey">Instantly API Key</label>
+                <input
+                  type="password"
+                  id="instantlyApiKey"
+                  name="instantlyApiKey"
+                  placeholder="sk-..."
+                  autocomplete="off"
+                >
+              </div>
+              <div class="form-group">
+                <label for="zaiApiKey">z.ai API Key</label>
+                <input
+                  type="password"
+                  id="zaiApiKey"
+                  name="zaiApiKey"
+                  placeholder="sk-..."
+                  autocomplete="off"
+                >
+              </div>
+              <div class="form-group">
+                <label for="aiBaseUrl">AI Base URL</label>
+                <input
+                  type="text"
+                  id="aiBaseUrl"
+                  name="aiBaseUrl"
+                  placeholder="https://api.z.ai/v1"
+                >
+              </div>
+              <div class="form-group">
+                <label for="campaignId">Campaign ID (Optional)</label>
+                <input
+                  type="text"
+                  id="campaignId"
+                  name="campaignId"
+                  placeholder="Filter by campaign..."
+                >
+              </div>
+              <div class="form-group">
+                <label for="eaccount">Email Account (Optional)</label>
+                <input
+                  type="text"
+                  id="eaccount"
+                  name="eaccount"
+                  placeholder="Filter by email account..."
+                >
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Auto-Send Settings</h2>
+            <form id="autoSendForm" class="form">
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="autoSendEnabled" name="autoSendEnabled">
+                  <span>Enable Auto-Send</span>
+                </label>
+                <small>Automatically send replies when confidence threshold is met</small>
+              </div>
+              <div class="form-group">
+                <label for="autoSendConfidence">Confidence Threshold</label>
+                <div class="range-input">
+                  <input
+                    type="range"
+                    id="autoSendConfidence"
+                    name="autoSendConfidence"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value="0.85"
+                  >
+                  <span class="range-value" id="confidenceValue">0.85</span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="card">
+            <button class="btn btn-primary" id="saveConfigBtn">
+              <span>💾</span> Save Configuration
+            </button>
+          </div>
+        </section>
+
+        <!-- Test Email Tab -->
+        <section id="test-tab" class="tab">
+          <div class="card">
+            <h2 class="card-title">Test Single Email</h2>
+            <form id="testForm" class="form">
+              <div class="form-group">
+                <label for="testFromEmail">From Email</label>
+                <input
+                  type="email"
+                  id="testFromEmail"
+                  placeholder="creator@example.com"
+                >
+              </div>
+              <div class="form-group">
+                <label for="testSubject">Subject</label>
+                <input
+                  type="text"
+                  id="testSubject"
+                  placeholder="Re: Partnership Opportunity"
+                >
+              </div>
+              <div class="form-group">
+                <label for="testFirstName">First Name</label>
+                <input
+                  type="text"
+                  id="testFirstName"
+                  placeholder="Sierra"
+                >
+              </div>
+              <div class="form-group">
+                <label for="testBody">Email Body</label>
+                <textarea
+                  id="testBody"
+                  rows="8"
+                  placeholder="Yes, I would be interested. - Sierra"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <span>🧪</span> Analyze & Generate Reply
+              </button>
+            </form>
+          </div>
+
+          <div class="card" id="testResultCard" style="display: none;">
+            <h2 class="card-title">Result</h2>
+            <div id="testResultContent" class="test-result"></div>
+          </div>
+        </section>
+
+        <!-- Logs Tab -->
+        <section id="logs-tab" class="tab">
+          <div class="card">
+            <div class="logs-header">
+              <h2 class="card-title">Live Logs</h2>
+              <button class="btn btn-sm btn-secondary" id="clearLogsBtn">Clear</button>
+            </div>
+            <div id="logsContainer" class="logs-list"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

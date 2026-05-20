@@ -1,0 +1,1237 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String             @id @default(cuid())
+  email                  String             @unique
+  passwordHash           String
+  name                   String
+  role                   Role               @default(ADMIN)
+  bio                    String?
+  phone                  String?
+  location               String?
+  website                String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  lockedUntil            DateTime?
+  failedLoginCount       Int                @default(0)
+  lastLoginAt            DateTime?
+  lastLoginIp            String?
+  sessionExpiry          DateTime?
+  activities             Activity[]
+  businessPlansGenerated BusinessPlan[]
+  deliverablesGenerated  Deliverable[]
+  filesUploaded          File[]
+  helpArticles           HelpArticle[]
+  loginAttempts          LoginAttempt[]
+  notes                  Note[]
+  ticketAttachments      TicketAttachment[]
+  ticketComments         TicketComment[]
+  assignedTickets        Ticket[]           @relation("AssignedTickets")
+
+  @@map("users")
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ip        String
+  userAgent String?
+  success   Boolean
+  reason    String?
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@index([userId, createdAt])
+  @@map("login_attempts")
+}
+
+model Client {
+  id                      String                   @id @default(cuid())
+  fullName                String
+  email                   String                   @unique
+  instagramHandle         String?
+  tiktokHandle            String?
+  country                 String
+  industryNiche           String
+  age                     Int
+  professionalMilestones  String
+  personalTurningPoints   String
+  visionForVenture        String
+  hopeToAchieve           String
+  targetAudience          String
+  demographicProfile      String
+  targetDemographicAge    String
+  audienceGenderSplit     String
+  audienceMaritalStatus   String
+  currentChannels         String
+  keyPainPoints           String
+  brandValues             String
+  differentiation         String
+  uniqueValueProps        String
+  emergingCompetitors     String
+  idealBrandImage         String
+  inspirationBrands       String
+  brandingAesthetics      String
+  emotionsBrandEvokes     String
+  brandPersonality        String
+  preferredFont           String
+  productCategories       String[]
+  otherProductIdeas       String?
+  scalingGoals            String
+  growthStrategies        String
+  longTermVision          String
+  specificDeadlines       String?
+  additionalInfo          String?
+  status                  ClientStatus             @default(ACTIVE)
+  onboardedAt             DateTime                 @default(now())
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+  activities              Activity[]
+  applications            Application[]
+  businessPlans           BusinessPlan[]
+  portalUser              ClientPortalUser?
+  deliverables            Deliverable[]
+  files                   File[]
+  notes                   Note[]
+  notificationPreferences NotificationPreferences?
+  portalMessages          PortalMessage[]
+  tickets                 Ticket[]
+
+  @@map("clients")
+}
+
+model BusinessPlan {
+  id              String         @id @default(cuid())
+  clientId        String
+  version         Int            @default(1)
+  status          DocumentStatus @default(DRAFT)
+  contentMarkdown String
+  pdfPath         String?
+  generatedBy     String
+  generatedAt     DateTime       @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  client          Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User           @relation(fields: [generatedBy], references: [id])
+
+  @@map("business_plans")
+}
+
+model Deliverable {
+  id              String          @id @default(cuid())
+  clientId        String
+  month           Int
+  title           String
+  type            DeliverableType @default(MAIN)
+  parentId        String?
+  contentMarkdown String
+  pdfPath         String?
+  status          DocumentStatus  @default(DRAFT)
+  generatedBy     String
+  generatedAt     DateTime        @default(now())
+  approvedAt      DateTime?
+  deliveredAt     DateTime?
+  rejectionReason String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  client          Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  generatedByUser User            @relation(fields: [generatedBy], references: [id])
+  parent          Deliverable?    @relation("subdocuments", fields: [parentId], references: [id])
+  subdocuments    Deliverable[]   @relation("subdocuments")
+
+  @@map("deliverables")
+}
+
+model File {
+  id             String       @id @default(cuid())
+  clientId       String?
+  filename       String
+  filepath       String
+  filesize       Int
+  mimetype       String
+  category       FileCategory @default(UPLOAD)
+  uploadedBy     String
+  uploadedAt     DateTime     @default(now())
+  deletedAt      DateTime?
+  client         Client?      @relation(fields: [clientId], references: [id])
+  uploadedByUser User         @relation(fields: [uploadedBy], references: [id])
+
+  @@map("files")
+}
+
+model PromptTemplate {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  type        PromptTemplateType
+  content     String
+  variables   String?
+  yamlPath    String?
+  isActive    Boolean            @default(false)
+  isDefault   Boolean            @default(false)
+  version     Int                @default(1)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("prompt_templates")
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  type        JobType
+  status      JobStatus @default(QUEUED)
+  payload     String
+  result      String?
+  error       String?
+  attempts    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  @@map("jobs")
+}
+
+model Note {
+  id          String   @id @default(cuid())
+  clientId    String
+  content     String
+  isImportant Boolean  @default(false)
+  tags        String?
+  category    String?
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  author      User     @relation(fields: [authorId], references: [id])
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model Activity {
+  id          String       @id @default(cuid())
+  clientId    String?
+  type        ActivityType
+  description String
+  metadata    String?
+  userId      String?
+  createdAt   DateTime     @default(now())
+  client      Client?      @relation(fields: [clientId], references: [id])
+  user        User?        @relation(fields: [userId], references: [id])
+
+  @@map("activities")
+}
+
+model BackupLog {
+  id        String       @id @default(cuid())
+  filename  String
+  filepath  String
+  filesize  Int
+  status    BackupStatus
+  verified  Boolean      @default(false)
+  error     String?
+  createdAt DateTime     @default(now())
+
+  @@map("backup_logs")
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+model Application {
+  id                     String    @id @default(cuid())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  fullName               String
+  email                  String
+  instagramHandle        String?
+  tiktokHandle           String?
+  country                String
+  industryNiche          String
+  age                    Int
+  professionalMilestones String
+  personalTurningPoints  String
+  visionForVenture       String
+  hopeToAchieve          String
+  targetAudience         String
+  demographicProfile     String
+  targetDemographicAge   String
+  audienceGenderSplit    String
+  audienceMaritalStatus  String?
+  currentChannels        String
+  keyPainPoints          String
+  brandValues            String
+  differentiation        String
+  uniqueValueProps       String
+  emergingCompetitors    String?
+  idealBrandImage        String
+  inspirationBrands      String?
+  brandingAesthetics     String
+  emotionsBrandEvokes    String?
+  brandPersonality       String
+  preferredFont          String?
+  productCategories      String
+  otherProductIdeas      String?
+  scalingGoals           String
+  growthStrategies       String?
+  longTermVision         String
+  specificDeadlines      String?
+  additionalInfo         String?
+  zipFilePath            String?
+  zipFileName            String?
+  zipFileSize            Int?
+  termsAccepted          Boolean   @default(false)
+  status                 String    @default("PENDING")
+  reviewedAt             DateTime?
+  reviewNotes            String?
+  convertedToClientId    String?
+  convertedToClient      Client?   @relation(fields: [convertedToClientId], references: [id])
+  
+  // Workflow relation
+  workflowState          WorkflowState?
+  blueprints             Blueprint[]
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([status])
+  @@map("applications")
+}
+
+model TokenUsage {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  operation        String
+  model            String
+  promptTokens     Int
+  completionTokens Int
+  totalTokens      Int
+  estimatedCost    Float
+  clientId         String?
+  userId           String?
+  jobId            String?
+  documentId       String?
+  documentType     String?
+  cacheHit         Boolean  @default(false)
+  cacheKey         String?
+  requestDuration  Int?
+  success          Boolean  @default(true)
+  errorMessage     String?
+
+  @@index([createdAt])
+  @@index([operation])
+  @@index([clientId])
+  @@index([cacheKey])
+  @@map("token_usage")
+}
+
+model PromptCache {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  cacheKey    String   @unique
+  promptHash  String
+  response    String
+  model       String
+  hitCount    Int      @default(0)
+  lastUsedAt  DateTime @default(now())
+  tokensSaved Int      @default(0)
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+  @@map("prompt_cache")
+}
+
+model GenerationCheckpoint {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  jobId             String   @unique
+  jobType           String
+  status            String
+  totalSections     Int
+  completedSections Int
+  currentSection    Int
+  documentId        String?
+  clientId          String
+  generatedContent  String
+  promptContext     String
+  canResume         Boolean  @default(true)
+  lastCheckpoint    DateTime @default(now())
+  errorMessage      String?
+
+  @@index([jobId])
+  @@index([clientId])
+  @@index([status])
+  @@map("generation_checkpoints")
+}
+
+model DocumentSection {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  documentId   String
+  documentType String
+  sectionName  String
+  sectionOrder Int
+  content      String
+  generatedBy  String?
+  generatedAt  DateTime?
+  tokensUsed   Int?
+  version      Int       @default(1)
+
+  @@index([documentId, documentType])
+  @@index([sectionName])
+  @@map("document_sections")
+}
+
+model TokenBudget {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  period           String
+  startDate        DateTime
+  endDate          DateTime
+  tokenLimit       Int
+  costLimit        Float
+  tokensUsed       Int      @default(0)
+  costUsed         Float    @default(0)
+  alertAt50        Boolean  @default(true)
+  alertAt75        Boolean  @default(true)
+  alertAt90        Boolean  @default(true)
+  alertAt100       Boolean  @default(true)
+  alert50Sent      Boolean  @default(false)
+  alert75Sent      Boolean  @default(false)
+  alert90Sent      Boolean  @default(false)
+  alert100Sent     Boolean  @default(false)
+  autoPauseAtLimit Boolean  @default(false)
+  isPaused         Boolean  @default(false)
+  isActive         Boolean  @default(true)
+
+  @@index([period])
+  @@index([endDate])
+  @@map("token_budgets")
+}
+
+model ClientPortalUser {
+  id                      String               @id @default(cuid())
+  clientId                String               @unique
+  email                   String               @unique
+  passwordHash            String
+  isActive                Boolean              @default(false)
+  invitedAt               DateTime             @default(now())
+  activatedAt             DateTime?
+  lastLoginAt             DateTime?
+  passwordChangedAt       DateTime?
+  emailVerified           Boolean              @default(false)
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  inviteToken             String?              @unique
+  inviteTokenExpiry       DateTime?
+  invitedBy               String?
+  completedOnboarding     Boolean              @default(false)
+  onboardingCompletedAt   DateTime?
+  notifyNewDeliverable    Boolean              @default(true)
+  notifyNewMessage        Boolean              @default(true)
+  notifyMilestoneReminder Boolean              @default(true)
+  notifyWeeklySummary     Boolean              @default(false)
+  client                  Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  messages                PortalMessage[]
+  notifications           PortalNotification[]
+
+  @@index([email])
+  @@index([clientId])
+  @@map("client_portal_users")
+}
+
+model PortalMessage {
+  id             String            @id @default(cuid())
+  threadId       String
+  clientUserId   String?
+  adminUserId    String?
+  clientId       String
+  subject        String
+  body           String
+  isFromAdmin    Boolean
+  isRead         Boolean           @default(false)
+  attachmentUrl  String?
+  attachmentName String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  client         Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientUser     ClientPortalUser? @relation(fields: [clientUserId], references: [id])
+
+  @@index([threadId])
+  @@index([clientId])
+  @@index([createdAt])
+  @@map("portal_messages")
+}
+
+model PortalNotification {
+  id           String           @id @default(cuid())
+  clientUserId String
+  type         String
+  title        String
+  message      String
+  actionUrl    String?
+  isRead       Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  clientUser   ClientPortalUser @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clientUserId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("portal_notifications")
+}
+
+model NotificationPreferences {
+  id                      String   @id @default(cuid())
+  clientId                String   @unique
+  emailWelcome            Boolean  @default(true)
+  emailActivation         Boolean  @default(true)
+  emailBusinessPlanReady  Boolean  @default(true)
+  emailDeliverableReady   Boolean  @default(true)
+  emailDeliverableOverdue Boolean  @default(true)
+  emailMilestoneReached   Boolean  @default(true)
+  emailJourneyCompleted   Boolean  @default(true)
+  emailWeeklyDigest       Boolean  @default(false)
+  emailMarketingUpdates   Boolean  @default(false)
+  portalNewDeliverable    Boolean  @default(true)
+  portalNewMessage        Boolean  @default(true)
+  portalMilestoneReminder Boolean  @default(true)
+  portalAccountUpdate     Boolean  @default(true)
+  preferredContactMethod  String   @default("email")
+  reminderFrequency       String   @default("daily")
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  client                  Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model Ticket {
+  id           String             @id @default(cuid())
+  clientId     String
+  assignedTo   String?
+  title        String
+  description  String
+  status       TicketStatus       @default(OPEN)
+  priority     TicketPriority     @default(MEDIUM)
+  category     String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  closedAt     DateTime?
+  resolvedAt   DateTime?
+  attachments  TicketAttachment[]
+  comments     TicketComment[]
+  assignedUser User?              @relation("AssignedTickets", fields: [assignedTo], references: [id])
+  client       Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketComment {
+  id         String   @id @default(cuid())
+  ticketId   String
+  authorId   String
+  content    String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("ticket_comments")
+}
+
+model TicketAttachment {
+  id             String   @id @default(cuid())
+  ticketId       String
+  uploadedBy     String
+  filename       String
+  filepath       String
+  filesize       Int
+  mimetype       String
+  createdAt      DateTime @default(now())
+  ticket         Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedByUser User     @relation(fields: [uploadedBy], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_attachments")
+}
+
+model HelpCategory {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  icon        String?
+  order       Int           @default(0)
+  isPublished Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  articles    HelpArticle[]
+
+  @@index([slug])
+  @@index([order])
+  @@map("help_categories")
+}
+
+model HelpArticle {
+  id          String       @id @default(cuid())
+  categoryId  String
+  title       String
+  slug        String       @unique
+  content     String
+  excerpt     String?
+  tags        String?
+  viewCount   Int          @default(0)
+  isPublished Boolean      @default(true)
+  isFeatured  Boolean      @default(false)
+  authorId    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  publishedAt DateTime?
+  author      User         @relation(fields: [authorId], references: [id])
+  category    HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([isPublished])
+  @@index([isFeatured])
+  @@index([viewCount])
+  @@map("help_articles")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  DELIVERED
+  REJECTED
+}
+
+enum DeliverableType {
+  MAIN
+  SUBDOCUMENT
+}
+
+enum FileCategory {
+  BUSINESS_PLAN
+  DELIVERABLE
+  UPLOAD
+  MISC
+}
+
+enum PromptTemplateType {
+  BUSINESS_PLAN
+  DELIVERABLE_M1
+  DELIVERABLE_M2
+  DELIVERABLE_M3
+  DELIVERABLE_M4
+  DELIVERABLE_M5
+  DELIVERABLE_M6
+  DELIVERABLE_M7
+  DELIVERABLE_M8
+  CUSTOM
+}
+
+enum JobType {
+  GENERATE_BUSINESS_PLAN
+  GENERATE_DELIVERABLE
+  GENERATE_PDF
+  SUMMARIZE_THREAD
+  BACKUP_DATABASE
+  CLEANUP_FILES
+  CLEANUP_OLD_JOBS
+  SEND_EMAIL
+  SEND_REMINDER_EMAILS
+  UPDATE_CLIENT_METRICS
+  REPLY_CLASSIFY_THREAD
+  REPLY_SUMMARIZE_THREAD
+  REPLY_GENERATE_DRAFT
+  REPLY_SEND
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ActivityType {
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_DELETED
+  CLIENT_ARCHIVED
+  CLIENT_RESTORED
+  BUSINESS_PLAN_GENERATED
+  BUSINESS_PLAN_UPDATED
+  BUSINESS_PLAN_APPROVED
+  BUSINESS_PLAN_DELIVERED
+  BUSINESS_PLAN_REJECTED
+  DELIVERABLE_GENERATED
+  DELIVERABLE_UPDATED
+  DELIVERABLE_APPROVED
+  DELIVERABLE_DELIVERED
+  DELIVERABLE_REJECTED
+  FILE_UPLOADED
+  APPLICATION_SUBMITTED
+  FILE_DELETED
+  NOTE_CREATED
+  NOTE_UPDATED
+  NOTE_DELETED
+  PROMPT_CREATED
+  PROMPT_UPDATED
+  PROMPT_DELETED
+  BACKUP_CREATED
+  BACKUP_RESTORED
+  SETTINGS_UPDATED
+}
+
+enum BackupStatus {
+  SUCCESS
+  FAILED
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CLIENT
+  WAITING_ON_TEAM
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Workflow Automation Enums
+enum WorkflowStatus {
+  SUBMITTED
+  SNAPSHOT_QUEUED
+  SNAPSHOT_GENERATING
+  SNAPSHOT_COMPLETE
+  SNAPSHOT_FAILED
+  DRAFT_EMAIL_READY
+  EMAIL_REVIEW_PENDING
+  EMAIL_EDITED
+  EMAIL_SENT
+  AWAITING_RESPONSE
+  FOLLOW_UP_QUEUED
+  FOLLOW_UP_READY
+  CONVERTED
+  REJECTED
+  ARCHIVED
+}
+
+// Blueprint Generation Enums
+enum BlueprintStage {
+  // Batch 1: Market Research (parallel)
+  MARKET_SIZING
+  COMPETITIVE_INTELLIGENCE
+  INDUSTRY_TRENDS
+  // Batch 2: Brand Analysis (parallel, after Batch 1)
+  AUDIENCE_DEEP_DIVE
+  BRAND_POSITIONING
+  // Batch 3: Product & Financials (parallel, after Batch 1-2)
+  PRODUCT_ARCHITECTURE
+  FINANCIAL_PROJECTIONS
+  // Batch 4: Strategy (parallel, after Batch 1-3)
+  GO_TO_MARKET
+  OPERATIONAL_FRAMEWORK
+  IMPLEMENTATION_ROADMAP
+  // Final: Synthesis (sequential)
+  EXECUTIVE_SUMMARY
+  // Compilation
+  COMPILATION
+}
+
+enum BlueprintResearchStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETE
+  FAILED
+  REVIEW_REQUIRED
+  APPROVED
+}
+
+enum DraftStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SENT
+  MODIFIED
+}
+
+enum ReplyMessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum ReplyDraftStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  MODIFIED
+  SENT
+}
+
+enum LeadType {
+  COLD
+  FOLLOWUP
+  PIPELINE
+  CLIENT
+  CLOSED
+}
+
+enum ReplyIntent {
+  UNSUBSCRIBE
+  NOT_INTERESTED
+  SCHEDULING
+  PRICING
+  QUESTIONS
+  INTERESTED
+  REFERRAL
+  CLIENT_UPDATE
+  OTHER
+  // NEW: Objection handling intents
+  PRICE_NEGOTIATION
+  TIMELINE_CONCERNS
+  SKEPTICISM_CONCERNS
+  COMPETITION_QUESTIONS
+  REVENUE_SHARING_OBJS
+  CONTRACT_QUESTIONS
+  PAYMENT_QUESTIONS
+  LONGTERM_QUESTIONS
+  // NEW: Vision form follow-up intents
+  VISION_VAGUE
+  VISION_INCOMPLETE
+  VISION_TECH_ISSUE
+  // NEW: Roadmap response intents
+  ROADMAP_CHANGES_REQUESTED
+  ROADMAP_UNSURE_DIRECTION
+  ROADMAP_COMPETITOR_ANALYSIS
+}
+
+enum ContactKind {
+  CLIENT
+  LEAD
+  PIPELINE
+  OTHER
+}
+
+enum ConversationStage {
+  INITIAL_CONTACT
+  VISION_FORM_SENT
+  VISION_FORM_COMPLETE
+  ROADMAP_DELIVERED
+  VC_SUBMITTED
+  VC_APPROVED
+  ONBOARDING_STARTED
+  ONBOARDING_COMPLETE
+}
+
+// Workflow Automation Models
+model WorkflowState {
+  id                    String         @id @default(cuid())
+  applicationId         String         @unique
+  application           Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  
+  // Current state in workflow
+  status                WorkflowStatus @default(SUBMITTED)
+  statusHistory         Json[]         @default([])
+
+  // Snapshot generation
+  snapshotMarkdown      String?
+  snapshotPdfPath       String?
+  generationStartedAt   DateTime?
+  generationCompletedAt DateTime?
+  generationError       String?
+
+  // Email workflow
+  draftEmailSubject     String?
+  draftEmailBody        String?
+  draftEmailPreparedAt  DateTime?
+  emailSentAt           DateTime?
+  emailSentBy           String?
+  
+  // Follow-up tracking
+  followUpCount         Int            @default(0)
+  lastFollowUpAt        DateTime?
+  nextFollowUpAt        DateTime?
+  
+  // Snapshot file reference
+  snapshotFilePath      String?
+  snapshotVersion       Int            @default(1)
+  
+  // Timestamps
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  
+  // Relations
+  auditLogs             WorkflowAuditLog[]
+  emailDrafts           EmailDraft[]
+  
+  @@index([status])
+  @@index([nextFollowUpAt])
+  @@map("workflow_states")
+}
+
+model WorkflowAuditLog {
+  id          String   @id @default(cuid())
+  workflowId  String
+  workflow    WorkflowState @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  action      String   // GENERATE_BLUEPRINT, PREPARE_EMAIL, SEND_EMAIL, etc.
+  performedBy String?  // User ID or 'SYSTEM'
+  oldStatus   String?
+  newStatus   String?
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now())
+  
+  @@index([workflowId])
+  @@index([createdAt])
+  @@map("workflow_audit_logs")
+}
+
+model EmailDraft {
+  id              String      @id @default(cuid())
+  workflowId      String
+  workflow        WorkflowState @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  blueprintId     String?     // Link to blueprint if this is a blueprint approval email
+  blueprint       Blueprint?  @relation(fields: [blueprintId], references: [id], onDelete: SetNull)
+  subject         String
+  body            String
+  attachments     Json[]      @default([]) // Array of {filename, path, mimeType}
+
+  // Review status
+  status          DraftStatus @default(PENDING_REVIEW)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewNotes     String?
+
+  // Send tracking
+  sentAt          DateTime?
+  sentBy          String?
+
+  // Automation tracking
+  autoGenerated   Boolean     @default(false) // true for automatically generated drafts
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([status])
+  @@index([workflowId])
+  @@index([blueprintId])
+  @@map("email_drafts")
+}
+
+model InstantlyConversation {
+  id                     String   @id @default(cuid())
+  providerConversationId  String?  @unique
+  campaignId              String?
+  campaignName            String?
+  mailboxEmail            String?
+  leadEmail               String
+  leadName                String?
+  leadCompany             String?
+  category                String?
+  leadType                LeadType @default(COLD)
+  leadTypeManualOverride  LeadType?
+  intent                  ReplyIntent?
+  pipelineSuggested       Boolean  @default(false)
+  needsReply              Boolean  @default(false)
+  summaryText             String?
+  lastAiProcessedAt       DateTime?
+  lastInboundAt           DateTime?
+  lastMessageAt           DateTime @default(now())
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  // NEW: Track conversation stage in funnel
+  conversationStage       ConversationStage @default(INITIAL_CONTACT)
+  stageUpdatedAt         DateTime @default(now())
+
+  messages                InstantlyMessage[]
+  drafts                  ReplyDraft[]
+
+  @@index([leadEmail])
+  @@index([campaignId])
+  @@index([lastMessageAt])
+  @@map("instantly_conversations")
+}
+
+model InstantlyCampaign {
+  id                 String   @id @default(cuid())
+  providerCampaignId String   @unique
+  name               String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([providerCampaignId])
+  @@map("instantly_campaigns")
+}
+
+model ReplyCampaignPolicy {
+  id                 String   @id @default(cuid())
+  providerCampaignId String   @unique
+  policyKey          String
+  allowCalls         Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([providerCampaignId])
+  @@index([policyKey])
+  @@map("reply_campaign_policies")
+}
+
+model ReplyPlaybook {
+  id        String  @id @default(cuid())
+  key       String  @unique
+  name      String
+  version   Int     @default(1)
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sections  ReplyPlaybookSection[]
+
+  @@index([key])
+  @@map("reply_playbooks")
+}
+
+model ReplyPlaybookSection {
+  id         String      @id @default(cuid())
+  playbookId String
+  playbook   ReplyPlaybook @relation(fields: [playbookId], references: [id], onDelete: Cascade)
+  order      Int
+  title      String
+  content    String
+  intents    ReplyIntent[] @default([])
+  leadTypes  LeadType[]    @default([])
+  keywords   String[]      @default([])
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([playbookId, order])
+  @@map("reply_playbook_sections")
+}
+
+model Contact {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  name      String?
+  kind      ContactKind @default(OTHER)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([kind])
+  @@map("contacts")
+}
+
+model InstantlyMessage {
+  id                String               @id @default(cuid())
+  conversationId     String
+  conversation       InstantlyConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  providerMessageId  String?              @unique
+  providerServerMessageId String?
+  ueType             Int?
+  emailType          String?
+  direction          ReplyMessageDirection
+  fromEmail          String?
+  toEmail            String?
+  subject            String?
+  bodyHtml           String?
+  bodyText           String
+  isUnread           Boolean              @default(false)
+  isFocused          Boolean              @default(false)
+  receivedAt         DateTime             @default(now())
+  raw                Json?
+
+  @@index([conversationId, receivedAt])
+  @@map("instantly_messages")
+}
+
+model ReplyDraft {
+  id              String           @id @default(cuid())
+  conversationId  String
+  conversation    InstantlyConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  subject         String
+  body            String
+  status          ReplyDraftStatus @default(PENDING_REVIEW)
+  model           String?
+  prompt          String?
+  rawResponse     String?
+  tokensUsed      Int?
+  confidence      Float?
+  category        String?
+  sentMessageId   String?
+  autoSent        Boolean          @default(false)
+  sentAt          DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([conversationId])
+  @@index([status])
+  @@index([sentMessageId])
+  @@map("reply_drafts")
+}
+
+model ExecutionLog {
+  id              String    @id @default(cuid())
+  executionType   String    // MANUAL_RUN, RETRY, etc.
+  startedAt       DateTime
+  completedAt     DateTime?
+  status          String    // RUNNING, COMPLETED, FAILED
+  itemsProcessed  Int       @default(0)
+  itemsFailed     Int       @default(0)
+  errorMessage    String?
+  logData         Json?     // Detailed processing log
+  triggeredBy     String?   // User who triggered (or 'SYSTEM')
+
+  @@index([startedAt])
+  @@index([status])
+  @@map("execution_logs")
+}
+
+// Blueprint Generation Models
+model Blueprint {
+  id              String                  @id @default(cuid())
+  applicationId   String                  @unique
+  application     Application             @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  // Overall status
+  status          BlueprintResearchStatus @default(PENDING)
+  currentBatch    Int                     @default(1)
+  progress        Float                   @default(0)
+
+  // Generated content
+  markdown        String?                 // Final compiled blueprint
+  pdfPath         String?
+
+  // Generation metadata
+  startedAt       DateTime?
+  completedAt     DateTime?
+  lastStageAt     DateTime?
+
+  // Token usage tracking
+  totalTokensUsed Int                     @default(0)
+  totalSearchQueries Int                  @default(0)
+
+  // Relationships
+  researchStages  BlueprintResearch[]
+  emailDrafts     EmailDraft[]            // Approval emails for this blueprint
+
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([status])
+  @@index([currentBatch])
+  @@map("blueprints")
+}
+
+model BlueprintResearch {
+  id              String                  @id @default(cuid())
+  blueprintId     String
+  blueprint       Blueprint               @relation(fields: [blueprintId], references: [id], onDelete: Cascade)
+
+  // Stage info
+  stage           BlueprintStage
+  batch           Int                     // Which batch (1-4) or 5 for final
+  status          BlueprintResearchStatus @default(PENDING)
+
+  // Content
+  prompt          String?                 // What was sent to AI (set when processing)
+  response        String?                 // AI raw response
+  markdown        String?                 // Formatted markdown for final doc
+  sectionNumber   Int?                    // Which section this contributes to (1-10)
+
+  // Research metadata
+  metadata        Json?                   // Sources, search queries, data points
+  sources         BlueprintSource[]
+
+  // Retry logic
+  attempts        Int                     @default(0)
+  error           String?
+
+  // Timestamps
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([blueprintId, stage])
+  @@index([status])
+  @@index([batch])
+  @@map("blueprint_research")
+}
+
+model BlueprintSource {
+  id              String   @id @default(cuid())
+  researchId      String
+  research        BlueprintResearch @relation(fields: [researchId], references: [id], onDelete: Cascade)
+
+  // Source info
+  type            String   // "web_search", "api", "report", "framework"
+  url             String?
+  title           String?
+  author          String?
+  publishedAt     DateTime?
+
+  // Extracted data
+  keyPoints       Json?
+  quotes          String[]
+  dataPoints      Json?    // Numbers, stats, figures
+
+  // Citation info
+  citation        String?  // Formatted citation for final doc
+
+  // Credibility
+  relevanceScore  Float?
+
+  createdAt       DateTime @default(now())
+
+  @@map("blueprint_sources")
+}
