@@ -45,6 +45,14 @@ await check(
 )
 
 await check(
+  'CRM submissions API protection',
+  { url: 'https://login.wavelaunch.org/api/applications' },
+  async (response) => response.status === 401
+    ? true
+    : `expected 401 without an admin session, received ${response.status}`,
+)
+
+await check(
   'Apply health',
   { url: 'https://apply.wavelaunch.org/api/health' },
   async (response) => {

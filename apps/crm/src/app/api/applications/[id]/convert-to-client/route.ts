@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 
 // POST /api/applications/[id]/convert-to-client - Convert approved application to client
@@ -7,6 +8,15 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await auth()
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const { id } = params
 
     // Get the application

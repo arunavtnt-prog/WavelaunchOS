@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 import { z } from 'zod'
 import { emailService } from '@/lib/email/service'
@@ -109,12 +110,20 @@ const applicationSchema = z.object({
 })
 
 // GET /api/applications - Get all applications
-// Note: Auth disabled for now since User table doesn't exist in database
 export async function GET(request: NextRequest) {
   const origin = request.headers.get('origin')
   const corsHeaders = getCorsHeaders(origin)
 
   try {
+    const session = await auth()
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401, headers: corsHeaders }
+      )
+    }
+
     const applications = await prisma.application.findMany({
       orderBy: {
         createdAt: 'desc',
