@@ -24,6 +24,7 @@ await check(
     return response.status === 200
       && body?.service === 'wavelaunch-crm'
       && body?.database === 'connected'
+      && body?.auth === 'ready'
       ? true
       : `expected CRM health response, received ${response.status} ${JSON.stringify(body)}`
   },

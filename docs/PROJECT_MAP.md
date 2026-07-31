@@ -59,6 +59,23 @@ VERCEL_TOKEN=... pnpm audit:deployments
 
 The expected IDs and ownership contract are stored in `ops/deployment-ownership.json`.
 
+## CRM Authentication Recovery
+
+The current production database predates the CRM's full historical schema. Do not
+run the legacy migration chain or `db:seed` against production: both reference
+tables that are not part of the active CRM database.
+
+To create or verify only the admin-authentication tables without touching
+applications or Mission Control data, run:
+
+```bash
+pnpm --dir apps/crm db:bootstrap-auth
+```
+
+This command requires `DATABASE_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`. It
+creates missing auth tables idempotently and never resets an existing password.
+The CRM health endpoint reports `auth: "ready"` only when an admin account exists.
+
 ## Archive
 
 `archive/` contains legacy docs, old root files, generated outputs, experimental scripts, and reference material. It is not part of the active app surface.
