@@ -14,6 +14,8 @@
     "build:workflow": "pnpm --dir apps/workflow-dashboard build",
     "lint:crm": "pnpm --dir apps/crm lint",
     "lint:apply": "pnpm --dir apps/apply lint",
-    "test:crm": "pnpm --dir apps/crm test"
+    "test:crm": "pnpm --dir apps/crm test",
+    "audit:deployments": "node scripts/audit-deployment-ownership.mjs",
+    "check:production": "node scripts/check-production.mjs"
   }
 }

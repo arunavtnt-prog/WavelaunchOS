@@ -1,0 +1,44 @@
+{
+  "teamId": "team_Ofb3pprcJ38nR6hmGFqpdhwb",
+  "repository": "WavelaunchOS",
+  "projects": [
+    {
+      "key": "crm",
+      "id": "prj_bqPBp5DYtbCLtXNfmlpvepTxC52g",
+      "name": "wavelaunch-crm",
+      "rootDirectory": "apps/crm",
+      "gitRepository": "WavelaunchOS",
+      "customDomains": [
+        "login.wavelaunch.org"
+      ]
+    },
+    {
+      "key": "apply",
+      "id": "prj_LPIvYlmlQjuVlGwfj0Mjkf1I9xy5",
+      "name": "wavelaunch-apply",
+      "rootDirectory": "apps/apply",
+      "gitRepository": "WavelaunchOS",
+      "customDomains": [
+        "apply.wavelaunch.org"
+      ]
+    },
+    {
+      "key": "review",
+      "id": "prj_EZoKm5ZUlNLFfEBr0YEQHvSdK8NL",
+      "name": "wavelaunch-review",
+      "rootDirectory": null,
+      "gitRepository": "blueprintOS",
+      "customDomains": [
+        "review.wavelaunch.org"
+      ]
+    },
+    {
+      "key": "blueprint",
+      "id": "prj_f3Cd9Lcye1hYKjgzOnEFtIiod6HO",
+      "name": "final-blueprint",
+      "rootDirectory": null,
+      "gitRepository": null,
+      "customDomains": []
+    }
+  ]
+}

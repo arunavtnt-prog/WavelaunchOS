@@ -33,3 +33,12 @@ Do not add a root `pnpm-workspace.yaml` unless the Prisma clients are separated 
 - Apply Vercel project: `wavelaunch-apply`, root directory `apps/apply`, domain `apply.wavelaunch.org`
 
 Do not use `login.wavelaunch.org/apply` as the public form link. Send creators to `https://apply.wavelaunch.org`.
+
+## Production Safety Checks
+
+```bash
+pnpm check:production
+VERCEL_TOKEN=... pnpm audit:deployments
+```
+
+The ownership contract and full domain map are documented in `docs/PROJECT_MAP.md`.
